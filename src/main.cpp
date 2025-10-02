@@ -1,5 +1,6 @@
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
+#include <MainMenuState.hpp>
 #include <memory>
 #include <chrono>
 
@@ -19,7 +20,7 @@ int main()
     float delta_time = 0.0f;
 
     StateMachine state_machine = StateMachine();
-    state_machine.add_state(std::make_unique<MainGameState>(), false);
+    state_machine.add_state(std::make_unique<MainMenuState>(), false);
 
     // Bucle principal del juego proporcionado por Raylib
     while (!WindowShouldClose()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
