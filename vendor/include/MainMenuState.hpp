@@ -31,8 +31,10 @@ class MainMenuState : public GameState
         // Variables para los botones y manejar el raton
         Vector2 mousePos;
         Rectangle playButton;
+        Rectangle optionsButton;
         Rectangle exitButton;
         bool mouseOverPlayButton = false;
+        bool mouseOverOptionsButton = false;
         bool mouseOverExitButton = false;
 
         

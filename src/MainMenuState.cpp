@@ -29,12 +29,15 @@ void MainMenuState::update(float deltaTime){
 
     if (mouseOverPlayButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
+    }
 
+    if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         
-        WindowShouldClose();
+       
     }
 };
 
@@ -47,9 +50,13 @@ void MainMenuState::render(){
     ClearBackground(SKYBLUE);
     DrawText("ELEMENTS", GetScreenWidth()/2, 30, 25, YELLOW);
 
-    DrawRectangleRec(playButton, mouseOverPlayButton ? GREEN : DARKGREEN);
+    DrawRectangleRec(playButton, mouseOverPlayButton ? GRAY : DARKGRAY);
     DrawText("JUGAR", playButton.x + 70, playButton.y + 10, 20, BLACK);
-    DrawRectangleRec(exitButton, mouseOverExitButton ? RED : MAROON);
+
+    DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
+    DrawText("OPCIONES", optionsButton.x + 70, optionsButton.y + 10, 20, BLACK);
+
+    DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
     DrawText("SALIR", exitButton.x + 70, exitButton.y + 10, 20, BLACK);
 
     EndDrawing();
