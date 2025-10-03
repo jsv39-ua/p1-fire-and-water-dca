@@ -7,6 +7,8 @@ extern "C" {
 
 
 #include <GameState.hpp>
+#include <StateMachine.hpp>
+#include <MainGameState.hpp>
 
 
 
@@ -26,7 +28,12 @@ class MainMenuState : public GameState
         virtual void resume(){};
 
     private:
-        
+        // Variables para los botones y manejar el raton
+        Vector2 mousePos;
+        Rectangle playButton;
+        Rectangle exitButton;
+        bool mouseOverPlayButton = false;
+        bool mouseOverExitButton = false;
 
         
 };
