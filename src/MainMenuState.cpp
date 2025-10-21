@@ -5,15 +5,26 @@
 
 MainMenuState::MainMenuState(){};
 
-// Para cuando necesitemos hacer cosas en el destructor
-//MainMenuState::~MainMenuState(){};
+MainMenuState::~MainMenuState(){
+    UnloadTexture(logo);
+};
 
 void MainMenuState::init(){
 
+    // Cargar el logo
+    logo = LoadTexture("assets/images/logo.png");
 
-    playButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 - 50, 200, 50 };
-    optionsButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 25, 200, 50 };
-    exitButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 100, 200, 50 };
+    // Botones horizontales en la parte inferior
+    float buttonWidth = 150;
+    float buttonHeight = 50;
+    float spacing = 20;
+    float totalWidth = (buttonWidth * 3) + (spacing * 2);
+    float startX = GetScreenWidth()/2 - totalWidth/2;
+    float buttonY = GetScreenHeight() - buttonHeight - 30;
+
+    playButton = { startX, buttonY, buttonWidth, buttonHeight };
+    optionsButton = { startX + buttonWidth + spacing, buttonY, buttonWidth, buttonHeight };
+    exitButton = { startX + (buttonWidth + spacing) * 2, buttonY, buttonWidth, buttonHeight };
 };
 
 void MainMenuState::handleInput(){
@@ -50,16 +61,30 @@ void MainMenuState::render(){
     BeginDrawing();
 
     ClearBackground(SKYBLUE);
-    DrawText("ELEMENTS", GetScreenWidth()/2 - 70, 30, 25, YELLOW);
+    
+    // Dibujar el logo más grande y centrado en la parte superior
+    if (logo.id != 0) {
+        float scale = 0.5f; // Escalar al 50% del tamaño original (512x512)
+        float logoWidth = logo.width * scale;
+        float logoHeight = logo.height * scale;
+        float logoX = GetScreenWidth()/2 - logoWidth/2;
+        float logoY = -30;
+        
+        Rectangle source = { 0, 0, (float)logo.width, (float)logo.height };
+        Rectangle dest = { logoX, logoY, logoWidth, logoHeight };
+        Vector2 origin = { 0, 0 };
+        
+        DrawTexturePro(logo, source, dest, origin, 0.0f, WHITE);
+    }
 
     DrawRectangleRec(playButton, mouseOverPlayButton ? GRAY : DARKGRAY);
-    DrawText("JUGAR", playButton.x + 70, playButton.y + 12, 20, BLACK);
+    DrawText("JUGAR", playButton.x + 45, playButton.y + 15, 20, BLACK);
 
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText("OPCIONES", optionsButton.x + 50, optionsButton.y + 12, 20, BLACK);
+    DrawText("OPCIONES", optionsButton.x + 25, optionsButton.y + 15, 20, BLACK);
 
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText("SALIR", exitButton.x + 70, exitButton.y + 12, 20, BLACK);
+    DrawText("SALIR", exitButton.x + 50, exitButton.y + 15, 20, BLACK);
 
     EndDrawing();
 };
