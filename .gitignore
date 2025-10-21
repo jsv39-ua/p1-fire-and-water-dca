@@ -29,7 +29,6 @@
 # Compiled Static libraries
 *.lai
 *.la
-*.a
 *.lib
 
 # Executables
@@ -41,7 +40,8 @@
 *.dwo
 
 # Vendor libraries
-vendor/lib/
+#vendor/lib/ 
+# Si no metemos esto al repo no se puede compilar el juego y habria que descargar Raylib 
 
 apunte.txt
 
