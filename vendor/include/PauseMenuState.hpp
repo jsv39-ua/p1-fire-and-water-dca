@@ -27,7 +27,9 @@ private:
     Rectangle resumeButton;
     Rectangle restartButton;
     Rectangle exitButton;
+    Rectangle optionsButton;
     bool mouseOverResumeButton = false;
     bool mouseOverRestartButton = false;
     bool mouseOverExitButton = false;
+    bool mouseOverOptionsButton = false;
 };

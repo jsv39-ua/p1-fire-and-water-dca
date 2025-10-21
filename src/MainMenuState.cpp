@@ -1,4 +1,5 @@
 #include <MainMenuState.hpp>
+#include "OptionsState.hpp"
 
 
 
@@ -34,7 +35,7 @@ void MainMenuState::update(float deltaTime){
     }
     
     if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        
+        this->state_machine->add_state(std::make_unique<OptionsState>(), false);
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
