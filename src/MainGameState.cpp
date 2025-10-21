@@ -1,6 +1,7 @@
 #include <MainGameState.hpp>
 #include <iostream>
 #include <GameOverState.hpp> // Incluye la nueva clase
+#include <PauseMenuState.hpp> // Incluye el menú de pausa
 #include <StateMachine.hpp> // Asegúrate de incluirla
 
 
@@ -56,6 +57,12 @@ void MainGameState::init()
 
 void MainGameState::handleInput()
 {
+    // Abrir menú de pausa con Escape
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        this->state_machine->add_state(std::make_unique<PauseMenuState>(), false);
+        return; // No procesar más input si se abre el menú de pausa
+    }
+
     // Control del personaje de Fuego (teclas A y D)
     if (IsKeyDown(KEY_A)) {
         fire_player.velocity.x = -200.0f;
