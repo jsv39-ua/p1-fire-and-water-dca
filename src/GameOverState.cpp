@@ -10,6 +10,9 @@ extern "C" {
 GameOverState::GameOverState() {}
 
 void GameOverState::init() {
+
+    optionsButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 25, 200, 50 };
+    exitButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 100, 200, 50 };
 }
 
 void GameOverState::handleInput() {
@@ -19,18 +22,39 @@ void GameOverState::handleInput() {
 }
 
 void GameOverState::update(float deltaTime) {
+    mousePos = GetMousePosition();
+
+    mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
+    mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
+
+    if(mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Añadir redireccion a estado de opciones
+    }
+    if(mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+    }
 }
 
 void GameOverState::render() {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(SKYBLUE);
 
     const char* message = "Game Over";
     int textWidth = MeasureText(message, 30);
     int x = (GetScreenWidth() - textWidth) / 2;
-    int y = (GetScreenHeight() / 2) - 15;
+    int y = (GetScreenHeight() / 2) - 100;
 
-    DrawText(message, x, y, 30, BLACK);
+    const char* message2 = "Pulsa ESPACIO para reiniciar";
+    int textWidth2 = MeasureText(message2, 20);
+    int x2 = (GetScreenWidth() - textWidth2) / 2;
+    int y2 = (GetScreenHeight() / 2) - 50;
+    DrawText(message2, x2, y2, 20, DARKGRAY);
+    DrawText(message, x, y, 30, YELLOW);
+
+    DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
+    DrawText("MENU DE PAUSA", optionsButton.x + 10, optionsButton.y + 12, 20, BLACK);
+    DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
+    DrawText("MENU PRINCIPAL", exitButton.x + 10, exitButton.y + 12, 20, BLACK);
 
     EndDrawing();
 }

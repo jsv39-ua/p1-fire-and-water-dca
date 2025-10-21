@@ -2,6 +2,7 @@
 
 #include <GameState.hpp>
 #include <memory>
+#include <MainMenuState.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -20,4 +21,11 @@ public:
     
     void pause() override {};
     void resume() override {};
+
+private:
+    Vector2 mousePos;
+    Rectangle optionsButton;
+    Rectangle exitButton;
+    bool mouseOverOptionsButton = false;
+    bool mouseOverExitButton = false;
 };
