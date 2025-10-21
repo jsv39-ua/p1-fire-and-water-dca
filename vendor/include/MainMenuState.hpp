@@ -17,7 +17,7 @@ class MainMenuState : public GameState
 
     public:
         MainMenuState();
-        virtual ~MainMenuState() = default;
+        virtual ~MainMenuState();
 
         virtual void init() override;
         virtual void handleInput() override;
@@ -37,5 +37,7 @@ class MainMenuState : public GameState
         bool mouseOverOptionsButton = false;
         bool mouseOverExitButton = false;
 
+        // Logo
+        Texture2D logo;
         
 };
