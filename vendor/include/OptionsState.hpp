@@ -28,17 +28,20 @@ public:
     };
 
 private:
-    static bool dark_theme;
     static float volume;
-    static Language current_language;
-    
-    Rectangle back_button;
-    Rectangle language_button;
-    Rectangle volume_slider;
-    Rectangle volume_handle;
-    
-    bool dragging_volume;
-    
+    static Language currentLanguage;
+
+    Rectangle backButton;
+    Rectangle languageButton;
+    Rectangle volumeSlider;
+    Rectangle volumeHandle;
+
+    bool draggingVolume;
+    Vector2 mousePos;
+    bool mouseOverLanguageButton = false;
+    bool mouseOverBackButton = false;
+    bool mouseOverVolumeButton = false;
+
     void updateVolumeSlider();
     
 public:
