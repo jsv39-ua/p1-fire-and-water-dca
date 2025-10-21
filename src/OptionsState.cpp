@@ -68,6 +68,7 @@ void OptionsState::update(float deltaTime)
         if (x < 0) x = 0;
         if (x > volumeSlider.width - volumeHandle.width) x = volumeSlider.width - volumeHandle.width;
         volume = x / (volumeSlider.width - volumeHandle.width);
+        SetMasterVolume(volume);
         updateVolumeSlider();
     }
 
