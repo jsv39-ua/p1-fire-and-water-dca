@@ -15,6 +15,7 @@ int main()
     const int screenHeight = 450;
     
     InitWindow(screenWidth, screenHeight, "Fuego y Agua");
+    SetExitKey(KEY_NULL); // Deshabilitar que Escape cierre la ventana
     SetTargetFPS(60);
 
     float delta_time = 0.0f;
