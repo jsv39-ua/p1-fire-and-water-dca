@@ -18,6 +18,14 @@ int main()
     SetExitKey(KEY_NULL); // Deshabilitar que Escape cierre la ventana
     SetTargetFPS(60);
 
+    // Inicializar el dispositivo de audio, sin esto no se pueden reproducir sonidos
+    InitAudioDevice();
+    SetMasterVolume(0.5f); // Ajustar el volumen maestro al 50%
+
+    Music backgroundMusic = LoadMusicStream("assets/music/backgroundMusic.mp3");
+    PlayMusicStream(backgroundMusic); // Iniciar la reproducción de la música
+    backgroundMusic.looping = true; // Hacer que la música se repita en bucle
+
     float delta_time = 0.0f;
 
     StateMachine state_machine = StateMachine();
@@ -26,6 +34,7 @@ int main()
     // Bucle principal del juego proporcionado por Raylib
     while (!WindowShouldClose() && !state_machine.is_game_ending()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
     {
+        UpdateMusicStream(backgroundMusic);
         delta_time = GetFrameTime(); // Obtiene el tiempo transcurrido desde el último fotograma
         
         state_machine.handle_state_changes(delta_time);
@@ -35,6 +44,9 @@ int main()
             state_machine.getCurrentState()->render();
         }
     }
+
+    UnloadMusicStream(backgroundMusic); // Liberar la memoria de la música
+    CloseAudioDevice();
 
     // Des-inicializa la ventana y los recursos
     CloseWindow();
