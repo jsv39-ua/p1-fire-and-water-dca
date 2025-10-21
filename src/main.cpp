@@ -8,6 +8,10 @@ extern "C" {
     #include <raylib.h>
 }
 
+// Variable global para controlar la música
+bool g_musicEnabled = true;
+Music g_backgroundMusic;
+
 int main()
 {
     // Initialize the game window
@@ -17,6 +21,16 @@ int main()
     InitWindow(screenWidth, screenHeight, "Fuego y Agua");
     SetExitKey(KEY_NULL); // Deshabilitar que Escape cierre la ventana
     SetTargetFPS(60);
+
+    // Inicializar sistema de audio y cargar música
+    InitAudioDevice();
+    g_backgroundMusic = LoadMusicStream("assets/music/background_music.wav");
+    g_backgroundMusic.looping = true;
+    
+    // Reproducir música si está habilitada
+    if (g_musicEnabled) {
+        PlayMusicStream(g_backgroundMusic);
+    }
 
     float delta_time = 0.0f;
 
@@ -28,6 +42,16 @@ int main()
     {
         delta_time = GetFrameTime(); // Obtiene el tiempo transcurrido desde el último fotograma
         
+        // Actualizar la música
+        UpdateMusicStream(g_backgroundMusic);
+        
+        // Controlar reproducción según el estado de musicEnabled
+        if (g_musicEnabled && !IsMusicStreamPlaying(g_backgroundMusic)) {
+            PlayMusicStream(g_backgroundMusic);
+        } else if (!g_musicEnabled && IsMusicStreamPlaying(g_backgroundMusic)) {
+            StopMusicStream(g_backgroundMusic);
+        }
+        
         state_machine.handle_state_changes(delta_time);
         if (state_machine.getCurrentState() != nullptr) {
             state_machine.getCurrentState()->handleInput();
@@ -36,6 +60,10 @@ int main()
         }
     }
 
+    // Des-inicializa la música y el sistema de audio
+    UnloadMusicStream(g_backgroundMusic);
+    CloseAudioDevice();
+    
     // Des-inicializa la ventana y los recursos
     CloseWindow();
 

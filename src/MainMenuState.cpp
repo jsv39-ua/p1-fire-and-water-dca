@@ -1,4 +1,8 @@
 #include <MainMenuState.hpp>
+#include <OptionsMenuState.hpp>
+
+// Declaraciones externas para acceder a las variables globales de música
+extern bool g_musicEnabled;
 
 
 
@@ -34,7 +38,7 @@ void MainMenuState::update(float deltaTime){
     }
     
     if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        
+        this->state_machine->add_state(std::make_unique<OptionsMenuState>(&g_musicEnabled), false);
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
