@@ -46,3 +46,6 @@
 apunte.txt
 
 game
+
+# CodeQL analysis files
+_codeql_detected_source_root
