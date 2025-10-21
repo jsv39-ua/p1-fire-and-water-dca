@@ -34,12 +34,12 @@ void PauseMenuState::update(float deltaTime){
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
     }
 
-    // Volver al menú principal - quita el menú de pausa y el juego
+    // Volver al menú principal - reemplaza todo con el menú principal
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         // Quita el menú de pausa
         this->state_machine->remove_state(false);
-        // Quita el juego y vuelve al menú principal
-        this->state_machine->remove_state(false);
+        // Reemplaza el estado de juego con el menú principal
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 
     // También permitir reanudar con Escape
@@ -51,11 +51,13 @@ void PauseMenuState::update(float deltaTime){
 void PauseMenuState::render(){
     BeginDrawing();
 
-    // Dibujar un fondo semi-transparente sobre el juego
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.6f));
-
-    // Título
-    DrawText("PAUSA", GetScreenWidth()/2 - 60, 80, 30, YELLOW);
+    // Fondo igual que el menú principal
+    ClearBackground(SKYBLUE);
+    
+    // Título centrado
+    const char* title = "PAUSA";
+    int titleWidth = MeasureText(title, 25);
+    DrawText(title, GetScreenWidth()/2 - titleWidth/2, 30, 25, YELLOW);
 
     // Botón de reanudar
     DrawRectangleRec(resumeButton, mouseOverResumeButton ? GRAY : DARKGRAY);
