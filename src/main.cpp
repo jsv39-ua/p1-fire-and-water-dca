@@ -23,7 +23,7 @@ int main()
     state_machine.add_state(std::make_unique<MainMenuState>(), false);
 
     // Bucle principal del juego proporcionado por Raylib
-    while (!WindowShouldClose()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
+    while (!WindowShouldClose() && !state_machine.is_game_ending()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
     {
         delta_time = GetFrameTime(); // Obtiene el tiempo transcurrido desde el último fotograma
         

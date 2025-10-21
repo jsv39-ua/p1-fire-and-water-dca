@@ -38,8 +38,7 @@ void MainMenuState::update(float deltaTime){
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        
-       
+        this->state_machine->remove_state(true);
     }
 };
 
