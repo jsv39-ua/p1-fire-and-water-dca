@@ -1,13 +1,15 @@
 #include <PauseMenuState.hpp>
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
+#include <OptionsState.hpp>
 
 PauseMenuState::PauseMenuState(){};
 
 void PauseMenuState::init(){
     resumeButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 - 75, 200, 50 };
     restartButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2, 200, 50 };
-    exitButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 75, 200, 50 };
+    optionsButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 75, 200, 50 };
+    exitButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 150, 200, 50 };
 };
 
 void PauseMenuState::handleInput(){
@@ -19,6 +21,7 @@ void PauseMenuState::update(float deltaTime){
 
     mouseOverResumeButton = CheckCollisionPointRec(mousePos, resumeButton);
     mouseOverRestartButton = CheckCollisionPointRec(mousePos, restartButton);
+    mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
     // Reanudar el juego - quita el menú de pausa y vuelve al juego
@@ -32,6 +35,11 @@ void PauseMenuState::update(float deltaTime){
         this->state_machine->remove_state(false);
         // Luego reemplaza el juego con uno nuevo
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
+    }
+
+    // Abrir opciones - añade el estado de opciones sobre el menú de pausa
+    if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        this->state_machine->add_state(std::make_unique<OptionsState>(), false);
     }
 
     // Volver al menú principal - reemplaza todo con el menú principal
@@ -66,6 +74,10 @@ void PauseMenuState::render(){
     // Botón de reiniciar
     DrawRectangleRec(restartButton, mouseOverRestartButton ? GRAY : DARKGRAY);
     DrawText("REINICIAR", restartButton.x + 45, restartButton.y + 12, 20, BLACK);
+
+    // Botón de opciones
+    DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
+    DrawText("OPCIONES", optionsButton.x + 45, optionsButton.y + 12, 20, BLACK);
 
     // Botón de salir
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
