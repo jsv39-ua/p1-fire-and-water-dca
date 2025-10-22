@@ -38,9 +38,14 @@ private:
 
     bool draggingVolume;
     Vector2 mousePos;
-    bool mouseOverLanguageButton = false;
+    
+   
     bool mouseOverBackButton = false;
+    bool mouseOverLanguageButton = false;
     bool mouseOverVolumeButton = false;
+    bool mouseExitedBackButton = true;
+    bool mouseExitedLanguageButton = true;
+    bool mouseExitedVolumeButton = true;
 
     void updateVolumeSlider();
     
