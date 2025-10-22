@@ -24,7 +24,13 @@ void AudioManager::cleanup() {
 }
 
 void AudioManager::init() {
-    
+    // Cargar y configurar música de fondo
+    backgroundMusic = LoadMusicStream("assets/music/backgroundMusic.mp3");
+    PlayMusicStream(backgroundMusic); // Iniciar la reproducción de la música
+    backgroundMusic.looping = true; // Hacer que la música se repita en bucle
+    SetMusicVolume(backgroundMusic, musicVolumeLevel); // Volumen inicial al 25%
+
+    // Cargar sonidos de botones
     buttonClickSound = LoadSound("assets/ui_sounds/boton_click.ogg");
     buttonHoverSound = LoadSound("assets/ui_sounds/boton_hover.ogg");
     
@@ -48,6 +54,28 @@ void AudioManager::playButtonHover() {
     }
 }
 
+void AudioManager::updateMusicStream() {
+    if (IsMusicValid(backgroundMusic)) {
+        UpdateMusicStream(backgroundMusic);
+    }
+}
+
+void AudioManager::setMusicVolume(float volume) {
+    if (IsMusicValid(backgroundMusic)) {
+        SetMusicVolume(backgroundMusic, volume);
+        musicVolumeLevel = volume * 100;
+    }
+}
+
+    
+float AudioManager::getMusicVolume() {
+    
+    return this->musicVolumeLevel;
+    
+}
+
+
+
 AudioManager::~AudioManager() {
 
     if (IsSoundValid(buttonClickSound)) {
@@ -56,4 +84,8 @@ AudioManager::~AudioManager() {
     if (IsSoundValid(buttonHoverSound)) {
         UnloadSound(buttonHoverSound);
     }
+    if (IsMusicValid(backgroundMusic)) {
+        UnloadMusicStream(backgroundMusic);
+    }
 }
+
