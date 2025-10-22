@@ -1,6 +1,7 @@
 #include <AudioManager.hpp>
 #include <iostream>
 
+// De esta clase se crea una instancia para poder cargar los sonidos
 
 AudioManager* AudioManager::instance = nullptr;
 
