@@ -37,6 +37,10 @@ class MainMenuState : public GameState
         bool mouseOverOptionsButton = false;
         bool mouseOverExitButton = false;
 
+        bool mouseExitedPlayButton = true;
+        bool mouseExitedOptionsButton = true;
+        bool mouseExitedExitButton = true;
+
         // Logo
         Texture2D logo;
         
