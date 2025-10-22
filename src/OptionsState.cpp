@@ -1,5 +1,6 @@
 #include "OptionsState.hpp"
 #include "StateMachine.hpp"
+#include <AudioManager.hpp>
 #include <iostream>
 
 extern "C" {
@@ -37,10 +38,12 @@ void OptionsState::handleInput()
     
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(mouse, backButton)) {
+            AudioManager::getInstance()->playButtonClick();
             this->state_machine->remove_state(false);
         }
 
         if (CheckCollisionPointRec(mouse, languageButton)) {
+            AudioManager::getInstance()->playButtonClick();
             currentLanguage = (Language)((currentLanguage + 1) % 2);
         }
 

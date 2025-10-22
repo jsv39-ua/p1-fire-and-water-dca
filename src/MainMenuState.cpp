@@ -1,4 +1,5 @@
 #include <MainMenuState.hpp>
+#include <AudioManager.hpp>
 #include "OptionsState.hpp"
 
 
@@ -42,14 +43,17 @@ void MainMenuState::update(float deltaTime){
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
     if (mouseOverPlayButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
     }
     
     if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<OptionsState>(), false);
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->remove_state(true);
     }
 };

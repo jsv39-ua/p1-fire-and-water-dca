@@ -1,6 +1,7 @@
 #include <GameOverState.hpp>
 #include <MainGameState.hpp>
 #include <StateMachine.hpp>
+#include <AudioManager.hpp>
 #include <memory>
 
 extern "C" {
@@ -17,6 +18,7 @@ void GameOverState::init() {
 
 void GameOverState::handleInput() {
     if (IsKeyPressed(KEY_SPACE)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
     }
 }
@@ -28,9 +30,11 @@ void GameOverState::update(float deltaTime) {
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
     if(mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         // Añadir redireccion a estado de opciones
     }
     if(mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 }
