@@ -1,4 +1,5 @@
 #include <MainMenuState.hpp>
+#include <AudioManager.hpp>
 #include "OptionsState.hpp"
 
 
@@ -41,15 +42,48 @@ void MainMenuState::update(float deltaTime){
     mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
+    // Lógica de hover para botón PLAY
+    if (mouseOverPlayButton && mouseExitedPlayButton) {
+        // Acabamos de entrar en el botón, reproducir sonido UNA vez
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedPlayButton = false;
+    } else if (!mouseOverPlayButton) {
+        // Salimos del botón, resetear flag
+        mouseExitedPlayButton = true;
+    }
+
+    // Lógica de hover para botón OPTIONS
+    if (mouseOverOptionsButton && mouseExitedOptionsButton) {
+        // Acabamos de entrar en el botón, reproducir sonido UNA vez
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedOptionsButton = false;
+    } else if (!mouseOverOptionsButton) {
+        // Salimos del botón, resetear flag
+        mouseExitedOptionsButton = true;
+    }
+
+    // Lógica de hover para botón EXIT
+    if (mouseOverExitButton && mouseExitedExitButton) {
+        // Acabamos de entrar en el botón, reproducir sonido UNA vez
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedExitButton = false;
+    } else if (!mouseOverExitButton) {
+        // Salimos del botón, resetear flag
+        mouseExitedExitButton = true;
+    }
+
     if (mouseOverPlayButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
     }
     
     if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<OptionsState>(), false);
     }
 
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->remove_state(true);
     }
 };

@@ -1,6 +1,7 @@
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
+#include <AudioManager.hpp>
 #include <memory>
 #include <chrono>
 
@@ -22,6 +23,9 @@ int main()
     InitAudioDevice();
     SetMasterVolume(0.5f); // Ajustar el volumen maestro al 50%
 
+    // Inicializar el AudioManager para sonidos globales
+    AudioManager::getInstance()->init();
+
     Music backgroundMusic = LoadMusicStream("assets/music/backgroundMusic.mp3");
     PlayMusicStream(backgroundMusic); // Iniciar la reproducción de la música
     backgroundMusic.looping = true; // Hacer que la música se repita en bucle
@@ -34,7 +38,7 @@ int main()
     // Bucle principal del juego proporcionado por Raylib
     while (!WindowShouldClose() && !state_machine.is_game_ending()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
     {
-        UpdateMusicStream(backgroundMusic);
+        UpdateMusicStream(backgroundMusic); // Reproduce la música de fondo
         delta_time = GetFrameTime(); // Obtiene el tiempo transcurrido desde el último fotograma
         
         state_machine.handle_state_changes(delta_time);
@@ -46,6 +50,7 @@ int main()
     }
 
     UnloadMusicStream(backgroundMusic); // Liberar la memoria de la música
+    AudioManager::cleanup(); // Limpiar el AudioManager
     CloseAudioDevice();
 
     // Des-inicializa la ventana y los recursos

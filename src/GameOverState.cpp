@@ -1,6 +1,7 @@
 #include <GameOverState.hpp>
 #include <MainGameState.hpp>
 #include <StateMachine.hpp>
+#include <AudioManager.hpp>
 #include <memory>
 
 extern "C" {
@@ -17,6 +18,7 @@ void GameOverState::init() {
 
 void GameOverState::handleInput() {
     if (IsKeyPressed(KEY_SPACE)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
     }
 }
@@ -27,10 +29,28 @@ void GameOverState::update(float deltaTime) {
     mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
+    // Lógica de hover para botón OPTIONS
+    if (mouseOverOptionsButton && mouseExitedOptionsButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedOptionsButton = false;
+    } else if (!mouseOverOptionsButton) {
+        mouseExitedOptionsButton = true;
+    }
+
+    // Lógica de hover para botón EXIT
+    if (mouseOverExitButton && mouseExitedExitButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedExitButton = false;
+    } else if (!mouseOverExitButton) {
+        mouseExitedExitButton = true;
+    }
+
     if(mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         // Añadir redireccion a estado de opciones
     }
     if(mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 }

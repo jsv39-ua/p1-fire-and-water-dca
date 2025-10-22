@@ -1,5 +1,6 @@
 #include "OptionsState.hpp"
 #include "StateMachine.hpp"
+#include <AudioManager.hpp>
 #include <iostream>
 
 extern "C" {
@@ -37,10 +38,12 @@ void OptionsState::handleInput()
     
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(mouse, backButton)) {
+            AudioManager::getInstance()->playButtonClick();
             this->state_machine->remove_state(false);
         }
 
         if (CheckCollisionPointRec(mouse, languageButton)) {
+            AudioManager::getInstance()->playButtonClick();
             currentLanguage = (Language)((currentLanguage + 1) % 2);
         }
 
@@ -73,10 +76,24 @@ void OptionsState::update(float deltaTime)
     }
 
     mouseOverBackButton = CheckCollisionPointRec(mousePos, backButton);
-
     mouseOverLanguageButton = CheckCollisionPointRec(mousePos, languageButton);
-
     mouseOverVolumeButton = CheckCollisionPointRec(mousePos, volumeSlider);
+
+    // Lógica de hover para botón BACK
+    if (mouseOverBackButton && mouseExitedBackButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedBackButton = false;
+    } else if (!mouseOverBackButton) {
+        mouseExitedBackButton = true;
+    }
+
+    // Lógica de hover para botón LANGUAGE
+    if (mouseOverLanguageButton && mouseExitedLanguageButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedLanguageButton = false;
+    } else if (!mouseOverLanguageButton) {
+        mouseExitedLanguageButton = true;
+    }
 }
 
 void OptionsState::updateVolumeSlider()

@@ -28,4 +28,8 @@ private:
     Rectangle exitButton;
     bool mouseOverOptionsButton = false;
     bool mouseOverExitButton = false;
+    
+    
+    bool mouseExitedOptionsButton = true;
+    bool mouseExitedExitButton = true;
 };
