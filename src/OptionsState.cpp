@@ -75,6 +75,16 @@ void OptionsState::update(float deltaTime)
         updateVolumeSlider();
     }
 
+    if (draggingMusicVolume) {
+        Vector2 mouse = GetMousePosition();
+        float x = mouse.x - musicVolumeSlider.x;
+        if (x < 0) x = 0;
+        if (x > musicVolumeSlider.width - musicVolumeHandle.width) x = musicVolumeSlider.width - musicVolumeHandle.width;
+        volume = x / (musicVolumeSlider.width - musicVolumeHandle.width);
+        SetMusicVolume(backgroundMusic, volume);
+        updateMusicVolumeSlider();
+    }
+
     mouseOverBackButton = CheckCollisionPointRec(mousePos, backButton);
     mouseOverLanguageButton = CheckCollisionPointRec(mousePos, languageButton);
     mouseOverVolumeButton = CheckCollisionPointRec(mousePos, volumeSlider);
