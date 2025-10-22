@@ -25,6 +25,38 @@ void PauseMenuState::update(float deltaTime){
     mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
+    // Lógica de hover para botón RESUME
+    if (mouseOverResumeButton && mouseExitedResumeButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedResumeButton = false;
+    } else if (!mouseOverResumeButton) {
+        mouseExitedResumeButton = true;
+    }
+
+    // Lógica de hover para botón RESTART
+    if (mouseOverRestartButton && mouseExitedRestartButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedRestartButton = false;
+    } else if (!mouseOverRestartButton) {
+        mouseExitedRestartButton = true;
+    }
+
+    // Lógica de hover para botón OPTIONS
+    if (mouseOverOptionsButton && mouseExitedOptionsButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedOptionsButton = false;
+    } else if (!mouseOverOptionsButton) {
+        mouseExitedOptionsButton = true;
+    }
+
+    // Lógica de hover para botón EXIT
+    if (mouseOverExitButton && mouseExitedExitButton) {
+        AudioManager::getInstance()->playButtonHover();
+        mouseExitedExitButton = false;
+    } else if (!mouseOverExitButton) {
+        mouseExitedExitButton = true;
+    }
+
     // Reanudar el juego - quita el menú de pausa y vuelve al juego
     if (mouseOverResumeButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         AudioManager::getInstance()->playButtonClick();

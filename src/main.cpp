@@ -38,7 +38,7 @@ int main()
     // Bucle principal del juego proporcionado por Raylib
     while (!WindowShouldClose() && !state_machine.is_game_ending()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
     {
-        //UpdateMusicStream(backgroundMusic);
+        UpdateMusicStream(backgroundMusic); // Reproduce la música de fondo
         delta_time = GetFrameTime(); // Obtiene el tiempo transcurrido desde el último fotograma
         
         state_machine.handle_state_changes(delta_time);

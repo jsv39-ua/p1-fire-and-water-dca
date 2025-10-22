@@ -32,4 +32,10 @@ private:
     bool mouseOverRestartButton = false;
     bool mouseOverExitButton = false;
     bool mouseOverOptionsButton = false;
+    
+    // Variables para hover sounds
+    bool mouseExitedResumeButton = true;
+    bool mouseExitedRestartButton = true;
+    bool mouseExitedExitButton = true;
+    bool mouseExitedOptionsButton = true;
 };
