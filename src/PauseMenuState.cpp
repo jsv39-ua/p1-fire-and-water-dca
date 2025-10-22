@@ -2,6 +2,7 @@
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
 #include <OptionsState.hpp>
+#include <AudioManager.hpp>
 
 PauseMenuState::PauseMenuState(){};
 
@@ -26,11 +27,13 @@ void PauseMenuState::update(float deltaTime){
 
     // Reanudar el juego - quita el menú de pausa y vuelve al juego
     if (mouseOverResumeButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->remove_state(false);
     }
     
     // Reiniciar el juego - reemplaza el estado actual del juego con uno nuevo
     if (mouseOverRestartButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         // Primero quita el menú de pausa
         this->state_machine->remove_state(false);
         // Luego reemplaza el juego con uno nuevo
@@ -39,11 +42,13 @@ void PauseMenuState::update(float deltaTime){
 
     // Abrir opciones - añade el estado de opciones sobre el menú de pausa
     if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<OptionsState>(), false);
     }
 
     // Volver al menú principal - reemplaza todo con el menú principal
     if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        AudioManager::getInstance()->playButtonClick();
         // Quita el menú de pausa
         this->state_machine->remove_state(false);
         // Reemplaza el estado de juego con el menú principal
