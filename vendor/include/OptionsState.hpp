@@ -29,6 +29,7 @@ public:
 
 private:
     static float volume;
+    static float musicVolume;
     static Language currentLanguage;
 
     Rectangle backButton;
@@ -61,6 +62,6 @@ public:
     // Funciones estáticas para acceder a las opciones
     static bool getDarkTheme();
     static float getVolume();
-    static float getMusicVolume();
+    static float getMusicVolumeFromAudioManager();
     static Language getLanguage();
 };
