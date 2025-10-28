@@ -11,7 +11,7 @@ extern "C" {
 class GameOverState : public GameState
 {
 public:
-    GameOverState();
+    GameOverState(bool isVictory = false);
     ~GameOverState() = default;
 
     void init() override;
@@ -32,4 +32,6 @@ private:
     
     bool mouseExitedOptionsButton = true;
     bool mouseExitedExitButton = true;
+    
+    bool isVictory; // true si ganó, false si perdió
 };

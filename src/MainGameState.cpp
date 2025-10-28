@@ -134,7 +134,7 @@ void MainGameState::update(float deltaTime)
 
         // Detecta si ambos jugadores están en la meta
         if(fire_collides && water_collides && platform.type == "goal") {
-            this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+            this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
         }
     }
 
