@@ -34,7 +34,10 @@ void MainGameState::init()
     // Creación de plataformas para el nivel de prueba
     Platform ground = { { 0, 400, 800, 50 } };
     level_platforms.push_back(ground);
-    
+
+    Platform goal = { { 400, 390, 100, 50 }, "goal" };
+    level_platforms.push_back(goal);
+
     Platform p1 = { { 300, 300, 200, 20 } };
     level_platforms.push_back(p1);
 
@@ -107,8 +110,11 @@ void MainGameState::update(float deltaTime)
 
     // Colisiones con plataformas
     for (const auto& platform : level_platforms) {
+        bool fire_collides = CheckCollisionRecs(fire_player.bounds, platform.bounds);
+        bool water_collides = CheckCollisionRecs(water_player.bounds, platform.bounds);
+
         // Revisa colisión con el personaje de Fuego
-        if (CheckCollisionRecs(fire_player.bounds, platform.bounds)) {
+        if (fire_collides) {
             // Detiene el movimiento vertical
             fire_player.velocity.y = 0;
             // Corrige la posición del jugador para que no caiga
@@ -117,13 +123,18 @@ void MainGameState::update(float deltaTime)
             fire_on_ground = true; // El jugador está en el suelo
         }
         // Revisa colisión con el personaje de Agua
-        if (CheckCollisionRecs(water_player.bounds, platform.bounds)) {
+        if (water_collides) {
             // Detiene el movimiento vertical
             water_player.velocity.y = 0;
             // Corrige la posición del jugador
             water_player.position.y = platform.bounds.y - water_player.bounds.height;
             water_player.bounds.y = water_player.position.y;
             water_on_ground = true; // El jugador está en el suelo
+        }
+
+        // Detecta si ambos jugadores están en la meta
+        if(fire_collides && water_collides && platform.type == "goal") {
+            this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         }
     }
 
@@ -194,7 +205,16 @@ void MainGameState::render()
 
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
-        DrawRectangleRec(platform.bounds, GRAY);
+        if(platform.type == "default"){
+            DrawRectangleRec(platform.bounds, GRAY);
+            continue;
+        }
+
+        else if(platform.type == "goal"){
+            DrawRectangleRec(platform.bounds, YELLOW);
+            continue;
+        }
+        
     }
 
     // Dibuja los peligros estáticos
