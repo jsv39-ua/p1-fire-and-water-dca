@@ -8,7 +8,7 @@ extern "C" {
     #include <raylib.h>
 }
 
-GameOverState::GameOverState() {}
+GameOverState::GameOverState(bool isVictory) : isVictory(isVictory) {}
 
 void GameOverState::init() {
 
@@ -59,7 +59,7 @@ void GameOverState::render() {
     BeginDrawing();
     ClearBackground(SKYBLUE);
 
-    const char* message = "Game Over";
+    const char* message = isVictory ? "¡Nivel Completado!" : "Game Over";
     int textWidth = MeasureText(message, 30);
     int x = (GetScreenWidth() - textWidth) / 2;
     int y = (GetScreenHeight() / 2) - 100;
