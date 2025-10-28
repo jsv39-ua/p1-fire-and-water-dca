@@ -2,6 +2,7 @@
 
 #include <GameState.hpp>
 #include <vector>
+#include <string>
 
 extern "C" {
     #include <raylib.h>
@@ -47,6 +48,7 @@ struct Player {
 
 struct Platform {
     Rectangle bounds;
+    std::string type = "default";
 };
 
 class MainGameState : public GameState
