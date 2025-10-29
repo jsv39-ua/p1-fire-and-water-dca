@@ -30,4 +30,10 @@ Hemos completado la configuración inicial de la versión "alpha" del juego. Los
 Para compilar y ejecutar esta versión del juego, asegúrate de tener las librerías necesarias de `raylib` en la carpeta `vendor/`. Luego, utiliza el siguiente comando en la raíz del proyecto:
 
 ```bash
-g++ -o game src/*.cpp -I src/ -I vendor/include/ -L vendor/lib -lraylib -lopengl32 -lgdi32 -lwinmm
+Para linux:
+g++ -o game src/*.cpp -I vendor/include/ -L vendor/lib/linux -lraylib -lGL -lm -lpthread -lrt -lX11
+
+
+Para Windows:
+
+g++ -o game.exe src/*.cpp -I vendor/include/ -L vendor/lib/windows -lraylib -lopengl32 -lgdi32 -lwinmm
