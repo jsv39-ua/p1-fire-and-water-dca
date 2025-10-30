@@ -7,6 +7,7 @@ extern "C" {
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 // Forward declaration - evita incluir raytmx.h en el header
 typedef struct tmx_map TmxMap;
@@ -29,6 +30,9 @@ public:
     void unloadMapa();
 
     void draw(const Camera2D& camera);
+
+    // Extrae todas las colisiones de los tiles del mapa que tienen objectGroup
+    std::vector<Rectangle> extractCollisions();
 
 private:
 
