@@ -5,6 +5,7 @@
 #include <StateMachine.hpp> // Asegúrate de incluirla
 
 
+
 extern "C" {
     #include <raylib.h>
 }
@@ -30,6 +31,21 @@ void MainGameState::init()
     water_player.height = 30.0f;
     water_player.bounds = { water_player.position.x, water_player.position.y, water_player.width, water_player.height };
     water_player.type = WATER;
+
+    // Inicialización de la cámara
+    camera = { 0 };
+    camera.target = (Vector2){ 0, 0 };
+    camera.offset = (Vector2){ 400, 240 };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    // Inicialización del MapLoader
+    try {
+        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-prueba.tmx");
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+    }
 
     // Creación de plataformas para el nivel de prueba
     Platform ground = { { 0, 400, 800, 50 } };
@@ -196,6 +212,8 @@ void MainGameState::render()
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
+
+    mapLoader.draw(camera);  // Dibuja el mapa usando la cámara
 
     // Dibujar el personaje de Fuego
     DrawRectangleRec(fire_player.bounds, RED);
