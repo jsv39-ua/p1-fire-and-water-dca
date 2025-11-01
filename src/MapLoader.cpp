@@ -56,6 +56,13 @@ void MapLoader::draw(const Camera2D& camera) {
     DrawTMX(this->mapa, NULL, 0, 0, WHITE);
 }
 
+
+
+// Este metodo de extraer las colisiones es muy ineficiente
+// porque asigna un rectangulo individual a cada tile.
+// Si hay muchos tiles con colision, esto puede ser un problema de rendimiento
+
+// Extrae las colisiones del mapa TMX cargado
 std::vector<Rectangle> MapLoader::extractCollisions() {
     std::vector<Rectangle> collisions;
     

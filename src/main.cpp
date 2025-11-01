@@ -12,8 +12,8 @@ extern "C" {
 int main()
 {
     // Initialize the game window
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 1280;  // Más grande (era 800)
+    const int screenHeight = 720;  // Más grande (era 450)
     
     InitWindow(screenWidth, screenHeight, "Fuego y Agua");
     SetExitKey(KEY_NULL); // Deshabilitar que Escape cierre la ventana

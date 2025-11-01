@@ -17,7 +17,9 @@ MainGameState::MainGameState()
 void MainGameState::init()
 {
     // Inicialización del personaje de Fuego
-    fire_player.position = { 100.0f, 300.0f };
+    // Plataforma en fila 5, columna 1: (1*18, 5*18) = (18, 90)
+    // Personaje encima: y = 90 - altura_personaje = 90 - 30 = 60
+    fire_player.position = { 36.0f, 60.0f };  // Columna 2, encima de la plataforma
     fire_player.velocity = { 0.0f, 0.0f };
     fire_player.width = 30.0f;
     fire_player.height = 30.0f;
@@ -25,7 +27,7 @@ void MainGameState::init()
     fire_player.type = FIRE;
 
     // Inicialización del personaje de Agua
-    water_player.position = { 150.0f, 300.0f };
+    water_player.position = { 72.0f, 60.0f };  // Columna 4, encima de la misma plataforma
     water_player.velocity = { 0.0f, 0.0f };
     water_player.width = 30.0f;
     water_player.height = 30.0f;
@@ -35,27 +37,33 @@ void MainGameState::init()
     // Inicialización de la cámara
     camera = { 0 };
     camera.target = (Vector2){ 0, 0 };
-    camera.offset = (Vector2){ 400, 240 };
+    camera.offset = (Vector2){ 640, 360 }; // Centro de pantalla 1280x720
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
+    camera.zoom = 2.0f; // Escala 2x para hacer los tiles más grandes
 
     // Inicialización del MapLoader
     try {
         mapLoader.loadMapa("assets/levels/level_prueba/nivel1-prueba.tmx");
+        
+        // Extraer colisiones del mapa de Tiled
+        std::vector<Rectangle> collisions = mapLoader.extractCollisions();
+        
+        // Convertir las colisiones en plataformas
+        for (const auto& collision : collisions) {
+            Platform platform = { collision, "default" };
+            level_platforms.push_back(platform);
+        }
+        
+        TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
+        
     } catch (const std::runtime_error& e) {
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 
-    // Creación de plataformas para el nivel de prueba
-    Platform ground = { { 0, 400, 800, 50 } };
-    level_platforms.push_back(ground);
-
-    Platform goal = { { 400, 390, 100, 50 }, "goal" };
-    level_platforms.push_back(goal);
-
-    Platform p1 = { { 300, 300, 200, 20 } };
-    level_platforms.push_back(p1);
+    // Plataforma de meta (puedes agregarla manualmente o crearla en Tiled)
+    // Platform goal = { { 400, 390, 100, 50 }, "goal" };
+    // level_platforms.push_back(goal);
 
     // Creación de peligros para el nivel de prueba
     Hazard lava = { { 200, 350, 100, 50 }, FIRE };
@@ -206,6 +214,17 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+    
+    // Actualizar la cámara para seguir el punto medio entre los dos personajes
+    Vector2 midPoint = {
+        (fire_player.position.x + water_player.position.x) / 2.0f,
+        (fire_player.position.y + water_player.position.y) / 2.0f
+    };
+    
+    // Suavizado de movimiento de cámara (interpolación)
+    float cameraSpeed = 3.0f * deltaTime;
+    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
+    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
 }
 
 void MainGameState::render()
@@ -213,7 +232,11 @@ void MainGameState::render()
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    mapLoader.draw(camera);  // Dibuja el mapa usando la cámara
+    // Inicia el modo de cámara 2D para todos los elementos
+    BeginMode2D(camera);
+    
+    // Dibuja el mapa dentro del modo cámara
+    mapLoader.draw(camera);
 
     // Dibujar el personaje de Fuego
     DrawRectangleRec(fire_player.bounds, RED);
@@ -221,18 +244,13 @@ void MainGameState::render()
     // Dibujar el personaje de Agua
     DrawRectangleRec(water_player.bounds, BLUE);
 
-    // Dibujar las plataformas del nivel
+    // NO dibujar las plataformas en gris porque ya se ven en el tilemap
+    // Solo dibujar plataformas especiales como la meta
     for (const auto& platform : level_platforms) {
-        if(platform.type == "default"){
-            DrawRectangleRec(platform.bounds, GRAY);
-            continue;
-        }
-
-        else if(platform.type == "goal"){
+        if(platform.type == "goal"){
             DrawRectangleRec(platform.bounds, YELLOW);
-            continue;
         }
-        
+        // Las plataformas "default" ya están en el tilemap, no las dibujamos
     }
 
     // Dibuja los peligros estáticos
@@ -252,6 +270,9 @@ void MainGameState::render()
             DrawRectangleRec(enemy.bounds, BLUE);
         }
     }
+
+    // Termina el modo de cámara 2D
+    EndMode2D();
     
     EndDrawing();
 }

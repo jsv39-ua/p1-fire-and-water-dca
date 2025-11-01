@@ -31,7 +31,7 @@ public:
 
     void draw(const Camera2D& camera);
 
-    // Extrae todas las colisiones de los tiles del mapa que tienen objectGroup
+    
     std::vector<Rectangle> extractCollisions();
 
 private:
