@@ -39,11 +39,11 @@ void MainGameState::init()
     camera.target = (Vector2){ 0, 0 };
     camera.offset = (Vector2){ 640, 360 }; // Centro de pantalla 1280x720
     camera.rotation = 0.0f;
-    camera.zoom = 2.0f; // Escala 2x para hacer los tiles más grandes
+    camera.zoom = 1.0f; // Escala 2x para hacer los tiles más grandes
 
     // Inicialización del MapLoader
     try {
-        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-prueba.tmx");
+        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
         
         // Extraer colisiones del mapa de Tiled
         std::vector<Rectangle> collisions = mapLoader.extractCollisions();
