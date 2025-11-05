@@ -1,22 +1,12 @@
 #pragma once
 
-#include <ElementType.hpp>
-#include <vector>
-#include <string>
+#include <Entity.hpp>
 
-extern "C" {
-    #include <raylib.h>
-}
-
-class Player {
-    public:
-    Vector2 position;
-    Vector2 velocity;
-    Rectangle bounds;
-    ElementType type;
-    float width;
-    float height;
-
+class Player : public Entity {
+public:
     Player();
     Player(float x, float y, ElementType t);
+    
+    void update(float deltaTime) override;
+    void render() override;
 };
