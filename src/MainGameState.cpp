@@ -53,14 +53,14 @@ void MainGameState::init()
     // Platform goal = { { 400, 390, 100, 50 }, "goal" };
     // level_platforms.push_back(goal);
     // Creación de plataformas para el nivel de prueba
-    Platform ground = Platform({ 0, 400, 800, 50 });
-    level_platforms.push_back(ground);
+    //Platform ground = Platform({ 0, 400, 800, 50 });
+    //level_platforms.push_back(ground);
 
     Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
     level_platforms.push_back(goal);
 
-    Platform p1 = Platform({ 300, 300, 200, 20 });
-    level_platforms.push_back(p1);
+    //Platform p1 = Platform({ 300, 300, 200, 20 });
+    //level_platforms.push_back(p1);
 
     // Creación de peligros (ahora son plataformas con tipo FIRE/WATER)
     Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
@@ -192,11 +192,23 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+
+    Vector2 midPoint = {
+        (fire_player.position.x + water_player.position.x) / 2.0f,
+        (fire_player.position.y + water_player.position.y) / 2.0f
+    };
+    
+    // Suavizado de movimiento de cámara (interpolación)
+    float cameraSpeed = 3.0f * deltaTime;
+    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
+    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
 }
 
 void MainGameState::render()
 {
     BeginDrawing();
+
+    BeginMode2D(camera);
     ClearBackground(RAYWHITE);
     mapLoader.draw(camera);
 
@@ -206,10 +218,7 @@ void MainGameState::render()
 
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
-        if(platform.type == NONE){
-            DrawRectangleRec(platform.bounds, GRAY);
-        }
-        else if(platform.type == GOAL){
+        if(platform.type == GOAL){
             DrawRectangleRec(platform.bounds, YELLOW);
         }
         else if(platform.type == FIRE){
@@ -224,6 +233,7 @@ void MainGameState::render()
     for (auto& enemy : level_enemies) {
         enemy.render();
     }
+    EndMode2D();
     
     EndDrawing();
 }
