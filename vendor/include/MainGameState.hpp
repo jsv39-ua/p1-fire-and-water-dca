@@ -1,17 +1,15 @@
 #pragma once
 
 #include <GameState.hpp>
+#include <ElementType.hpp>
+#include <Player.hpp>
+#include <Platform.hpp>
 #include <vector>
 #include <string>
 
 extern "C" {
     #include <raylib.h>
 }
-
-enum ElementType {
-    FIRE,
-    WATER
-};
 
 struct Hazard {
     Rectangle bounds;
@@ -34,21 +32,6 @@ struct Enemy : public Hazard {
         : Hazard(bounds, type), patrolRange(range), originalX(bounds.x), movingRight(true) {
         velocity = 30.0f; // Movimiento lento
     }
-};
-
-struct Player {
-    Vector2 position;
-    Vector2 velocity;
-    Rectangle bounds;
-    ElementType type;
-    // Debes añadir estas dos variables en tu struct para que el código compile
-    float width;
-    float height;
-};
-
-struct Platform {
-    Rectangle bounds;
-    std::string type = "default";
 };
 
 class MainGameState : public GameState
