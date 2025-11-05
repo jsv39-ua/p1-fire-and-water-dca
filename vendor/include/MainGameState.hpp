@@ -6,6 +6,7 @@
 #include <Platform.hpp>
 #include <vector>
 #include <string>
+#include <MapLoader.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -60,4 +61,7 @@ private:
     std::vector<Hazard> level_hazards;
     // Enemigos que se mueven
     std::vector<Enemy> level_enemies;
+
+    MapLoader mapLoader;
+    Camera2D camera;
 };
