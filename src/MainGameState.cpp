@@ -22,6 +22,36 @@ void MainGameState::init()
     // Inicialización del personaje de Agua
     water_player = Player(150.0f, 300.0f, WATER);
 
+    // Inicialización de la cámara
+    camera = { 0 };
+    camera.target = (Vector2){ 0, 0 };
+    camera.offset = (Vector2){ 640, 360 }; // Centro de pantalla 1280x720
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f; // Escala 2x para hacer los tiles más grandes
+
+    // Inicialización del MapLoader
+    try {
+        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
+        
+        // Extraer colisiones del mapa de Tiled
+        std::vector<Rectangle> collisions = mapLoader.extractCollisions();
+        
+        // Convertir las colisiones en plataformas
+        for (const auto& collision : collisions) {
+            Platform platform = { collision, NONE };
+            level_platforms.push_back(platform);
+        }
+        
+        TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
+        
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+    }
+
+    // Plataforma de meta (puedes agregarla manualmente o crearla en Tiled)
+    // Platform goal = { { 400, 390, 100, 50 }, "goal" };
+    // level_platforms.push_back(goal);
     // Creación de plataformas para el nivel de prueba
     Platform ground = Platform({ 0, 400, 800, 50 });
     level_platforms.push_back(ground);
@@ -194,6 +224,17 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+    
+    // Actualizar la cámara para seguir el punto medio entre los dos personajes
+    Vector2 midPoint = {
+        (fire_player.position.x + water_player.position.x) / 2.0f,
+        (fire_player.position.y + water_player.position.y) / 2.0f
+    };
+    
+    // Suavizado de movimiento de cámara (interpolación)
+    float cameraSpeed = 3.0f * deltaTime;
+    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
+    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
 }
 
 void MainGameState::render()
@@ -201,13 +242,20 @@ void MainGameState::render()
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
+    // Inicia el modo de cámara 2D para todos los elementos
+    BeginMode2D(camera);
+    
+    // Dibuja el mapa dentro del modo cámara
+    mapLoader.draw(camera);
+
     // Dibujar el personaje de Fuego
     DrawRectangleRec(fire_player.bounds, RED);
     
     // Dibujar el personaje de Agua
     DrawRectangleRec(water_player.bounds, BLUE);
 
-    // Dibujar las plataformas del nivel
+    // NO dibujar las plataformas en gris porque ya se ven en el tilemap
+    // Solo dibujar plataformas especiales como la meta
     for (const auto& platform : level_platforms) {
         if(platform.type == NONE){
             DrawRectangleRec(platform.bounds, GRAY);
@@ -231,6 +279,9 @@ void MainGameState::render()
             DrawRectangleRec(enemy.bounds, BLUE);
         }
     }
+
+    // Termina el modo de cámara 2D
+    EndMode2D();
     
     EndDrawing();
 }
