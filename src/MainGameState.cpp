@@ -94,6 +94,11 @@ void MainGameState::handleInput()
         fire_player.velocity.x = 0.0f;
     }
 
+    // Salto del personaje de Fuego (tecla W)
+    if (IsKeyPressed(KEY_W) && fire_on_ground) {
+        fire_player.velocity.y = -300.0f;
+    }
+
     // Control del personaje de Agua (flechas izquierda y derecha)
     if (IsKeyDown(KEY_LEFT)) {
         water_player.velocity.x = -200.0f;
@@ -101,6 +106,11 @@ void MainGameState::handleInput()
         water_player.velocity.x = 200.0f;
     } else {
         water_player.velocity.x = 0.0f;
+    }
+
+    // Salto del personaje de Agua (tecla FLECHA ARRIBA)
+    if (IsKeyPressed(KEY_UP) && water_on_ground) {
+        water_player.velocity.y = -300.0f;
     }
 }
 
@@ -110,24 +120,15 @@ void MainGameState::update(float deltaTime)
     fire_on_ground = false;
     water_on_ground = false;
 
-    // Aplica gravedad a los jugadores
-    const float gravity = 800.0f;
-    fire_player.velocity.y += gravity * deltaTime;
-    water_player.velocity.y += gravity * deltaTime;
+    // Aplicar gravedad
+    fire_player.velocity.y += 500.0f * deltaTime;
+    water_player.velocity.y += 500.0f * deltaTime;
 
-    // Actualiza las posiciones de los jugadores según su velocidad
-    fire_player.position.x += fire_player.velocity.x * deltaTime;
-    fire_player.position.y += fire_player.velocity.y * deltaTime;
-    water_player.position.x += water_player.velocity.x * deltaTime;
-    water_player.position.y += water_player.velocity.y * deltaTime;
+    // Actualizar posiciones
+    fire_player.update(deltaTime);
+    water_player.update(deltaTime);
 
-    // Actualiza los límites (bounds) de colisión
-    fire_player.bounds.x = fire_player.position.x;
-    fire_player.bounds.y = fire_player.position.y;
-    water_player.bounds.x = water_player.position.x;
-    water_player.bounds.y = water_player.position.y;
-
-    // Colisiones con plataformas (incluyendo peligros)
+    // Colisiones con plataformas
     for (const auto& platform : level_platforms) {
         bool fire_collides = CheckCollisionRecs(fire_player.bounds, platform.bounds);
         bool water_collides = CheckCollisionRecs(water_player.bounds, platform.bounds);
@@ -172,90 +173,38 @@ void MainGameState::update(float deltaTime)
         }
     }
 
-    // Lógica de Salto
-    if (IsKeyPressed(KEY_W) && fire_on_ground) {
-        fire_player.velocity.y = -400.0f; // Impulso de salto
-    }
-    if (IsKeyPressed(KEY_UP) && water_on_ground) {
-        water_player.velocity.y = -400.0f; // Impulso de salto
-    }
-
-    // Actualizar enemigos (movimiento de patrulla)
+    // Actualizar enemigos con patrullaje
     for (auto& enemy : level_enemies) {
-        if (enemy.movingRight) {
-            enemy.bounds.x += enemy.velocity * deltaTime;
-            if (enemy.bounds.x >= enemy.originalX + enemy.patrolRange) {
-                enemy.movingRight = false;
-            }
-        } else {
-            enemy.bounds.x -= enemy.velocity * deltaTime;
-            if (enemy.bounds.x <= enemy.originalX) {
-                enemy.movingRight = true;
-            }
-        }
-    }
-    
-    // Lógica de colisión con peligros estáticos
-    for (const auto& hazard : level_hazards) {
-        if (CheckCollisionRecs(fire_player.bounds, hazard.bounds)) {
-            if (hazard.type == WATER) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-            }
-        }
+        enemy.update(deltaTime);
         
-        if (CheckCollisionRecs(water_player.bounds, hazard.bounds)) {
-            if (hazard.type == FIRE) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-            }
-        }
-    }
-    
-    // Lógica de colisión con enemigos
-    for (const auto& enemy : level_enemies) {
+        // Colisiones con enemigos
         if (CheckCollisionRecs(fire_player.bounds, enemy.bounds)) {
             if (enemy.type == WATER) {
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                return;
             }
         }
         
         if (CheckCollisionRecs(water_player.bounds, enemy.bounds)) {
             if (enemy.type == FIRE) {
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                return;
             }
         }
     }
-    
-    // Actualizar la cámara para seguir el punto medio entre los dos personajes
-    Vector2 midPoint = {
-        (fire_player.position.x + water_player.position.x) / 2.0f,
-        (fire_player.position.y + water_player.position.y) / 2.0f
-    };
-    
-    // Suavizado de movimiento de cámara (interpolación)
-    float cameraSpeed = 3.0f * deltaTime;
-    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
-    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
 }
 
 void MainGameState::render()
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-
-    // Inicia el modo de cámara 2D para todos los elementos
-    BeginMode2D(camera);
-    
-    // Dibuja el mapa dentro del modo cámara
     mapLoader.draw(camera);
 
-    // Dibujar el personaje de Fuego
-    DrawRectangleRec(fire_player.bounds, RED);
-    
-    // Dibujar el personaje de Agua
-    DrawRectangleRec(water_player.bounds, BLUE);
+    // Renderizar jugadores
+    fire_player.render();
+    water_player.render();
 
-    // NO dibujar las plataformas en gris porque ya se ven en el tilemap
-    // Solo dibujar plataformas especiales como la meta
+    // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
         if(platform.type == NONE){
             DrawRectangleRec(platform.bounds, GRAY);
@@ -271,17 +220,10 @@ void MainGameState::render()
         }
     }
     
-    // Dibuja los enemigos
-    for (const auto& enemy : level_enemies) {
-        if (enemy.type == FIRE) {
-            DrawRectangleRec(enemy.bounds, RED);
-        } else if (enemy.type == WATER) {
-            DrawRectangleRec(enemy.bounds, BLUE);
-        }
+    // Renderizar enemigos
+    for (auto& enemy : level_enemies) {
+        enemy.render();
     }
-
-    // Termina el modo de cámara 2D
-    EndMode2D();
     
     EndDrawing();
 }
