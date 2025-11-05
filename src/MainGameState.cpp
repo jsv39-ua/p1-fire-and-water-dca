@@ -3,6 +3,7 @@
 #include <GameOverState.hpp> // Incluye la nueva clase
 #include <PauseMenuState.hpp> // Incluye el menú de pausa
 #include <StateMachine.hpp> // Asegúrate de incluirla
+#include <Player.hpp>
 
 
 extern "C" {
@@ -16,44 +17,32 @@ MainGameState::MainGameState()
 void MainGameState::init()
 {
     // Inicialización del personaje de Fuego
-    fire_player.position = { 100.0f, 300.0f };
-    fire_player.velocity = { 0.0f, 0.0f };
-    fire_player.width = 30.0f;
-    fire_player.height = 30.0f;
-    fire_player.bounds = { fire_player.position.x, fire_player.position.y, fire_player.width, fire_player.height };
-    fire_player.type = FIRE;
+    fire_player = Player(100.0f, 300.0f, FIRE);
 
     // Inicialización del personaje de Agua
-    water_player.position = { 150.0f, 300.0f };
-    water_player.velocity = { 0.0f, 0.0f };
-    water_player.width = 30.0f;
-    water_player.height = 30.0f;
-    water_player.bounds = { water_player.position.x, water_player.position.y, water_player.width, water_player.height };
-    water_player.type = WATER;
+    water_player = Player(150.0f, 300.0f, WATER);
 
     // Creación de plataformas para el nivel de prueba
-    Platform ground = { { 0, 400, 800, 50 } };
+    Platform ground = Platform({ 0, 400, 800, 50 });
     level_platforms.push_back(ground);
 
-    Platform goal = { { 400, 390, 100, 50 }, "goal" };
+    Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
     level_platforms.push_back(goal);
 
-    Platform p1 = { { 300, 300, 200, 20 } };
+    Platform p1 = Platform({ 300, 300, 200, 20 });
     level_platforms.push_back(p1);
 
-    // Creación de peligros para el nivel de prueba
-    Hazard lava = { { 200, 350, 100, 50 }, FIRE };
-    level_hazards.push_back(lava);
+    // Creación de peligros (ahora son plataformas con tipo FIRE/WATER)
+    Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
+    level_platforms.push_back(lava);
 
-    Hazard water = { { 550, 350, 100, 50 }, WATER };
-    level_hazards.push_back(water);
+    Platform water = Platform({ 550, 350, 100, 50 }, WATER);
+    level_platforms.push_back(water);
     
-    // Crear enemigos que se mueven (al final de la pantalla)
-    // Enemigo de fuego en la plataforma superior (lado derecho)
+    // Enemigos permanecen igual
     Enemy fire_enemy = { { 450, 270, 25, 25 }, FIRE, 60.0f };
     level_enemies.push_back(fire_enemy);
     
-    // Enemigo de agua cerca del suelo (lado derecho)
     Enemy water_enemy = { { 650, 370, 25, 25 }, WATER, 70.0f };
     level_enemies.push_back(water_enemy);
 }
@@ -108,32 +97,47 @@ void MainGameState::update(float deltaTime)
     water_player.bounds.x = water_player.position.x;
     water_player.bounds.y = water_player.position.y;
 
-    // Colisiones con plataformas
+    // Colisiones con plataformas (incluyendo peligros)
     for (const auto& platform : level_platforms) {
         bool fire_collides = CheckCollisionRecs(fire_player.bounds, platform.bounds);
         bool water_collides = CheckCollisionRecs(water_player.bounds, platform.bounds);
 
         // Revisa colisión con el personaje de Fuego
         if (fire_collides) {
-            // Detiene el movimiento vertical
-            fire_player.velocity.y = 0;
-            // Corrige la posición del jugador para que no caiga
-            fire_player.position.y = platform.bounds.y - fire_player.bounds.height;
-            fire_player.bounds.y = fire_player.position.y;
-            fire_on_ground = true; // El jugador está en el suelo
+            // Si es peligro de agua, game over
+            if (platform.type == WATER) {
+                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                return;
+            }
+            
+            // Si no es peligro, comportamiento normal de plataforma
+            if (platform.type != FIRE) {
+                fire_player.velocity.y = 0;
+                fire_player.position.y = platform.bounds.y - fire_player.bounds.height;
+                fire_player.bounds.y = fire_player.position.y;
+                fire_on_ground = true;
+            }
         }
+        
         // Revisa colisión con el personaje de Agua
         if (water_collides) {
-            // Detiene el movimiento vertical
-            water_player.velocity.y = 0;
-            // Corrige la posición del jugador
-            water_player.position.y = platform.bounds.y - water_player.bounds.height;
-            water_player.bounds.y = water_player.position.y;
-            water_on_ground = true; // El jugador está en el suelo
+            // Si es peligro de fuego, game over
+            if (platform.type == FIRE) {
+                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                return;
+            }
+            
+            // Si no es peligro, comportamiento normal de plataforma
+            if (platform.type != WATER) {
+                water_player.velocity.y = 0;
+                water_player.position.y = platform.bounds.y - water_player.bounds.height;
+                water_player.bounds.y = water_player.position.y;
+                water_on_ground = true;
+            }
         }
 
         // Detecta si ambos jugadores están en la meta
-        if(fire_collides && water_collides && platform.type == "goal") {
+        if(fire_collides && water_collides && platform.type == GOAL) {
             this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
         }
     }
@@ -205,24 +209,17 @@ void MainGameState::render()
 
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
-        if(platform.type == "default"){
+        if(platform.type == NONE){
             DrawRectangleRec(platform.bounds, GRAY);
-            continue;
         }
-
-        else if(platform.type == "goal"){
+        else if(platform.type == GOAL){
             DrawRectangleRec(platform.bounds, YELLOW);
-            continue;
         }
-        
-    }
-
-    // Dibuja los peligros estáticos
-    for (const auto& hazard : level_hazards) {
-        if (hazard.type == FIRE) {
-            DrawRectangleRec(hazard.bounds, MAROON);
-        } else if (hazard.type == WATER) {
-            DrawRectangleRec(hazard.bounds, DARKBLUE);
+        else if(platform.type == FIRE){
+            DrawRectangleRec(platform.bounds, MAROON);
+        }
+        else if(platform.type == WATER){
+            DrawRectangleRec(platform.bounds, DARKBLUE);
         }
     }
     
