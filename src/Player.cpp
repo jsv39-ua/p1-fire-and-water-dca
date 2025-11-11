@@ -32,3 +32,18 @@ void Player::render() {
     Color color = (type == FIRE) ? RED : BLUE;
     DrawRectangleRec(bounds, color);
 }
+
+void Player::walk(int direction) {
+    // direction: -1 = izquierda, 0 = parar, 1 = derecha
+    if (direction == -1) {
+        velocity.x = -WALK_SPEED;
+    } else if (direction == 1) {
+        velocity.x = WALK_SPEED;
+    } else {
+        velocity.x = 0.0f;
+    }
+}
+
+void Player::jump() {
+    velocity.y = -JUMP_FORCE;
+}
