@@ -16,10 +16,13 @@ Player::Player(float x, float y, ElementType t)
 }
 
 void Player::update(float deltaTime) {
-    // Actualizar posición basada en velocidad
+    // Aplicar gravedad y actualizar posición basada en velocidad
+    static const float gravity = 800.0f;
+    velocity.y += gravity * deltaTime;
+
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
-    
+
     // Actualizar bounds
     bounds.x = position.x;
     bounds.y = position.y;

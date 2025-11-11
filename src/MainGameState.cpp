@@ -120,11 +120,7 @@ void MainGameState::update(float deltaTime)
     fire_on_ground = false;
     water_on_ground = false;
 
-    // Aplicar gravedad
-    fire_player.velocity.y += 500.0f * deltaTime;
-    water_player.velocity.y += 500.0f * deltaTime;
-
-    // Actualizar posiciones
+    // Actualizar jugadores (la gravedad se aplica dentro de Player::update)
     fire_player.update(deltaTime);
     water_player.update(deltaTime);
 
