@@ -1,5 +1,6 @@
 #include <MainMenuState.hpp>
 #include <AudioManager.hpp>
+#include <ResourceManager.hpp>
 #include "OptionsState.hpp"
 
 
@@ -7,13 +8,13 @@
 MainMenuState::MainMenuState(){};
 
 MainMenuState::~MainMenuState(){
-    UnloadTexture(logo);
+    //no descargo la textura porque se queda en cache
 };
 
 void MainMenuState::init(){
 
-    // Cargar el logo
-    logo = LoadTexture("assets/images/logo.png");
+    // Cargar el logo desde el ResourceManager 
+    logo = ResourceManager::getInstance()->loadTexture("assets/images/logo.png");
 
     // Botones horizontales en la parte inferior
     float buttonWidth = 150;
