@@ -118,59 +118,39 @@ void MainGameState::update(float deltaTime)
 
     // Colisiones con plataformas
     for (const auto& platform : level_platforms) {
-        bool fire_collides = CheckCollisionRecs(fire_player.bounds, platform.bounds);
-        bool water_collides = CheckCollisionRecs(water_player.bounds, platform.bounds);
+        int fire_collision = fire_player.checkPlatformCollision(platform);
+        int water_collision = water_player.checkPlatformCollision(platform);
 
-        // Revisa colisión con el personaje de Fuego
-        if (fire_collides) {
-            // Si es peligro de agua, game over
-            if (platform.type == WATER) {
+        // Procesar colisión del personaje de Fuego
+        switch (fire_collision) {
+            case 0: // Plataforma neutra - comportamiento normal
+            case 2: // Plataforma amiga (Fire en plataforma FIRE)
+            case 3: // Meta (también es sólida)
+                if (fire_player.resolvePlatformCollision(platform)) {
+                    fire_on_ground = true;
+                }
+                break;
+            case 1: // Plataforma contraria - Game Over
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
                 return;
-            }
-            
-            // Si no es peligro, comportamiento normal de plataforma
-            if (platform.type != FIRE) {
-                // Solo corregir si viene desde arriba (cayendo)
-                if (fire_player.velocity.y > 0) {
-                    // Verificar que el jugador está encima de la plataforma (no dentro por los lados)
-                    float playerBottom = fire_player.position.y + fire_player.height;
-                    if (playerBottom > platform.bounds.y && playerBottom < platform.bounds.y + platform.bounds.height / 2) {
-                        fire_player.velocity.y = 0;
-                        fire_player.position.y = platform.bounds.y - fire_player.bounds.height;
-                        fire_player.bounds.y = fire_player.position.y;
-                        fire_on_ground = true;
-                    }
-                }
-            }
         }
-        
-        // Revisa colisión con el personaje de Agua
-        if (water_collides) {
-            // Si es peligro de fuego, game over
-            if (platform.type == FIRE) {
+
+        // Procesar colisión del personaje de Agua
+        switch (water_collision) {
+            case 0: // Plataforma neutra - comportamiento normal
+            case 2: // Plataforma amiga (Water en plataforma WATER)
+            case 3: // Meta (también es sólida)
+                if (water_player.resolvePlatformCollision(platform)) {
+                    water_on_ground = true;
+                }
+                break;
+            case 1: // Plataforma contraria - Game Over
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
                 return;
-            }
-            
-            // Si no es peligro, comportamiento normal de plataforma
-            if (platform.type != WATER) {
-                // Solo corregir si viene desde arriba (cayendo)
-                if (water_player.velocity.y > 0) {
-                    // Verificar que el jugador está encima de la plataforma (no dentro por los lados)
-                    float playerBottom = water_player.position.y + water_player.height;
-                    if (playerBottom > platform.bounds.y && playerBottom < platform.bounds.y + platform.bounds.height / 2) {
-                        water_player.velocity.y = 0;
-                        water_player.position.y = platform.bounds.y - water_player.bounds.height;
-                        water_player.bounds.y = water_player.position.y;
-                        water_on_ground = true;
-                    }
-                }
-            }
         }
 
         // Detecta si ambos jugadores están en la meta
-        if(fire_collides && water_collides && platform.type == GOAL) {
+        if (fire_collision == 3 && water_collision == 3) {
             this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
         }
     }
