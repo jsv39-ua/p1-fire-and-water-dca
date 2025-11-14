@@ -2,6 +2,7 @@
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
 #include <AudioManager.hpp>
+#include <ResourceManager.hpp>
 #include <memory>
 #include <chrono>
 
@@ -23,9 +24,9 @@ int main()
     InitAudioDevice();
     SetMasterVolume(0.5f); // Ajustar el volumen maestro al 50%
 
-    // Inicializar el AudioManager para sonidos globales
+    // Inicializar gestores Singleton
     AudioManager::getInstance()->init();
-
+    // resourcemanager se inicializa automaticamente al llamar a getInstance()
     float delta_time = 0.0f;
 
     StateMachine state_machine = StateMachine();
@@ -45,8 +46,11 @@ int main()
         }
     }
 
-    //UnloadMusicStream(backgroundMusic); // Liberar la memoria de la música
-    AudioManager::cleanup(); // Limpiar el AudioManager
+    // Limpiar gestores Singleton
+    AudioManager::cleanup();
+    ResourceManager::getInstance()->clearAllCache();
+    ResourceManager::cleanup();
+    
     CloseAudioDevice();
 
     // Des-inicializa la ventana y los recursos

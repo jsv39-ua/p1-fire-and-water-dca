@@ -1,11 +1,12 @@
 #include <MapLoader.hpp>
+#include <ResourceManager.hpp>
 #include <raytmx.h>  // Incluir la implementación en el .cpp
 
 
 MapLoader::MapLoader(const char* filePath)
 {
-    this->mapa = LoadTMX(filePath);
-
+    // Cargar mapa desde ResourceManager
+    this->mapa = ResourceManager::getInstance()->loadMap(filePath);
 
     if (this->mapa == nullptr) {
         TraceLog(LOG_ERROR, "Error al cargar mapa del archivo: %s", filePath); 
@@ -17,21 +18,18 @@ MapLoader::MapLoader()  {
 }
 
 MapLoader::~MapLoader() {
-        if (mapa != nullptr) {
-            UnloadTMX(mapa);
-        }
-    }
+    // No se descarga el mapa
+    // se queda en cache para reutilizarlo
+    this->mapa = nullptr;
+}
 
 TmxMap* MapLoader::getMapa() const {
     return this->mapa;
 }
 
 void MapLoader::loadMapa(const char* filePath) {
-    if (this->mapa != nullptr) {
-        UnloadTMX(this->mapa);
-    }
-
-    this->mapa = LoadTMX(filePath);
+    // Cargar mapa desde ResourceManager (con cache)
+    this->mapa = ResourceManager::getInstance()->loadMap(filePath);
 
     if (this->mapa == nullptr) {
         TraceLog(LOG_ERROR, "Error al cargar mapa del archivo: %s", filePath); 
@@ -40,10 +38,9 @@ void MapLoader::loadMapa(const char* filePath) {
 }
 
 void MapLoader::unloadMapa() {
-    if (this->mapa != nullptr) {
-        UnloadTMX(this->mapa);
-        this->mapa = nullptr;
-    }
+    // limpio la referencia local
+    // ResourceManager mantiene el mapa en caché
+    this->mapa = nullptr;
 }
 
 void MapLoader::draw(const Camera2D& camera) {
