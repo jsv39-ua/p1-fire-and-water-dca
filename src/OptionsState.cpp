@@ -30,14 +30,24 @@ const char* getLanguageName(OptionsState::Language lang) {
 
 void OptionsState::init()
 {
+    // Obtener tamaño de pantalla
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    
+    // Calcular posiciones centradas relativamente al tamaño de pantalla
+    float centerX = screenWidth / 2.0f;
+    float centerY = screenHeight / 2.0f;
+    
     // Configurar las posiciones de los elementos de la UI (centrados)
-    backButton = { 300, 400, 200, 50 };
-    languageButton = { 250, 150, 300, 50 };
-    volumeSlider = { 250, 250, 300, 20 };
-    volumeHandle = { 250 + (volume * 280), 245, 20, 30 };
+    languageButton = { centerX - 150, centerY - 210, 300, 50 };
+    
+    volumeSlider = { centerX - 150, centerY - 110, 300, 20 };
+    volumeHandle = { centerX - 150 + (volume * 280), centerY - 115, 20, 30 };
 
-    musicVolumeSlider = { 250, 350, 300, 20 };
-    musicVolumeHandle = { 250 + (musicVolume * 280), 345, 20, 30 };
+    musicVolumeSlider = { centerX - 150, centerY - 10, 300, 20 };
+    musicVolumeHandle = { centerX - 150 + (musicVolume * 280), centerY - 15, 20, 30 };
+    
+    backButton = { centerX - 100, centerY + 90, 200, 50 };
 }
 
 void OptionsState::handleInput()
@@ -136,11 +146,16 @@ void OptionsState::render()
 {
     BeginDrawing();
 
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    float centerX = screenWidth / 2.0f;
     
     ClearBackground(SKYBLUE);
     
-    // Título
-    DrawText("OPCIONES", 300, 50, 40, BLACK);
+    // Título (centrado)
+    const char* title = "OPCIONES";
+    int titleWidth = MeasureText(title, 40);
+    DrawText(title, centerX - titleWidth / 2, 50, 40, BLACK);
     
     Vector2 mouse = GetMousePosition();
     
@@ -148,10 +163,11 @@ void OptionsState::render()
     DrawRectangleRec(languageButton, mouseOverLanguageButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(languageButton, 2, BLACK);
     const char* lang = getLanguageName(currentLanguage);
-    DrawText(lang, 330, 165, 20, BLACK);
+    int langWidth = MeasureText(lang, 20);
+    DrawText(lang, languageButton.x + (languageButton.width - langWidth) / 2, languageButton.y + 15, 20, BLACK);
     
     // Volumen
-    DrawText("VOLUMEN", 250, 220, 20, BLACK);
+    DrawText("VOLUMEN", volumeSlider.x, volumeSlider.y - 30, 20, BLACK);
     
     // Slider
     DrawRectangleRec(volumeSlider, LIGHTGRAY);
@@ -166,11 +182,11 @@ void OptionsState::render()
     
     char vol_text[16];
     sprintf(vol_text, "%.0f%%", volume * 100);
-    DrawText(vol_text, 570, 255, 20, DARKGRAY);
+    DrawText(vol_text, volumeSlider.x + volumeSlider.width + 20, volumeSlider.y + 5, 20, DARKGRAY);
 
 
     // Slider música
-    DrawText("VOLUMEN MÚSICA", 250, 320, 20, BLACK);        
+    DrawText("VOLUMEN MÚSICA", musicVolumeSlider.x, musicVolumeSlider.y - 30, 20, BLACK);        
    
     DrawRectangleRec(musicVolumeSlider, LIGHTGRAY);
     DrawRectangleLinesEx(musicVolumeSlider, 2, BLACK);
@@ -183,15 +199,19 @@ void OptionsState::render()
 
     char music_vol_text[16];
     sprintf(music_vol_text, "%.0f%%", musicVolume * 100);
-    DrawText(music_vol_text, 570, 335, 20, DARKGRAY);
+    DrawText(music_vol_text, musicVolumeSlider.x + musicVolumeSlider.width + 20, musicVolumeSlider.y - 15, 20, DARKGRAY);
 
     // Botón volver
     DrawRectangleRec(backButton, mouseOverBackButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(backButton, 2, BLACK);
-    DrawText("VOLVER", 345, 337+80, 20, BLACK);
+    const char* backText = "VOLVER";
+    int backWidth = MeasureText(backText, 20);
+    DrawText(backText, backButton.x + (backButton.width - backWidth) / 2, backButton.y + 15, 20, BLACK);
     
-    // Ayuda
-    DrawText("ESC: Volver", 305, 500, 16, BLACK);
+    // Ayuda (centrada en la parte inferior)
+    const char* help = "ESC: Volver";
+    int helpWidth = MeasureText(help, 16);
+    DrawText(help, centerX - helpWidth / 2, screenHeight - 60, 16, BLACK);
     
     EndDrawing();
 }
