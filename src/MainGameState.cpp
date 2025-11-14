@@ -49,18 +49,10 @@ void MainGameState::init()
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 
-    // Plataforma de meta (puedes agregarla manualmente o crearla en Tiled)
-    // Platform goal = { { 400, 390, 100, 50 }, "goal" };
-    // level_platforms.push_back(goal);
-    // Creación de plataformas para el nivel de prueba
-    //Platform ground = Platform({ 0, 400, 800, 50 });
-    //level_platforms.push_back(ground);
 
     Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
     level_platforms.push_back(goal);
 
-    //Platform p1 = Platform({ 300, 300, 200, 20 });
-    //level_platforms.push_back(p1);
 
     // Creación de peligros (ahora son plataformas con tipo FIRE/WATER)
     Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
@@ -87,30 +79,30 @@ void MainGameState::handleInput()
 
     // Control del personaje de Fuego (teclas A y D)
     if (IsKeyDown(KEY_A)) {
-        fire_player.velocity.x = -200.0f;
+        fire_player.walk(-1);
     } else if (IsKeyDown(KEY_D)) {
-        fire_player.velocity.x = 200.0f;
+        fire_player.walk(1);
     } else {
-        fire_player.velocity.x = 0.0f;
+        fire_player.walk(0);
     }
 
     // Salto del personaje de Fuego (tecla W)
     if (IsKeyPressed(KEY_W) && fire_on_ground) {
-        fire_player.velocity.y = -300.0f;
+        fire_player.jump();
     }
 
     // Control del personaje de Agua (flechas izquierda y derecha)
     if (IsKeyDown(KEY_LEFT)) {
-        water_player.velocity.x = -200.0f;
+        water_player.walk(-1);
     } else if (IsKeyDown(KEY_RIGHT)) {
-        water_player.velocity.x = 200.0f;
+        water_player.walk(1);
     } else {
-        water_player.velocity.x = 0.0f;
+        water_player.walk(0);
     }
 
     // Salto del personaje de Agua (tecla FLECHA ARRIBA)
     if (IsKeyPressed(KEY_UP) && water_on_ground) {
-        water_player.velocity.y = -300.0f;
+        water_player.jump();
     }
 }
 
@@ -120,55 +112,45 @@ void MainGameState::update(float deltaTime)
     fire_on_ground = false;
     water_on_ground = false;
 
-    // Aplicar gravedad
-    fire_player.velocity.y += 500.0f * deltaTime;
-    water_player.velocity.y += 500.0f * deltaTime;
-
-    // Actualizar posiciones
+    // Actualizar jugadores (la gravedad se aplica dentro de Player::update)
     fire_player.update(deltaTime);
     water_player.update(deltaTime);
 
     // Colisiones con plataformas
     for (const auto& platform : level_platforms) {
-        bool fire_collides = CheckCollisionRecs(fire_player.bounds, platform.bounds);
-        bool water_collides = CheckCollisionRecs(water_player.bounds, platform.bounds);
+        int fire_collision = fire_player.checkPlatformCollision(platform);
+        int water_collision = water_player.checkPlatformCollision(platform);
 
-        // Revisa colisión con el personaje de Fuego
-        if (fire_collides) {
-            // Si es peligro de agua, game over
-            if (platform.type == WATER) {
+        // Procesar colisión del personaje de Fuego
+        switch (fire_collision) {
+            case 0: // Plataforma neutra - comportamiento normal
+            case 2: // Plataforma amiga (Fire en plataforma FIRE)
+            case 3: // Meta (también es sólida)
+                if (fire_player.resolvePlatformCollision(platform)) {
+                    fire_on_ground = true;
+                }
+                break;
+            case 1: // Plataforma contraria - Game Over
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
                 return;
-            }
-            
-            // Si no es peligro, comportamiento normal de plataforma
-            if (platform.type != FIRE) {
-                fire_player.velocity.y = 0;
-                fire_player.position.y = platform.bounds.y - fire_player.bounds.height;
-                fire_player.bounds.y = fire_player.position.y;
-                fire_on_ground = true;
-            }
         }
-        
-        // Revisa colisión con el personaje de Agua
-        if (water_collides) {
-            // Si es peligro de fuego, game over
-            if (platform.type == FIRE) {
+
+        // Procesar colisión del personaje de Agua
+        switch (water_collision) {
+            case 0: // Plataforma neutra - comportamiento normal
+            case 2: // Plataforma amiga (Water en plataforma WATER)
+            case 3: // Meta (también es sólida)
+                if (water_player.resolvePlatformCollision(platform)) {
+                    water_on_ground = true;
+                }
+                break;
+            case 1: // Plataforma contraria - Game Over
                 this->state_machine->add_state(std::make_unique<GameOverState>(), true);
                 return;
-            }
-            
-            // Si no es peligro, comportamiento normal de plataforma
-            if (platform.type != WATER) {
-                water_player.velocity.y = 0;
-                water_player.position.y = platform.bounds.y - water_player.bounds.height;
-                water_player.bounds.y = water_player.position.y;
-                water_on_ground = true;
-            }
         }
 
         // Detecta si ambos jugadores están en la meta
-        if(fire_collides && water_collides && platform.type == GOAL) {
+        if (fire_collision == 3 && water_collision == 3) {
             this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
         }
     }
