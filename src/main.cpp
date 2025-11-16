@@ -48,7 +48,6 @@ int main()
 
     // Limpiar gestores Singleton
     AudioManager::cleanup();
-    ResourceManager::getInstance()->clearAllCache();
     ResourceManager::cleanup();
     
     CloseAudioDevice();
