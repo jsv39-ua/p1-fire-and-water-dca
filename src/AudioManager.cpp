@@ -1,4 +1,5 @@
 #include <AudioManager.hpp>
+#include <ResourceManager.hpp>
 #include <iostream>
 
 // De esta clase se crea una instancia para poder cargar los sonidos
@@ -24,16 +25,19 @@ void AudioManager::cleanup() {
 }
 
 void AudioManager::init() {
-    // Cargar y configurar música de fondo
-    backgroundMusic = LoadMusicStream("assets/music/backgroundMusic.mp3");
-    PlayMusicStream(backgroundMusic); // Iniciar la reproducción de la música
-    backgroundMusic.looping = true; // Hacer que la música se repita en bucle
-    SetMusicVolume(backgroundMusic, musicVolumeLevel); // Volumen inicial al 25%
-
-    // Cargar sonidos de botones
-    buttonClickSound = LoadSound("assets/ui_sounds/boton_click.ogg");
-    buttonHoverSound = LoadSound("assets/ui_sounds/boton_hover.ogg");
+    // Cargar musica y sonidos desde ResourceManager
+    backgroundMusic = ResourceManager::getInstance()->loadMusic("assets/music/backgroundMusic.mp3");
+    buttonClickSound = ResourceManager::getInstance()->loadSound("assets/ui_sounds/boton_click.ogg");
+    buttonHoverSound = ResourceManager::getInstance()->loadSound("assets/ui_sounds/boton_hover.ogg");
     
+    // Configurar y reproducir musica de fondo
+    if (IsMusicValid(backgroundMusic)) {
+        PlayMusicStream(backgroundMusic);
+        backgroundMusic.looping = true;
+        SetMusicVolume(backgroundMusic, musicVolumeLevel);
+    }
+    
+    // Verificar validez de los sonidos
     if (!IsSoundValid(buttonClickSound)) {
         std::cerr << "Error: No se pudo cargar boton_click.ogg" << std::endl;
     }
@@ -77,15 +81,6 @@ float AudioManager::getMusicVolume() {
 
 
 AudioManager::~AudioManager() {
-
-    if (IsSoundValid(buttonClickSound)) {
-        UnloadSound(buttonClickSound);
-    }
-    if (IsSoundValid(buttonHoverSound)) {
-        UnloadSound(buttonHoverSound);
-    }
-    if (IsMusicValid(backgroundMusic)) {
-        UnloadMusicStream(backgroundMusic);
-    }
+    //no descargo porque se queda en cache
 }
 
