@@ -71,6 +71,10 @@
         "ranges": "cpp",
         "span": "cpp",
         "sstream": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "cinttypes": "cpp",
+        "variant": "cpp"
     }
 }
