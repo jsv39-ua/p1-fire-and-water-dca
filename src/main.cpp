@@ -44,6 +44,7 @@ int main()
             state_machine.getCurrentState()->update(delta_time);
             state_machine.getCurrentState()->render();
         }
+        
     }
 
     // Limpiar gestores Singleton

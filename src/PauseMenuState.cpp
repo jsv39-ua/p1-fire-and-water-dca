@@ -120,5 +120,7 @@ void PauseMenuState::render(){
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
     DrawText("MENU PRINCIPAL", exitButton.x + 15, exitButton.y + 12, 20, BLACK);
 
+    renderGlobalUI();
+    
     EndDrawing();
 };
