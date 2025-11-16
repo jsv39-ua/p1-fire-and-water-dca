@@ -213,6 +213,8 @@ void OptionsState::render()
     int helpWidth = MeasureText(help, 16);
     DrawText(help, centerX - helpWidth / 2, screenHeight - 60, 16, BLACK);
     
+    renderGlobalUI();
+    
     EndDrawing();
 }
 
