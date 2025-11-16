@@ -28,40 +28,50 @@ public:
     };
 
 private:
-    static float volume;
-    static float musicVolume;
+    // Variables de instancia para UI (NO son la fuente de verdad)
+    // La fuente de verdad es AudioManager
+    float masterVolume;      // Cache local del volumen general
+    float musicVolume;       // Cache local del volumen de música
+    float sfxVolume;         // Cache local del volumen de efectos
+    
     static Language currentLanguage;
 
     Rectangle backButton;
     Rectangle languageButton;
-    Rectangle volumeSlider;
-    Rectangle volumeHandle;
+    
+    // Sliders de volumen
+    Rectangle masterVolumeSlider;
+    Rectangle masterVolumeHandle;
     Rectangle musicVolumeSlider;
     Rectangle musicVolumeHandle;
+    Rectangle sfxVolumeSlider;
+    Rectangle sfxVolumeHandle;
 
-    bool draggingVolume;
+    // Estados de dragging
+    bool draggingMasterVolume;
     bool draggingMusicVolume;
+    bool draggingSfxVolume;
+    
     Vector2 mousePos;
 
-    
-   
+    // Estados de hover
     bool mouseOverBackButton = false;
     bool mouseOverLanguageButton = false;
-    bool mouseOverVolumeButton = false;
+    bool mouseOverMasterVolumeButton = false;
     bool mouseOverMusicVolumeButton = false;
+    bool mouseOverSfxVolumeButton = false;
 
     bool mouseExitedBackButton = true;
     bool mouseExitedLanguageButton = true;
-    bool mouseExitedVolumeButton = true;
+    bool mouseExitedMasterVolumeButton = true;
     bool mouseExitedMusicVolumeButton = true;
+    bool mouseExitedSfxVolumeButton = true;
 
-    void updateVolumeSlider();
+    void updateMasterVolumeSlider();
     void updateMusicVolumeSlider();
+    void updateSfxVolumeSlider();
     
 public:
-    // Funciones estáticas para acceder a las opciones
-    static bool getDarkTheme();
-    static float getVolume();
-    static float getMusicVolumeFromAudioManager();
+    // Función estática para acceder al idioma
     static Language getLanguage();
 };
