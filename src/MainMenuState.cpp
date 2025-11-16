@@ -121,6 +121,8 @@ void MainMenuState::render(){
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
     DrawText("SALIR", exitButton.x + 50, exitButton.y + 15, 20, BLACK);
 
+    renderGlobalUI();
+    
     EndDrawing();
 };
 

@@ -217,5 +217,8 @@ void MainGameState::render()
     }
     EndMode2D();
     
+    // Renderizar UI global (en coordenadas de pantalla, no del mundo)
+    renderGlobalUI();
+    
     EndDrawing();
 }
