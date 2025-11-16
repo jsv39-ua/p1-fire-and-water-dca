@@ -18,7 +18,14 @@ Player::Player(float x, float y, ElementType t)
 void Player::update(float deltaTime) {
     // Aplicar gravedad y actualizar posición basada en velocidad
     static const float gravity = 800.0f;
+    static const float MAX_FALL_SPEED = 900.0f;
+    
     velocity.y += gravity * deltaTime;
+    
+    // Limitar velocidad de caída para evitar tunneling
+    if (velocity.y > MAX_FALL_SPEED) {
+        velocity.y = MAX_FALL_SPEED;
+    }
 
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
@@ -57,7 +64,7 @@ bool Player::resolvePlatformCollision(const Platform & platform) {
     if (this->velocity.y > 0) {
         float playerBottom = this->position.y + this->height;
         // Verificar que el jugador está encima de la plataforma (no dentro por los lados)
-        if (playerBottom > platform.bounds.y && playerBottom < platform.bounds.y + platform.bounds.height / 2) {
+        if (playerBottom > platform.bounds.y && playerBottom < platform.bounds.y + platform.bounds.height) {
             this->velocity.y = 0;
             this->position.y = platform.bounds.y - this->bounds.height;
             this->bounds.y = this->position.y;
