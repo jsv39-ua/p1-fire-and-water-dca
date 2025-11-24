@@ -5,6 +5,7 @@
 #include <Player.hpp>
 #include <Enemy.hpp>
 #include <Platform.hpp>
+#include <Animation.hpp>
 #include <vector>
 #include <string>
 #include <MapLoader.hpp>
@@ -47,6 +48,15 @@ private:
     bool fire_on_ground = false;    
     bool water_on_ground = false;
     std::vector<Enemy> level_enemies;
+
+    Texture2D character1;
+    Texture2D character2;
+    
+    // Animaciones para los personajes
+    Animation fire_idle_animation;
+    Animation fire_walk_animation;
+    Animation water_idle_animation;
+    Animation water_walk_animation;
 
     MapLoader mapLoader;
     Camera2D camera;
