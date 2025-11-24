@@ -1,5 +1,6 @@
 #include <MainGameState.hpp>
 #include <iostream>
+#include <cmath>
 #include <GameOverState.hpp> // Incluye la nueva clase
 #include <PauseMenuState.hpp> // Incluye el menú de pausa
 #include <StateMachine.hpp> // Asegúrate de incluirla
@@ -30,7 +31,7 @@ void MainGameState::init()
     camera.target = (Vector2){ 0, 0 };
     camera.offset = (Vector2){ 640, 360 }; // Centro de pantalla 1280x720
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f; // Escala 2x para hacer los tiles más grandes
+    camera.zoom = 2.0f; // Escala 2x para hacer los tiles más grandes
 
     // Inicialización del MapLoader
     try {
@@ -74,18 +75,18 @@ void MainGameState::init()
     character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
     character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_B.png");
 
-    // Inicializar animaciones (tu spritesheet: 512x192 = 8 columnas x 3 filas, 64x64 por frame)
+    // Inicializar animaciones (tu spritesheet: 512x192 = 8 columnas x 4 filas, 64x48 por frame)
     // Animation(frameCount, frameTime, isLooping, sprite, primerFrame, ultimoFrame)
     
     // Idle: primeros 4 frames de la primera fila (frames 0-3)
-    fire_idle_animation = Animation(4, 0.2f, true, character1, 0, 3);
+    fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     
-    // Walk: frames de la tercera fila (frames 16-23) - 8 frames de caminar
-    fire_walk_animation = Animation(8, 0.1f, true, character1, 16, 23);
+    // Walk: frames de la tercera fila (fila 2, frames 16-22) - 7 frames de caminar
+    fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
     
     // Lo mismo para el personaje de agua
-    water_idle_animation = Animation(4, 0.2f, true, character2, 0, 3);
-    water_walk_animation = Animation(8, 0.1f, true, character2, 16, 23);
+    water_idle_animation = Animation(5, 0.2f, true, character2, 9, 12);
+    water_walk_animation = Animation(8, 0.1f, true, character2, 0, 8);
 }
 
 void MainGameState::handleInput()
@@ -184,7 +185,7 @@ void MainGameState::update(float deltaTime)
                 return;
         }
 
-        // Detecta si ambos jugadores están en la meta
+        
         if (fire_collision == 3 && water_collision == 3) {
             this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
         }
@@ -219,6 +220,10 @@ void MainGameState::update(float deltaTime)
     float cameraSpeed = 3.0f * deltaTime;
     camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
     camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
+    
+    // Redondear la posición de la cámara para evitar parpadeo
+    camera.target.x = roundf(camera.target.x);
+    camera.target.y = roundf(camera.target.y);
 }
 
 void MainGameState::render()
@@ -230,17 +235,17 @@ void MainGameState::render()
     mapLoader.draw(camera);
 
     // Renderizar jugadores con animaciones
-    float spriteScale = 1.0f;  // Ajustado para frames de 64x64
+    float spriteScale = 1.0f;  // Ajustado para frames de 64x48
     int frameWidth = 64;  // Ancho de cada frame en el spritesheet (512/8)
-    int frameHeight = 64; // Alto de cada frame en el spritesheet (192/3)
+    int frameHeight = 48; // Alto de cada frame en el spritesheet (192/4)
     
     // Obtener el frame actual de la animación según el estado del jugador de fuego
     Rectangle fireSourceRect;
     if (fire_player.velocity.x != 0) {
-        // 8 frames por fila, 32x32 cada frame
-        fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth);
+        // 8 frames por fila, 64x48 cada frame
+        fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth, frameHeight);
     } else {
-        fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth);
+        fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
     // Voltear el sprite si va hacia la izquierda
@@ -259,9 +264,9 @@ void MainGameState::render()
     // Obtener el frame actual de la animación del jugador de agua
     Rectangle waterSourceRect;
     if (water_player.velocity.x != 0) {
-        waterSourceRect = water_walk_animation.animationFrame(8, frameWidth);
+        waterSourceRect = water_walk_animation.animationFrame(8, frameWidth, frameHeight);
     } else {
-        waterSourceRect = water_idle_animation.animationFrame(8, frameWidth);
+        waterSourceRect = water_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
     // Voltear el sprite si va hacia la izquierda
