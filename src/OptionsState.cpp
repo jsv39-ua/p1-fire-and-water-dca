@@ -1,5 +1,6 @@
 #include "OptionsState.hpp"
 #include "StateMachine.hpp"
+#include "KeyBindingsState.hpp"
 #include <AudioManager.hpp>
 #include <iostream>
 
@@ -46,13 +47,16 @@ void OptionsState::init()
     
     // Espaciado vertical entre elementos
     float sliderSpacing = 80.0f;
-    float startY = centerY - 180.0f;  // Subimos un poco para acomodar el tercer slider
+    float startY = centerY - 200.0f;
     
     // Configurar botón de idioma
     languageButton = { centerX - 150, startY, 300, 50 };
     
+    // Botón de asignar teclas
+    keyBindingsButton = { centerX - 150, startY + 60, 300, 50 };
+    
     // Slider de volumen general (master)
-    float masterSliderY = startY + 100.0f;
+    float masterSliderY = startY + 130.0f;
     masterVolumeSlider = { centerX - 150, masterSliderY, 300, 20 };
     masterVolumeHandle = { centerX - 150 + (masterVolume * 280), masterSliderY - 5, 20, 30 };
     
@@ -66,7 +70,7 @@ void OptionsState::init()
     sfxVolumeSlider = { centerX - 150, sfxSliderY, 300, 20 };
     sfxVolumeHandle = { centerX - 150 + (sfxVolume * 280), sfxSliderY - 5, 20, 30 };
     
-    // Botón volver (más abajo para acomodar el tercer slider)
+    // Botón volver (más abajo para acomodar el botón de teclas)
     backButton = { centerX - 100, sfxSliderY + 70, 200, 50 };
 }
 
@@ -83,6 +87,11 @@ void OptionsState::handleInput()
         if (CheckCollisionPointRec(mouse, languageButton)) {
             AudioManager::getInstance()->playButtonClick();
             currentLanguage = (Language)((currentLanguage + 1) % 2);
+        }
+
+        if (CheckCollisionPointRec(mouse, keyBindingsButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->add_state(std::make_unique<KeyBindingsState>(), false);
         }
 
         // Detección de click en los handles de los sliders
@@ -152,6 +161,7 @@ void OptionsState::update(float deltaTime)
     // Actualizar estados de mouse over
     mouseOverBackButton = CheckCollisionPointRec(mousePos, backButton);
     mouseOverLanguageButton = CheckCollisionPointRec(mousePos, languageButton);
+    mouseOverKeyBindingsButton = CheckCollisionPointRec(mousePos, keyBindingsButton);
     mouseOverMasterVolumeButton = CheckCollisionPointRec(mousePos, masterVolumeSlider);
     mouseOverMusicVolumeButton = CheckCollisionPointRec(mousePos, musicVolumeSlider);
     mouseOverSfxVolumeButton = CheckCollisionPointRec(mousePos, sfxVolumeSlider);
@@ -171,6 +181,14 @@ void OptionsState::update(float deltaTime)
     } else if (!mouseOverLanguageButton) {
         mouseExitedLanguageButton = true;
     }
+
+    // Lógica de hover para botón KEY BINDINGS
+    if (mouseOverKeyBindingsButton && mouseExitedKeyBindingsButton) {
+        audioMgr->playButtonHover();
+        mouseExitedKeyBindingsButton = false;
+    } else if (!mouseOverKeyBindingsButton) {
+        mouseExitedKeyBindingsButton = true;
+    }
 }
 
 void OptionsState::updateMasterVolumeSlider()
@@ -187,8 +205,6 @@ void OptionsState::updateSfxVolumeSlider()
 {
     sfxVolumeHandle.x = sfxVolumeSlider.x + (sfxVolume * (sfxVolumeSlider.width - sfxVolumeHandle.width));
 }
-
-// Funciones estáticas para acceder a las opciones desde otros estados
 
 void OptionsState::render()
 {
@@ -213,6 +229,13 @@ void OptionsState::render()
     const char* lang = getLanguageName(currentLanguage);
     int langWidth = MeasureText(lang, 20);
     DrawText(lang, languageButton.x + (languageButton.width - langWidth) / 2, languageButton.y + 15, 20, BLACK);
+    
+    // Botón asignar teclas
+    DrawRectangleRec(keyBindingsButton, mouseOverKeyBindingsButton ? GRAY : DARKGRAY);
+    DrawRectangleLinesEx(keyBindingsButton, 2, BLACK);
+    const char* keyBindText = "ASIGNAR TECLAS";
+    int keyBindWidth = MeasureText(keyBindText, 20);
+    DrawText(keyBindText, keyBindingsButton.x + (keyBindingsButton.width - keyBindWidth) / 2, keyBindingsButton.y + 15, 20, BLACK);
     
     // slider volumen general
     DrawText("VOLUMEN GENERAL", masterVolumeSlider.x, masterVolumeSlider.y - 30, 20, BLACK);
@@ -283,7 +306,6 @@ void OptionsState::render()
     EndDrawing();
 }
 
-// Getter estático solo para el idioma (única opción que se comparte globalmente)
 OptionsState::Language OptionsState::getLanguage() 
 {
     return OptionsState::currentLanguage;
