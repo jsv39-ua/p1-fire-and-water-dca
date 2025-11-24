@@ -9,6 +9,7 @@ extern "C" {
 #include <GameState.hpp>
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
+#include <Player.hpp>
 
 
 
@@ -44,4 +45,6 @@ class MainMenuState : public GameState
         // Logo
         Texture2D logo;
         
+        Player fire_player;
+        Player water_player;
 };

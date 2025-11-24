@@ -1,5 +1,7 @@
 #include "OptionsState.hpp"
 #include "StateMachine.hpp"
+#include "KeyBindingsState.hpp"
+#include "MainGameState.hpp"
 #include <AudioManager.hpp>
 #include <iostream>
 
@@ -8,16 +10,24 @@ extern "C" {
 }
 
 // Variables estáticas para las opciones
-// Solo el idioma es estático, los volúmenes se obtienen de AudioManager
 OptionsState::Language OptionsState::currentLanguage = OptionsState::SPANISH;
+
+OptionsState::OptionsState(Player& firePlayer, Player& waterPlayer) : 
+    draggingMasterVolume(false), 
+    draggingMusicVolume(false),
+    draggingSfxVolume(false),
+    firePlayer(&firePlayer),
+    waterPlayer(&waterPlayer)
+{
+}
 
 OptionsState::OptionsState() : 
     draggingMasterVolume(false), 
     draggingMusicVolume(false),
-    draggingSfxVolume(false)
+    draggingSfxVolume(false),
+    firePlayer(new Player()),
+    waterPlayer(new Player())
 {
-    // Los volúmenes (masterVolume, musicVolume, sfxVolume) se inicializarán
-    // en init() obteniendo los valores actuales de AudioManager
 }
 
 const char* getLanguageName(OptionsState::Language lang) {
@@ -40,34 +50,28 @@ void OptionsState::init()
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     
-    // Calcular posiciones centradas relativamente al tamaño de pantalla
+    // Calcular posiciones centradas
     float centerX = screenWidth / 2.0f;
-    float centerY = screenHeight / 2.0f;
+    float startY = 100.0f;
     
-    // Espaciado vertical entre elementos
-    float sliderSpacing = 80.0f;
-    float startY = centerY - 180.0f;  // Subimos un poco para acomodar el tercer slider
-    
-    // Configurar botón de idioma
+    // Botón de idioma
     languageButton = { centerX - 150, startY, 300, 50 };
     
-    // Slider de volumen general (master)
-    float masterSliderY = startY + 100.0f;
-    masterVolumeSlider = { centerX - 150, masterSliderY, 300, 20 };
-    masterVolumeHandle = { centerX - 150 + (masterVolume * 280), masterSliderY - 5, 20, 30 };
+    // Botón de teclas asignadas (nuevo)
+    keyBindingsButton = { centerX - 150, startY + 70, 300, 50 };
     
-    // Slider de volumen de música
-    float musicSliderY = masterSliderY + sliderSpacing;
-    musicVolumeSlider = { centerX - 150, musicSliderY, 300, 20 };
-    musicVolumeHandle = { centerX - 150 + (musicVolume * 280), musicSliderY - 5, 20, 30 };
-    
-    // Slider de volumen de efectos (SFX)
-    float sfxSliderY = musicSliderY + sliderSpacing;
-    sfxVolumeSlider = { centerX - 150, sfxSliderY, 300, 20 };
-    sfxVolumeHandle = { centerX - 150 + (sfxVolume * 280), sfxSliderY - 5, 20, 30 };
-    
-    // Botón volver (más abajo para acomodar el tercer slider)
-    backButton = { centerX - 100, sfxSliderY + 70, 200, 50 };
+    // Sliders de volumen (ajustados hacia abajo)
+    float sliderY = startY + 140.0f;
+    float sliderWidth = 300.0f;
+    float sliderHeight = 20.0f;
+    float sliderSpacing = 80.0f;
+
+    masterVolumeSlider = { centerX - sliderWidth / 2, sliderY, sliderWidth, sliderHeight };
+    musicVolumeSlider = { centerX - sliderWidth / 2, sliderY + sliderSpacing, sliderWidth, sliderHeight };
+    sfxVolumeSlider = { centerX - sliderWidth / 2, sliderY + sliderSpacing * 2, sliderWidth, sliderHeight };
+
+    // Botón de volver
+    backButton = { centerX - 100, sliderY + sliderSpacing * 3 + 20, 200, 50 };
 }
 
 void OptionsState::handleInput()
@@ -78,31 +82,45 @@ void OptionsState::handleInput()
         if (CheckCollisionPointRec(mouse, backButton)) {
             AudioManager::getInstance()->playButtonClick();
             this->state_machine->remove_state(false);
+            return;
         }
 
         if (CheckCollisionPointRec(mouse, languageButton)) {
             AudioManager::getInstance()->playButtonClick();
             currentLanguage = (Language)((currentLanguage + 1) % 2);
         }
+        
+        // Botón de teclas asignadas - Usar desreferencia de punteros
+        if (CheckCollisionPointRec(mouse, keyBindingsButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->add_state(
+                std::make_unique<KeyBindingsState>(
+                    *this->firePlayer,   // Desreferenciar puntero
+                    *this->waterPlayer   // Desreferenciar puntero
+                ), 
+                false
+            );
+            return;
+        }
 
-        // Detección de click en los handles de los sliders
-        if (CheckCollisionPointRec(mouse, masterVolumeHandle)) {
+        // Comprobar si se hace clic en algún slider
+        if (CheckCollisionPointRec(mouse, masterVolumeSlider)) {
             draggingMasterVolume = true;
         }
-        if (CheckCollisionPointRec(mouse, musicVolumeHandle)) {
+        if (CheckCollisionPointRec(mouse, musicVolumeSlider)) {
             draggingMusicVolume = true;
         }
-        if (CheckCollisionPointRec(mouse, sfxVolumeHandle)) {
+        if (CheckCollisionPointRec(mouse, sfxVolumeSlider)) {
             draggingSfxVolume = true;
         }
     }
-    
+
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         draggingMasterVolume = false;
         draggingMusicVolume = false;
         draggingSfxVolume = false;
     }
-    
+
     if (IsKeyPressed(KEY_ESCAPE)) {
         this->state_machine->remove_state(false);
     }
@@ -111,52 +129,29 @@ void OptionsState::handleInput()
 void OptionsState::update(float deltaTime)
 {
     Vector2 mousePos = GetMousePosition();
-    AudioManager* audioMgr = AudioManager::getInstance();
-
-    // Lógica de dragging para slider de volumen general (master)
-    if (draggingMasterVolume) {
-        Vector2 mouse = GetMousePosition();
-        float x = mouse.x - masterVolumeSlider.x;
-        if (x < 0) x = 0;
-        if (x > masterVolumeSlider.width - masterVolumeHandle.width) x = masterVolumeSlider.width - masterVolumeHandle.width;
-        masterVolume = x / (masterVolumeSlider.width - masterVolumeHandle.width);
-        
-        audioMgr->setMasterVolume(masterVolume);
-        updateMasterVolumeSlider();
-    }
-
-    // Lógica de dragging para slider de volumen de música
-    if (draggingMusicVolume) {
-        Vector2 mouse = GetMousePosition();
-        float x = mouse.x - musicVolumeSlider.x;
-        if (x < 0) x = 0;
-        if (x > musicVolumeSlider.width - musicVolumeHandle.width) x = musicVolumeSlider.width - musicVolumeHandle.width;
-        musicVolume = x / (musicVolumeSlider.width - musicVolumeHandle.width);
-
-        audioMgr->setMusicVolume(musicVolume);
-        updateMusicVolumeSlider();
-    }
-
-    // Lógica de dragging para slider de volumen de efectos (SFX)
-    if (draggingSfxVolume) {
-        Vector2 mouse = GetMousePosition();
-        float x = mouse.x - sfxVolumeSlider.x;
-        if (x < 0) x = 0;
-        if (x > sfxVolumeSlider.width - sfxVolumeHandle.width) x = sfxVolumeSlider.width - sfxVolumeHandle.width;
-        sfxVolume = x / (sfxVolumeSlider.width - sfxVolumeHandle.width);
-
-        audioMgr->setSfxVolume(sfxVolume);
-        updateSfxVolumeSlider();
-    }
-
-    // Actualizar estados de mouse over
-    mouseOverBackButton = CheckCollisionPointRec(mousePos, backButton);
+    
     mouseOverLanguageButton = CheckCollisionPointRec(mousePos, languageButton);
-    mouseOverMasterVolumeButton = CheckCollisionPointRec(mousePos, masterVolumeSlider);
-    mouseOverMusicVolumeButton = CheckCollisionPointRec(mousePos, musicVolumeSlider);
-    mouseOverSfxVolumeButton = CheckCollisionPointRec(mousePos, sfxVolumeSlider);
-
-    // Lógica de hover para botón BACK
+    mouseOverKeyBindingsButton = CheckCollisionPointRec(mousePos, keyBindingsButton);  // Nuevo
+    mouseOverBackButton = CheckCollisionPointRec(mousePos, backButton);
+    
+    // Hover effects
+    AudioManager* audioMgr = AudioManager::getInstance();
+    
+    if (mouseOverLanguageButton && mouseExitedLanguageButton) {
+        audioMgr->playButtonHover();
+        mouseExitedLanguageButton = false;
+    } else if (!mouseOverLanguageButton) {
+        mouseExitedLanguageButton = true;
+    }
+    
+    // Hover para botón de teclas (nuevo)
+    if (mouseOverKeyBindingsButton && mouseExitedKeyBindingsButton) {
+        audioMgr->playButtonHover();
+        mouseExitedKeyBindingsButton = false;
+    } else if (!mouseOverKeyBindingsButton) {
+        mouseExitedKeyBindingsButton = true;
+    }
+    
     if (mouseOverBackButton && mouseExitedBackButton) {
         audioMgr->playButtonHover();
         mouseExitedBackButton = false;
@@ -164,107 +159,100 @@ void OptionsState::update(float deltaTime)
         mouseExitedBackButton = true;
     }
 
-    // Lógica de hover para botón LANGUAGE
-    if (mouseOverLanguageButton && mouseExitedLanguageButton) {
-        audioMgr->playButtonHover();
-        mouseExitedLanguageButton = false;
-    } else if (!mouseOverLanguageButton) {
-        mouseExitedLanguageButton = true;
+    // Actualizar sliders si se están arrastrando
+    if (draggingMasterVolume) {
+        updateMasterVolumeSlider();
+    }
+    if (draggingMusicVolume) {
+        updateMusicVolumeSlider();
+    }
+    if (draggingSfxVolume) {
+        updateSfxVolumeSlider();
     }
 }
 
 void OptionsState::updateMasterVolumeSlider()
 {
-    masterVolumeHandle.x = masterVolumeSlider.x + (masterVolume * (masterVolumeSlider.width - masterVolumeHandle.width));
+    Vector2 mousePos = GetMousePosition();
+    float relativeX = mousePos.x - masterVolumeSlider.x;
+    masterVolume = relativeX / masterVolumeSlider.width;
+    masterVolume = (masterVolume < 0.0f) ? 0.0f : (masterVolume > 1.0f) ? 1.0f : masterVolume;
+    
+    AudioManager::getInstance()->setMasterVolume(masterVolume);
 }
 
 void OptionsState::updateMusicVolumeSlider()
 {
-    musicVolumeHandle.x = musicVolumeSlider.x + (musicVolume * (musicVolumeSlider.width - musicVolumeHandle.width));
+    Vector2 mousePos = GetMousePosition();
+    float relativeX = mousePos.x - musicVolumeSlider.x;
+    musicVolume = relativeX / musicVolumeSlider.width;
+    musicVolume = (musicVolume < 0.0f) ? 0.0f : (musicVolume > 1.0f) ? 1.0f : musicVolume;
+    
+    AudioManager::getInstance()->setMusicVolume(musicVolume);
 }
 
 void OptionsState::updateSfxVolumeSlider()
 {
-    sfxVolumeHandle.x = sfxVolumeSlider.x + (sfxVolume * (sfxVolumeSlider.width - sfxVolumeHandle.width));
+    Vector2 mousePos = GetMousePosition();
+    float relativeX = mousePos.x - sfxVolumeSlider.x;
+    sfxVolume = relativeX / sfxVolumeSlider.width;
+    sfxVolume = (sfxVolume < 0.0f) ? 0.0f : (sfxVolume > 1.0f) ? 1.0f : sfxVolume;
+    
+    AudioManager::getInstance()->setSfxVolume(sfxVolume);
 }
-
-// Funciones estáticas para acceder a las opciones desde otros estados
 
 void OptionsState::render()
 {
     BeginDrawing();
+    ClearBackground(SKYBLUE);
 
     int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
     float centerX = screenWidth / 2.0f;
-    
-    ClearBackground(SKYBLUE);
-    
-    // Título (centrado)
+
+    // Título
     const char* title = "OPCIONES";
-    int titleWidth = MeasureText(title, 40);
-    DrawText(title, centerX - titleWidth / 2, 50, 40, BLACK);
-    
-    Vector2 mouse = GetMousePosition();
-    
-    // Botón idioma
+    int titleWidth = MeasureText(title, 60);
+    DrawText(title, centerX - titleWidth / 2, 20, 60, BLACK);
+
+    // Botón de idioma
     DrawRectangleRec(languageButton, mouseOverLanguageButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(languageButton, 2, BLACK);
-    const char* lang = getLanguageName(currentLanguage);
-    int langWidth = MeasureText(lang, 20);
-    DrawText(lang, languageButton.x + (languageButton.width - langWidth) / 2, languageButton.y + 15, 20, BLACK);
-    
-    // slider volumen general
-    DrawText("VOLUMEN GENERAL", masterVolumeSlider.x, masterVolumeSlider.y - 30, 20, BLACK);
-    
-    // Barra del slider
+    const char* langText = TextFormat("IDIOMA: %s", getLanguageName(currentLanguage));
+    int langWidth = MeasureText(langText, 20);
+    DrawText(langText, languageButton.x + (languageButton.width - langWidth) / 2, languageButton.y + 15, 20, BLACK);
+
+    // Botón de teclas asignadas (nuevo)
+    DrawRectangleRec(keyBindingsButton, mouseOverKeyBindingsButton ? GRAY : DARKGRAY);
+    DrawRectangleLinesEx(keyBindingsButton, 2, BLACK);
+    const char* keyText = "TECLAS ASIGNADAS";
+    int keyWidth = MeasureText(keyText, 20);
+    DrawText(keyText, keyBindingsButton.x + (keyBindingsButton.width - keyWidth) / 2, keyBindingsButton.y + 15, 20, BLACK);
+
+    // Etiquetas de volumen
+    DrawText("VOLUMEN MAESTRO", masterVolumeSlider.x, masterVolumeSlider.y - 25, 20, BLACK);
+    DrawText("VOLUMEN MUSICA", musicVolumeSlider.x, musicVolumeSlider.y - 25, 20, BLACK);
+    DrawText("VOLUMEN SFX", sfxVolumeSlider.x, sfxVolumeSlider.y - 25, 20, BLACK);
+
+    // Dibujar sliders
     DrawRectangleRec(masterVolumeSlider, LIGHTGRAY);
+    DrawRectangle(masterVolumeSlider.x, masterVolumeSlider.y, 
+                  masterVolumeSlider.width * masterVolume, masterVolumeSlider.height, DARKGRAY);
     DrawRectangleLinesEx(masterVolumeSlider, 2, BLACK);
 
-    // Fill proporcional
-    Rectangle masterFill = { masterVolumeSlider.x, masterVolumeSlider.y, masterVolume * masterVolumeSlider.width, masterVolumeSlider.height };
-    DrawRectangleRec(masterFill, DARKBLUE);
-
-    // Handle
-    DrawRectangleRec(masterVolumeHandle, mouseOverMasterVolumeButton ? GRAY : DARKGRAY);
-    DrawRectangleLinesEx(masterVolumeHandle, 2, BLACK);
-    
-    // Porcentaje
-    char master_vol_text[16];
-    sprintf(master_vol_text, "%.0f%%", masterVolume * 100);
-    DrawText(master_vol_text, masterVolumeSlider.x + masterVolumeSlider.width + 20, masterVolumeSlider.y + 5, 20, DARKGRAY);
-
-    // slider volumen musica
-    DrawText("VOLUMEN MUSICA", musicVolumeSlider.x, musicVolumeSlider.y - 30, 20, BLACK);        
-   
     DrawRectangleRec(musicVolumeSlider, LIGHTGRAY);
+    DrawRectangle(musicVolumeSlider.x, musicVolumeSlider.y, 
+                  musicVolumeSlider.width * musicVolume, musicVolumeSlider.height, DARKGRAY);
     DrawRectangleLinesEx(musicVolumeSlider, 2, BLACK);
 
-    Rectangle musicFill = { musicVolumeSlider.x, musicVolumeSlider.y, musicVolume * musicVolumeSlider.width, musicVolumeSlider.height };
-    DrawRectangleRec(musicFill, DARKBLUE);
-
-    DrawRectangleRec(musicVolumeHandle, mouseOverMusicVolumeButton ? GRAY : DARKGRAY);
-    DrawRectangleLinesEx(musicVolumeHandle, 2, BLACK);
-
-    char music_vol_text[16];
-    sprintf(music_vol_text, "%.0f%%", musicVolume * 100);
-    DrawText(music_vol_text, musicVolumeSlider.x + musicVolumeSlider.width + 20, musicVolumeSlider.y + 5, 20, DARKGRAY);
-
-    // slider volumen efectos
-    DrawText("VOLUMEN EFECTOS", sfxVolumeSlider.x, sfxVolumeSlider.y - 30, 20, BLACK);
-    
     DrawRectangleRec(sfxVolumeSlider, LIGHTGRAY);
+    DrawRectangle(sfxVolumeSlider.x, sfxVolumeSlider.y, 
+                  sfxVolumeSlider.width * sfxVolume, sfxVolumeSlider.height, DARKGRAY);
     DrawRectangleLinesEx(sfxVolumeSlider, 2, BLACK);
 
-    Rectangle sfxFill = { sfxVolumeSlider.x, sfxVolumeSlider.y, sfxVolume * sfxVolumeSlider.width, sfxVolumeSlider.height };
-    DrawRectangleRec(sfxFill, DARKBLUE);
-
-    DrawRectangleRec(sfxVolumeHandle, mouseOverSfxVolumeButton ? GRAY : DARKGRAY);
-    DrawRectangleLinesEx(sfxVolumeHandle, 2, BLACK);
-
-    char sfx_vol_text[16];
-    sprintf(sfx_vol_text, "%.0f%%", sfxVolume * 100);
-    DrawText(sfx_vol_text, sfxVolumeSlider.x + sfxVolumeSlider.width + 20, sfxVolumeSlider.y + 5, 20, DARKGRAY);
+    // Porcentajes de volumen
+    DrawText(TextFormat("%d%%", (int)(masterVolume * 100)), masterVolumeSlider.x + masterVolumeSlider.width + 10, masterVolumeSlider.y, 20, BLACK);
+    DrawText(TextFormat("%d%%", (int)(musicVolume * 100)), musicVolumeSlider.x + musicVolumeSlider.width + 10, musicVolumeSlider.y, 20, BLACK);
+    DrawText(TextFormat("%d%%", (int)(sfxVolume * 100)), sfxVolumeSlider.x + sfxVolumeSlider.width + 10, sfxVolumeSlider.y, 20, BLACK);
 
     // Botón volver
     DrawRectangleRec(backButton, mouseOverBackButton ? GRAY : DARKGRAY);
@@ -272,19 +260,11 @@ void OptionsState::render()
     const char* backText = "VOLVER";
     int backWidth = MeasureText(backText, 20);
     DrawText(backText, backButton.x + (backButton.width - backWidth) / 2, backButton.y + 15, 20, BLACK);
-    
-    // Ayuda (centrada en la parte inferior)
-    const char* help = "ESC: Volver";
-    int helpWidth = MeasureText(help, 16);
-    DrawText(help, centerX - helpWidth / 2, screenHeight - 60, 16, BLACK);
-    
-    renderGlobalUI();
-    
+
     EndDrawing();
 }
 
-// Getter estático solo para el idioma (única opción que se comparte globalmente)
 OptionsState::Language OptionsState::getLanguage() 
 {
-    return OptionsState::currentLanguage;
+    return currentLanguage;
 }

@@ -1,7 +1,8 @@
 #include <MainMenuState.hpp>
+#include <MainGameState.hpp>
+#include <OptionsState.hpp>
 #include <AudioManager.hpp>
 #include <ResourceManager.hpp>
-#include "OptionsState.hpp"
 
 
 
@@ -21,19 +22,42 @@ void MainMenuState::init(){
     float buttonHeight = 50;
     float spacing = 20;
     float totalWidth = (buttonWidth * 3) + (spacing * 2);
-    float startX = GetScreenWidth()/2 - totalWidth/2;
-    float buttonY = GetScreenHeight() - buttonHeight - 30;
+    float startX = (GetScreenWidth() - totalWidth) / 2;
+    float buttonY = GetScreenHeight() - 100;
 
     playButton = { startX, buttonY, buttonWidth, buttonHeight };
     optionsButton = { startX + buttonWidth + spacing, buttonY, buttonWidth, buttonHeight };
     exitButton = { startX + (buttonWidth + spacing) * 2, buttonY, buttonWidth, buttonHeight };
 };
 
-void MainMenuState::handleInput(){
+void MainMenuState::handleInput()
+{
+    Vector2 mouse = GetMousePosition();
 
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (CheckCollisionPointRec(mouse, playButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->add_state(std::make_unique<MainGameState>(), true);
+            return;
+        }
 
+        if (CheckCollisionPointRec(mouse, optionsButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->add_state(std::make_unique<OptionsState>(), false);
+            return;
+        }
 
-};
+        if (CheckCollisionPointRec(mouse, exitButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->remove_state(true);
+            return;
+        }
+    }
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        this->state_machine->remove_state(true);
+    }
+}
 
 void MainMenuState::update(float deltaTime){
 
@@ -71,21 +95,6 @@ void MainMenuState::update(float deltaTime){
     } else if (!mouseOverExitButton) {
         // Salimos del botón, resetear flag
         mouseExitedExitButton = true;
-    }
-
-    if (mouseOverPlayButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        this->state_machine->add_state(std::make_unique<MainGameState>(), true);
-    }
-    
-    if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        this->state_machine->add_state(std::make_unique<OptionsState>(), false);
-    }
-
-    if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        this->state_machine->remove_state(true);
     }
 };
 

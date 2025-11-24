@@ -3,8 +3,12 @@
 #include <MainMenuState.hpp>
 #include <OptionsState.hpp>
 #include <AudioManager.hpp>
+#include <Player.hpp>
 
-PauseMenuState::PauseMenuState(){};
+PauseMenuState::PauseMenuState(Player & firePlayer, Player & waterPlayer){ 
+    this->firePlayer = &firePlayer;
+    this->waterPlayer = &waterPlayer;
+};
 
 void PauseMenuState::init(){
     resumeButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 - 75, 200, 50 };
@@ -13,9 +17,35 @@ void PauseMenuState::init(){
     exitButton = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 150, 200, 50 };
 };
 
-void PauseMenuState::handleInput(){
-    // El input se maneja en update
-};
+void PauseMenuState::handleInput()
+{
+    Vector2 mouse = GetMousePosition();
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (CheckCollisionPointRec(mouse, resumeButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->remove_state(false);
+        }
+
+        if (CheckCollisionPointRec(mouse, optionsButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->add_state(
+                std::make_unique<OptionsState>(*firePlayer, *waterPlayer), 
+                false
+            );
+        }
+
+        if (CheckCollisionPointRec(mouse, exitButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            this->state_machine->remove_state(false);
+            this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+        }
+    }
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        this->state_machine->remove_state(false);
+    }
+}
 
 void PauseMenuState::update(float deltaTime){
     mousePos = GetMousePosition();
@@ -25,98 +55,55 @@ void PauseMenuState::update(float deltaTime){
     mouseOverOptionsButton = CheckCollisionPointRec(mousePos, optionsButton);
     mouseOverExitButton = CheckCollisionPointRec(mousePos, exitButton);
 
-    // Lógica de hover para botón RESUME
+    AudioManager* audioMgr = AudioManager::getInstance();
+
     if (mouseOverResumeButton && mouseExitedResumeButton) {
-        AudioManager::getInstance()->playButtonHover();
+        audioMgr->playButtonHover();
         mouseExitedResumeButton = false;
     } else if (!mouseOverResumeButton) {
         mouseExitedResumeButton = true;
     }
 
-    // Lógica de hover para botón RESTART
     if (mouseOverRestartButton && mouseExitedRestartButton) {
-        AudioManager::getInstance()->playButtonHover();
+        audioMgr->playButtonHover();
         mouseExitedRestartButton = false;
     } else if (!mouseOverRestartButton) {
         mouseExitedRestartButton = true;
     }
 
-    // Lógica de hover para botón OPTIONS
     if (mouseOverOptionsButton && mouseExitedOptionsButton) {
-        AudioManager::getInstance()->playButtonHover();
+        audioMgr->playButtonHover();
         mouseExitedOptionsButton = false;
     } else if (!mouseOverOptionsButton) {
         mouseExitedOptionsButton = true;
     }
 
-    // Lógica de hover para botón EXIT
     if (mouseOverExitButton && mouseExitedExitButton) {
-        AudioManager::getInstance()->playButtonHover();
+        audioMgr->playButtonHover();
         mouseExitedExitButton = false;
     } else if (!mouseOverExitButton) {
         mouseExitedExitButton = true;
-    }
-
-    // Reanudar el juego - quita el menú de pausa y vuelve al juego
-    if (mouseOverResumeButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        this->state_machine->remove_state(false);
-    }
-    
-    // Reiniciar el juego - reemplaza el estado actual del juego con uno nuevo
-    if (mouseOverRestartButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        // Primero quita el menú de pausa
-        this->state_machine->remove_state(false);
-        // Luego reemplaza el juego con uno nuevo
-        this->state_machine->add_state(std::make_unique<MainGameState>(), true);
-    }
-
-    // Abrir opciones - añade el estado de opciones sobre el menú de pausa
-    if (mouseOverOptionsButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        this->state_machine->add_state(std::make_unique<OptionsState>(), false);
-    }
-
-    // Volver al menú principal - reemplaza todo con el menú principal
-    if (mouseOverExitButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        AudioManager::getInstance()->playButtonClick();
-        // Quita el menú de pausa
-        this->state_machine->remove_state(false);
-        // Reemplaza el estado de juego con el menú principal
-        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
-    }
-
-    // También permitir reanudar con Escape
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        this->state_machine->remove_state(false);
     }
 };
 
 void PauseMenuState::render(){
     BeginDrawing();
 
-    // Fondo igual que el menú principal
     ClearBackground(SKYBLUE);
     
-    // Título centrado
     const char* title = "PAUSA";
     int titleWidth = MeasureText(title, 25);
     DrawText(title, GetScreenWidth()/2 - titleWidth/2, 30, 25, YELLOW);
 
-    // Botón de reanudar
     DrawRectangleRec(resumeButton, mouseOverResumeButton ? GRAY : DARKGRAY);
     DrawText("REANUDAR", resumeButton.x + 45, resumeButton.y + 12, 20, BLACK);
 
-    // Botón de reiniciar
     DrawRectangleRec(restartButton, mouseOverRestartButton ? GRAY : DARKGRAY);
     DrawText("REINICIAR", restartButton.x + 45, restartButton.y + 12, 20, BLACK);
 
-    // Botón de opciones
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
     DrawText("OPCIONES", optionsButton.x + 45, optionsButton.y + 12, 20, BLACK);
 
-    // Botón de salir
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
     DrawText("MENU PRINCIPAL", exitButton.x + 15, exitButton.y + 12, 20, BLACK);
 
