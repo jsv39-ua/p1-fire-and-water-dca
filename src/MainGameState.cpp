@@ -31,7 +31,7 @@ void MainGameState::init()
 
     // Inicialización del MapLoader
     try {
-        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
+        mapLoader.loadMapa("assets/levels/niveles/nivel-tutorial/nivel-tutorial.tmx");
         
         // Extraer colisiones del mapa de Tiled
         std::vector<Rectangle> collisions = mapLoader.extractCollisions();
