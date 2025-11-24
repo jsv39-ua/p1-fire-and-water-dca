@@ -18,8 +18,24 @@ MainGameState::MainGameState()
 
 void MainGameState::init()
 {
+    // Cargar texturas primero para obtener sus dimensiones
+    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
+    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
+    
+    // Calcular dimensiones de cada frame del spritesheet
+    int columns = 8; // 8 columnas en el spritesheet
+    int rows = 4;    // 4 filas en el spritesheet
+    float frameWidth = character1.width / (float)columns;
+    float frameHeight = character1.height / (float)rows;
+    
+    // Ajustar el tamaño de la hitbox (aproximadamente la mitad del ancho del frame)
+    float hitboxWidth = frameWidth * 0.5f;
+    float hitboxHeight = frameHeight;
+   
+    // Inicialización del personaje de Fuego con tamaño basado en el asset
+    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
     // Inicialización del personaje de Fuego
-    fire_player = Player(100.0f, 300.0f, FIRE);
+    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
     
     // Cargar teclas desde SettingsManager
     fire_player.setKeys(
@@ -28,8 +44,8 @@ void MainGameState::init()
         SettingsManager::getInstance()->getFireJump()
     );
 
-    // Inicialización del personaje de Agua
-    water_player = Player(150.0f, 300.0f, WATER);
+    // Inicialización del personaje de Agua con tamaño basado en el asset
+    water_player = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
     water_player.setKeys(
@@ -77,9 +93,6 @@ void MainGameState::init()
     
     Enemy water_enemy = { { 650, 370, 25, 25 }, WATER, 70.0f };
     level_enemies.push_back(water_enemy);
-
-    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
-    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_B.png");
 
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
@@ -213,6 +226,38 @@ void MainGameState::update(float deltaTime)
     camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
     camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
     
+    
+    Rectangle mapBounds = mapLoader.getMapBounds();
+    
+    // Calcular los límites de la cámara basados en el tamaño de la pantalla y el zoom
+    float screenWidth = 1280.0f;  
+    float screenHeight = 720.0f;
+    
+    // Calcular el área visible de la cámara en el mundo (dividido por el zoom)
+    float visibleWidth = screenWidth / camera.zoom;
+    float visibleHeight = screenHeight / camera.zoom;
+    
+    // Calcular los límites mínimos y máximos para el target de la cámara
+    float minX = mapBounds.x + visibleWidth / 2.0f;
+    float maxX = mapBounds.x + mapBounds.width - visibleWidth / 2.0f;
+    float minY = mapBounds.y + visibleHeight / 2.0f;
+    float maxY = mapBounds.y + mapBounds.height - visibleHeight / 2.0f;
+    
+    // Aplicar los límites a la posición de la cámara
+    if (mapBounds.width > visibleWidth) {
+        camera.target.x = fmaxf(minX, fminf(camera.target.x, maxX));
+    } else {
+        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
+        camera.target.x = mapBounds.x + mapBounds.width / 2.0f;
+    }
+    
+    if (mapBounds.height > visibleHeight) {
+        camera.target.y = fmaxf(minY, fminf(camera.target.y, maxY));
+    } else {
+        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
+        camera.target.y = mapBounds.y + mapBounds.height / 2.0f;
+    }
+    
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
 }
@@ -225,48 +270,71 @@ void MainGameState::render()
     ClearBackground(RAYWHITE);
     mapLoader.draw(camera);
 
-    float spriteScale = 1.0f;
-    int frameWidth = 64;
-    int frameHeight = 48;
+    // Renderizar jugadores con animaciones
+    float spriteScale = 1.5f;  
+    int frameWidth = 64;  // Ancho de cada frame en el spritesheet (512/8)
+    int frameHeight = 48; // Alto de cada frame en el spritesheet (192/4)
+    
+    
+    float renderWidth = frameWidth * spriteScale;
+    float renderHeight = frameHeight * spriteScale;
+    
     
     Rectangle fireSourceRect;
     if (fire_player.velocity.x != 0) {
+        
         fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth, frameHeight);
+        fire_player.facingRight = fire_player.velocity.x > 0;
     } else {
         fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    bool fireFlipped = fire_player.velocity.x < 0;
-    if (fireFlipped) {
+    if (!fire_player.facingRight) {
         fireSourceRect.width = -frameWidth;
     }
     
+    float fireRenderX = fire_player.position.x + (fire_player.width / 2.0f) - (renderWidth / 2.0f);
+    float fireRenderY = fire_player.position.y + fire_player.height - renderHeight;
+    
     DrawTexturePro(character1, 
-                   fireSourceRect,
-                   (Rectangle){fire_player.position.x, fire_player.position.y, frameWidth * spriteScale, frameHeight * spriteScale}, 
+                   fireSourceRect,  
+                   (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
+    
     
     Rectangle waterSourceRect;
     if (water_player.velocity.x != 0) {
         waterSourceRect = water_walk_animation.animationFrame(8, frameWidth, frameHeight);
+      
+        water_player.facingRight = water_player.velocity.x > 0;
     } else {
         waterSourceRect = water_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    bool waterFlipped = water_player.velocity.x < 0;
-    if (waterFlipped) {
+    
+    if (!water_player.facingRight) {
         waterSourceRect.width = -frameWidth;
     }
     
+    float waterRenderX = water_player.position.x + (water_player.width / 2.0f) - (renderWidth / 2.0f);
+    float waterRenderY = water_player.position.y + water_player.height - renderHeight;
+    
     DrawTexturePro(character2, 
                    waterSourceRect,
-                   (Rectangle){water_player.position.x, water_player.position.y, frameWidth * spriteScale, frameHeight * spriteScale}, 
+                   (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
 
+    // Debug
+    DrawRectangleLinesEx(fire_player.bounds, 2, GREEN);
+    DrawRectangleLinesEx(water_player.bounds, 2, BLUE);
+
+    
+
+    // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
         if(platform.type == GOAL){
             DrawRectangleRec(platform.bounds, YELLOW);

@@ -14,8 +14,8 @@ Player::Player() : Entity() {
     key_jump = 0;
 }
 
-Player::Player(float x, float y, ElementType t) 
-    : Entity({x, y}, {0.0f, 0.0f}, 30.0f, 30.0f, t) {
+Player::Player(float x, float y, float height, float width, ElementType t) 
+    : Entity({x, y}, {0.0f, 0.0f}, height, width, t) {
     // Inicializar teclas a 0 por defecto
     key_left = 0;
     key_right = 0;
