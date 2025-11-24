@@ -43,12 +43,12 @@ void Animation::animationUpdate(float deltaTime){
     }
 }
 
-// Tamaño tileset debe ser la resolución de cada frame individual (ej: 32x32)
-Rectangle Animation::animationFrame(int frames_por_columna, int tamanyo_tileset){
-    float x = (frameActual % frames_por_columna) * tamanyo_tileset;
-    float y = (frameActual / frames_por_columna) * tamanyo_tileset;
+// Calcular el frame actual del spritesheet
+Rectangle Animation::animationFrame(int frames_por_columna, int frame_width, int frame_height){
+    float x = (frameActual % frames_por_columna) * frame_width;
+    float y = (frameActual / frames_por_columna) * frame_height;
     
-    return Rectangle{x, y, (float)tamanyo_tileset, (float)tamanyo_tileset};
+    return Rectangle{x, y, (float)frame_width, (float)frame_height};
 }
 
 void Animation::reset() {
