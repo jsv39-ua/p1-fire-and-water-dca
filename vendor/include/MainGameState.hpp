@@ -27,6 +27,10 @@ public:
     void pause(){};
     void resume(){};
 
+    // Función para actualizar las teclas
+    void setFirePlayerKeys(int left, int right, int jump);
+    void setWaterPlayerKeys(int left, int right, int jump);
+
 private:
     char entered_key;
     Player fire_player;

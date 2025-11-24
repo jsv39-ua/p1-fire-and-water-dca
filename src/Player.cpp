@@ -13,6 +13,34 @@ Player::Player() : Entity() {
 
 Player::Player(float x, float y, ElementType t) 
     : Entity({x, y}, {0.0f, 0.0f}, 30.0f, 30.0f, t) {
+    // Configurar teclas por defecto
+    if (t == FIRE) {
+        setKeys(KEY_A, KEY_D, KEY_W);
+    } else if (t == WATER) {
+        setKeys(KEY_LEFT, KEY_RIGHT, KEY_UP);
+    }
+}
+
+void Player::setKeys(int left, int right, int jump) {
+    key_left = left;
+    key_right = right;
+    key_jump = jump;
+}
+
+void Player::handleInput(bool isOnGround) {
+    // Movimiento horizontal
+    if (IsKeyDown(key_left)) {
+        walk(-1);
+    } else if (IsKeyDown(key_right)) {
+        walk(1);
+    } else {
+        walk(0);
+    }
+    
+    // Salto
+    if (IsKeyPressed(key_jump) && isOnGround) {
+        jump();
+    }
 }
 
 void Player::update(float deltaTime) {

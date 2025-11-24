@@ -10,6 +10,10 @@ public:
     
     void update(float deltaTime) override;
     void render() override;
+    void handleInput(bool isOnGround); // Nuevo método
+
+    // Configurar teclas
+    void setKeys(int left, int right, int jump);
     
     // Métodos de control
     void walk(int direction); // -1 = izquierda, 0 = parar, 1 = derecha
@@ -20,4 +24,9 @@ public:
 private:
     static constexpr float WALK_SPEED = 200.0f;
     static constexpr float JUMP_FORCE = 500.0f;
+
+    // Teclas configurables
+    int key_left;
+    int key_right;
+    int key_jump;
 };
