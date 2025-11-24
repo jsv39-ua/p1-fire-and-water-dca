@@ -230,6 +230,38 @@ void MainGameState::update(float deltaTime)
     camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
     camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
     
+    
+    Rectangle mapBounds = mapLoader.getMapBounds();
+    
+    // Calcular los límites de la cámara basados en el tamaño de la pantalla y el zoom
+    float screenWidth = 1280.0f;  
+    float screenHeight = 720.0f;
+    
+    // Calcular el área visible de la cámara en el mundo (dividido por el zoom)
+    float visibleWidth = screenWidth / camera.zoom;
+    float visibleHeight = screenHeight / camera.zoom;
+    
+    // Calcular los límites mínimos y máximos para el target de la cámara
+    float minX = mapBounds.x + visibleWidth / 2.0f;
+    float maxX = mapBounds.x + mapBounds.width - visibleWidth / 2.0f;
+    float minY = mapBounds.y + visibleHeight / 2.0f;
+    float maxY = mapBounds.y + mapBounds.height - visibleHeight / 2.0f;
+    
+    // Aplicar los límites a la posición de la cámara
+    if (mapBounds.width > visibleWidth) {
+        camera.target.x = fmaxf(minX, fminf(camera.target.x, maxX));
+    } else {
+        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
+        camera.target.x = mapBounds.x + mapBounds.width / 2.0f;
+    }
+    
+    if (mapBounds.height > visibleHeight) {
+        camera.target.y = fmaxf(minY, fminf(camera.target.y, maxY));
+    } else {
+        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
+        camera.target.y = mapBounds.y + mapBounds.height / 2.0f;
+    }
+    
     // Redondear la posición de la cámara para evitar parpadeo
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
@@ -244,68 +276,64 @@ void MainGameState::render()
     mapLoader.draw(camera);
 
     // Renderizar jugadores con animaciones
-    float spriteScale = 1.5f;  // Escala para hacer los sprites más grandes
+    float spriteScale = 1.5f;  
     int frameWidth = 64;  // Ancho de cada frame en el spritesheet (512/8)
     int frameHeight = 48; // Alto de cada frame en el spritesheet (192/4)
     
-    // Calcular el tamaño final del sprite renderizado
+    
     float renderWidth = frameWidth * spriteScale;
     float renderHeight = frameHeight * spriteScale;
     
-    // Obtener el frame actual de la animación según el estado del jugador de fuego
+    
     Rectangle fireSourceRect;
     if (fire_player.velocity.x != 0) {
-        // 8 frames por fila, 64x48 cada frame
+        
         fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth, frameHeight);
-        // Actualizar dirección según movimiento
         fire_player.facingRight = fire_player.velocity.x > 0;
     } else {
         fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    // Voltear el sprite según la dirección almacenada
     if (!fire_player.facingRight) {
         fireSourceRect.width = -frameWidth;
     }
     
-    // Calcular posición centrada del sprite sobre el bounds
     float fireRenderX = fire_player.position.x + (fire_player.width / 2.0f) - (renderWidth / 2.0f);
-    float fireRenderY = fire_player.position.y + fire_player.height - renderHeight; // Alineado al fondo
+    float fireRenderY = fire_player.position.y + fire_player.height - renderHeight;
     
     DrawTexturePro(character1, 
-                   fireSourceRect,  // Source: frame actual de la animación
+                   fireSourceRect,  
                    (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
     
-    // Obtener el frame actual de la animación del jugador de agua
+    
     Rectangle waterSourceRect;
     if (water_player.velocity.x != 0) {
         waterSourceRect = water_walk_animation.animationFrame(8, frameWidth, frameHeight);
-        // Actualizar dirección según movimiento
+      
         water_player.facingRight = water_player.velocity.x > 0;
     } else {
         waterSourceRect = water_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    // Voltear el sprite según la dirección almacenada
+    
     if (!water_player.facingRight) {
         waterSourceRect.width = -frameWidth;
     }
     
-    // Calcular posición centrada del sprite sobre el bounds
     float waterRenderX = water_player.position.x + (water_player.width / 2.0f) - (renderWidth / 2.0f);
-    float waterRenderY = water_player.position.y + water_player.height - renderHeight; // Alineado al fondo
+    float waterRenderY = water_player.position.y + water_player.height - renderHeight;
     
     DrawTexturePro(character2, 
-                   waterSourceRect,  // Source: frame actual de la animación
+                   waterSourceRect,
                    (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
 
-    // Debug: Dibujar hitboxes
+    // Debug
     DrawRectangleLinesEx(fire_player.bounds, 2, GREEN);
     DrawRectangleLinesEx(water_player.bounds, 2, BLUE);
 
