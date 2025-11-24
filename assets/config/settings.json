@@ -8,13 +8,13 @@
     "controls": {
         "firePlayer": {
             "left": 65,
-            "right": 65,
-            "jump": 65
+            "right": 68,
+            "jump": 87
         },
         "waterPlayer": {
-            "left": 65,
-            "right": 65,
-            "jump": 65
+            "left": 263,
+            "right": 262,
+            "jump": 265
         }
     }
 }

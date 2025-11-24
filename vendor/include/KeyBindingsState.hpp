@@ -22,6 +22,17 @@ public:
     void resume() override;
 
 private:
+    // Estado de edición
+    enum EditingKey {
+        NONE,
+        FIRE_LEFT,
+        FIRE_RIGHT,
+        FIRE_JUMP,
+        WATER_LEFT,
+        WATER_RIGHT,
+        WATER_JUMP
+    };
+    
     // Botones para cada tecla
     Rectangle fireLeftButton;
     Rectangle fireRightButton;
@@ -35,17 +46,6 @@ private:
     Rectangle saveButton;
     Rectangle cancelButton;
     
-    // Estado de edición
-    enum EditingKey {
-        NONE,
-        FIRE_LEFT,
-        FIRE_RIGHT,
-        FIRE_JUMP,
-        WATER_LEFT,
-        WATER_RIGHT,
-        WATER_JUMP
-    };
-    
     EditingKey currentlyEditing;
     
     // Teclas temporales (se guardan al presionar "Guardar")
@@ -58,6 +58,8 @@ private:
     bool mouseExitedSaveButton = true;
     bool mouseExitedCancelButton = true;
     
+    // Funciones privadas
     void saveKeys();
     void cancelChanges();
+    bool isKeyInUse(int key, EditingKey excludeThis);
 };

@@ -78,21 +78,42 @@ void KeyBindingsState::init() {
     cancelButton = { centerX + 10, startY + spacing * 4, 200, 50 };
 }
 
+// Función helper para verificar si una tecla ya está en uso
+bool KeyBindingsState::isKeyInUse(int key, EditingKey excludeThis) {
+    if (key == 0) return false; // Tecla no asignada no cuenta como "en uso"
+    
+    if (excludeThis != FIRE_LEFT && key == tempFireLeft) return true;
+    if (excludeThis != FIRE_RIGHT && key == tempFireRight) return true;
+    if (excludeThis != FIRE_JUMP && key == tempFireJump) return true;
+    if (excludeThis != WATER_LEFT && key == tempWaterLeft) return true;
+    if (excludeThis != WATER_RIGHT && key == tempWaterRight) return true;
+    if (excludeThis != WATER_JUMP && key == tempWaterJump) return true;
+    
+    return false;
+}
+
 void KeyBindingsState::handleInput() {
     // Si estamos editando una tecla, capturar la nueva tecla
     if (currentlyEditing != NONE) {
         int key = GetKeyPressed();
         if (key != 0) {
-            AudioManager::getInstance()->playButtonClick();
-            
-            switch(currentlyEditing) {
-                case FIRE_LEFT: tempFireLeft = key; break;
-                case FIRE_RIGHT: tempFireRight = key; break;
-                case FIRE_JUMP: tempFireJump = key; break;
-                case WATER_LEFT: tempWaterLeft = key; break;
-                case WATER_RIGHT: tempWaterRight = key; break;
-                case WATER_JUMP: tempWaterJump = key; break;
-                default: break;
+            // Verificar si la tecla ya está en uso
+            if (isKeyInUse(key, currentlyEditing)) {
+                // Reproducir sonido de error y no asignar la tecla
+                AudioManager::getInstance()->playButtonClick(); // Podrías usar un sonido de error
+                TraceLog(LOG_WARNING, "Key already in use!");
+            } else {
+                AudioManager::getInstance()->playButtonClick();
+                
+                switch(currentlyEditing) {
+                    case FIRE_LEFT: tempFireLeft = key; break;
+                    case FIRE_RIGHT: tempFireRight = key; break;
+                    case FIRE_JUMP: tempFireJump = key; break;
+                    case WATER_LEFT: tempWaterLeft = key; break;
+                    case WATER_RIGHT: tempWaterRight = key; break;
+                    case WATER_JUMP: tempWaterJump = key; break;
+                    default: break;
+                }
             }
             
             currentlyEditing = NONE;
@@ -180,8 +201,16 @@ void KeyBindingsState::render() {
     DrawText("JUGADOR AGUA", waterLeftButton.x, 120, 20, BLUE);
     
     // Función helper para dibujar botón de tecla
-    auto drawKeyButton = [&](Rectangle button, const char* label, int key, bool isEditing) {
-        Color bgColor = isEditing ? YELLOW : LIGHTGRAY;
+    auto drawKeyButton = [&](Rectangle button, const char* label, int key, bool isEditing, bool isDuplicate) {
+        Color bgColor;
+        if (isEditing) {
+            bgColor = YELLOW;
+        } else if (isDuplicate) {
+            bgColor = (Color){ 255, 100, 100, 255 }; // Rojo claro para indicar duplicado
+        } else {
+            bgColor = LIGHTGRAY;
+        }
+        
         DrawRectangleRec(button, bgColor);
         DrawRectangleLinesEx(button, 2, BLACK);
         
@@ -206,15 +235,23 @@ void KeyBindingsState::render() {
         DrawText(upperKeyName.c_str(), button.x + button.width - keyWidth - 10, button.y + 10, 20, BLACK);
     };
     
+    // Verificar duplicados para cada tecla
+    bool fireLeftDup = isKeyInUse(tempFireLeft, FIRE_LEFT);
+    bool fireRightDup = isKeyInUse(tempFireRight, FIRE_RIGHT);
+    bool fireJumpDup = isKeyInUse(tempFireJump, FIRE_JUMP);
+    bool waterLeftDup = isKeyInUse(tempWaterLeft, WATER_LEFT);
+    bool waterRightDup = isKeyInUse(tempWaterRight, WATER_RIGHT);
+    bool waterJumpDup = isKeyInUse(tempWaterJump, WATER_JUMP);
+    
     // Dibujar botones de teclas - Fuego
-    drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT);
-    drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT);
-    drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP);
+    drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup);
+    drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup);
+    drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup);
     
     // Dibujar botones de teclas - Agua
-    drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT);
-    drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT);
-    drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP);
+    drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup);
+    drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup);
+    drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup);
     
     // Botón Guardar
     DrawRectangleRec(saveButton, mouseOverSaveButton ? GRAY : DARKGRAY);
@@ -236,6 +273,13 @@ void KeyBindingsState::render() {
         "Click en una tecla para cambiarla | ESC: Cancelar";
     int helpWidth = MeasureText(help, 16);
     DrawText(help, centerX - helpWidth / 2, GetScreenHeight() - 40, 16, BLACK);
+    
+    // Advertencia si hay duplicados
+    if (fireLeftDup || fireRightDup || fireJumpDup || waterLeftDup || waterRightDup || waterJumpDup) {
+        const char* warning = "¡Advertencia: Tecla duplicada!";
+        int warningWidth = MeasureText(warning, 20);
+        DrawText(warning, centerX - warningWidth / 2, GetScreenHeight() - 80, 20, RED);
+    }
     
     EndDrawing();
 }
