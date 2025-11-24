@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="70" height="40" tilewidth="18" tileheight="18" infinite="0" nextlayerid="3" nextobjectid="1">
- <tileset firstgid="1" source="../tilesets_niveles_prueba/TileMap PixelPlatformer.tsx"/>
+<map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="70" height="40" tilewidth="18" tileheight="18" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
  <layer id="1" name="Capa plataformas" width="70" height="40">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
