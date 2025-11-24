@@ -244,13 +244,14 @@ void MainGameState::render()
     if (fire_player.velocity.x != 0) {
         // 8 frames por fila, 64x48 cada frame
         fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth, frameHeight);
+        // Actualizar dirección según movimiento
+        fire_player.facingRight = fire_player.velocity.x > 0;
     } else {
         fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    // Voltear el sprite si va hacia la izquierda
-    bool fireFlipped = fire_player.velocity.x < 0;
-    if (fireFlipped) {
+    // Voltear el sprite según la dirección almacenada
+    if (!fire_player.facingRight) {
         fireSourceRect.width = -frameWidth;
     }
     
@@ -265,13 +266,14 @@ void MainGameState::render()
     Rectangle waterSourceRect;
     if (water_player.velocity.x != 0) {
         waterSourceRect = water_walk_animation.animationFrame(8, frameWidth, frameHeight);
+        // Actualizar dirección según movimiento
+        water_player.facingRight = water_player.velocity.x > 0;
     } else {
         waterSourceRect = water_idle_animation.animationFrame(8, frameWidth, frameHeight);
     }
     
-    // Voltear el sprite si va hacia la izquierda
-    bool waterFlipped = water_player.velocity.x < 0;
-    if (waterFlipped) {
+    // Voltear el sprite según la dirección almacenada
+    if (!water_player.facingRight) {
         waterSourceRect.width = -frameWidth;
     }
     
