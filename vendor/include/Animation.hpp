@@ -12,19 +12,17 @@ class Animation{
         ~Animation();
 
         void animationUpdate(float deltaTime);
-
         Rectangle animationFrame(int frames_por_columna, int tamanyo_tileset);
-
-        void dibujarAnimacion();
-
+        void reset(); // Reiniciar animación al primer frame
+        int getCurrentFrame() const; // Obtener frame actual
 
     private:
         int primerFrame;
         int ultimoFrame;
         int frameActual;
-
         int frameCount;
-        float frameTime;
-
-
+        float frameTime; // Tiempo por frame en segundos
+        float currentTime; // Tiempo acumulado
+        bool isLooping;
+        Texture2D sprite;
 };
