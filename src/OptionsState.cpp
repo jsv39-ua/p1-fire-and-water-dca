@@ -45,33 +45,34 @@ void OptionsState::init()
     float centerX = screenWidth / 2.0f;
     float centerY = screenHeight / 2.0f;
     
-    // Espaciado vertical entre elementos
-    float sliderSpacing = 80.0f;
-    float startY = centerY - 200.0f;
+    // Espaciado vertical entre elementos (aumentado para mejor separación)
+    float buttonSpacing = 70.0f;
+    float sliderSpacing = 85.0f;
+    float startY = centerY - 250.0f;
     
     // Configurar botón de idioma
     languageButton = { centerX - 150, startY, 300, 50 };
     
-    // Botón de asignar teclas
-    keyBindingsButton = { centerX - 150, startY + 60, 300, 50 };
+    // Botón de asignar teclas (más separado)
+    keyBindingsButton = { centerX - 150, startY + buttonSpacing, 300, 50 };
     
-    // Slider de volumen general (master)
-    float masterSliderY = startY + 130.0f;
+    // Slider de volumen general (master) - más separado de los botones
+    float masterSliderY = startY + buttonSpacing * 2 + 30.0f;
     masterVolumeSlider = { centerX - 150, masterSliderY, 300, 20 };
     masterVolumeHandle = { centerX - 150 + (masterVolume * 280), masterSliderY - 5, 20, 30 };
     
-    // Slider de volumen de música
+    // Slider de volumen de música (más espaciado)
     float musicSliderY = masterSliderY + sliderSpacing;
     musicVolumeSlider = { centerX - 150, musicSliderY, 300, 20 };
     musicVolumeHandle = { centerX - 150 + (musicVolume * 280), musicSliderY - 5, 20, 30 };
     
-    // Slider de volumen de efectos (SFX)
+    // Slider de volumen de efectos (SFX) (más espaciado)
     float sfxSliderY = musicSliderY + sliderSpacing;
     sfxVolumeSlider = { centerX - 150, sfxSliderY, 300, 20 };
     sfxVolumeHandle = { centerX - 150 + (sfxVolume * 280), sfxSliderY - 5, 20, 30 };
     
-    // Botón volver (más abajo para acomodar el botón de teclas)
-    backButton = { centerX - 100, sfxSliderY + 70, 200, 50 };
+    // Botón volver (más abajo con mayor separación)
+    backButton = { centerX - 100, sfxSliderY + 100, 200, 50 };
 }
 
 void OptionsState::handleInput()
