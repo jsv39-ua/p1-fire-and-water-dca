@@ -14,6 +14,7 @@ public:
     ElementType type;
     float width;
     float height;
+    bool facingRight; // true = derecha, false = izquierda
 
     Entity();
     Entity(Vector2 pos, Vector2 vel, float w, float h, ElementType t);
