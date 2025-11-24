@@ -34,6 +34,9 @@ public:
     
     std::vector<Rectangle> extractCollisions();
 
+    // Obtener las dimensiones del mapa en pixeles
+    Rectangle getMapBounds() const;
+
 private:
 
    TmxMap* mapa; // Mapa cargado actualmente
