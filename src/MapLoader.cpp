@@ -50,7 +50,7 @@ void MapLoader::draw(const Camera2D& camera) {
     }
 
     // Pasar NULL como cámara porque BeginMode2D ya aplica la transformación
-    DrawTMX(this->mapa, NULL, 0, 0, RED);
+    DrawTMX(this->mapa, NULL, 0, 0, WHITE);
 }
 
 
