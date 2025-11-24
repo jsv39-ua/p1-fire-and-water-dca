@@ -20,8 +20,6 @@ public:
     void pause() {};
     void resume() {};
 
-public:
-    public:
     enum Language {
         SPANISH = 0,
         ENGLISH = 1
@@ -38,6 +36,7 @@ private:
 
     Rectangle backButton;
     Rectangle languageButton;
+    Rectangle keyBindingsButton;
     
     // Sliders de volumen
     Rectangle masterVolumeSlider;
@@ -57,12 +56,14 @@ private:
     // Estados de hover
     bool mouseOverBackButton = false;
     bool mouseOverLanguageButton = false;
+    bool mouseOverKeyBindingsButton = false;
     bool mouseOverMasterVolumeButton = false;
     bool mouseOverMusicVolumeButton = false;
     bool mouseOverSfxVolumeButton = false;
 
     bool mouseExitedBackButton = true;
     bool mouseExitedLanguageButton = true;
+    bool mouseExitedKeyBindingsButton = true;
     bool mouseExitedMasterVolumeButton = true;
     bool mouseExitedMusicVolumeButton = true;
     bool mouseExitedSfxVolumeButton = true;
