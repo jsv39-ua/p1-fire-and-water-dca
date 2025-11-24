@@ -18,13 +18,25 @@ MainGameState::MainGameState()
 
 void MainGameState::init()
 {
+    // Cargar texturas primero para obtener sus dimensiones
+    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
+    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
     
+    // Calcular dimensiones de cada frame del spritesheet
+    int columns = 8; // 8 columnas en el spritesheet
+    int rows = 4;    // 4 filas en el spritesheet
+    float frameWidth = character1.width / (float)columns;
+    float frameHeight = character1.height / (float)rows;
+    
+    // Ajustar el tamaño de la hitbox (aproximadamente la mitad del ancho del frame)
+    float hitboxWidth = frameWidth * 0.5f;
+    float hitboxHeight = frameHeight;
    
-    // Inicialización del personaje de Fuego
-    fire_player = Player(100.0f, 300.0f, FIRE);
+    // Inicialización del personaje de Fuego con tamaño basado en el asset
+    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
 
-    // Inicialización del personaje de Agua
-    water_player = Player(150.0f, 300.0f, WATER);
+    // Inicialización del personaje de Agua con tamaño basado en el asset
+    water_player = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
 
     // Inicialización de la cámara
     camera = { 0 };
@@ -71,9 +83,6 @@ void MainGameState::init()
     
     Enemy water_enemy = { { 650, 370, 25, 25 }, WATER, 70.0f };
     level_enemies.push_back(water_enemy);
-
-    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
-    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_B.png");
 
     // Inicializar animaciones (tu spritesheet: 512x192 = 8 columnas x 4 filas, 64x48 por frame)
     // Animation(frameCount, frameTime, isLooping, sprite, primerFrame, ultimoFrame)
@@ -235,9 +244,13 @@ void MainGameState::render()
     mapLoader.draw(camera);
 
     // Renderizar jugadores con animaciones
-    float spriteScale = 1.0f;  // Ajustado para frames de 64x48
+    float spriteScale = 1.5f;  // Escala para hacer los sprites más grandes
     int frameWidth = 64;  // Ancho de cada frame en el spritesheet (512/8)
     int frameHeight = 48; // Alto de cada frame en el spritesheet (192/4)
+    
+    // Calcular el tamaño final del sprite renderizado
+    float renderWidth = frameWidth * spriteScale;
+    float renderHeight = frameHeight * spriteScale;
     
     // Obtener el frame actual de la animación según el estado del jugador de fuego
     Rectangle fireSourceRect;
@@ -255,9 +268,13 @@ void MainGameState::render()
         fireSourceRect.width = -frameWidth;
     }
     
+    // Calcular posición centrada del sprite sobre el bounds
+    float fireRenderX = fire_player.position.x + (fire_player.width / 2.0f) - (renderWidth / 2.0f);
+    float fireRenderY = fire_player.position.y + fire_player.height - renderHeight; // Alineado al fondo
+    
     DrawTexturePro(character1, 
                    fireSourceRect,  // Source: frame actual de la animación
-                   (Rectangle){fire_player.position.x, fire_player.position.y, frameWidth * spriteScale, frameHeight * spriteScale}, 
+                   (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
@@ -277,12 +294,20 @@ void MainGameState::render()
         waterSourceRect.width = -frameWidth;
     }
     
+    // Calcular posición centrada del sprite sobre el bounds
+    float waterRenderX = water_player.position.x + (water_player.width / 2.0f) - (renderWidth / 2.0f);
+    float waterRenderY = water_player.position.y + water_player.height - renderHeight; // Alineado al fondo
+    
     DrawTexturePro(character2, 
                    waterSourceRect,  // Source: frame actual de la animación
-                   (Rectangle){water_player.position.x, water_player.position.y, frameWidth * spriteScale, frameHeight * spriteScale}, 
+                   (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
                    (Vector2){0, 0}, 
                    0.0f, 
                    WHITE);
+
+    // Debug: Dibujar hitboxes
+    DrawRectangleLinesEx(fire_player.bounds, 2, GREEN);
+    DrawRectangleLinesEx(water_player.bounds, 2, BLUE);
 
     
 
