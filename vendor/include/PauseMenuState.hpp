@@ -6,11 +6,12 @@ extern "C" {
 
 #include <GameState.hpp>
 #include <StateMachine.hpp>
+#include <Player.hpp>
 
 class PauseMenuState : public GameState
 {
 public:
-    PauseMenuState();
+    PauseMenuState(Player & firePlayer, Player & waterPlayer);
     virtual ~PauseMenuState() = default;
 
     virtual void init() override;
@@ -38,4 +39,7 @@ private:
     bool mouseExitedRestartButton = true;
     bool mouseExitedExitButton = true;
     bool mouseExitedOptionsButton = true;
+
+    Player* firePlayer;
+    Player* waterPlayer;
 };

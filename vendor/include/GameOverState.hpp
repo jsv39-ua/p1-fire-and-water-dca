@@ -1,37 +1,35 @@
 #pragma once
 
 #include <GameState.hpp>
-#include <memory>
-#include <MainMenuState.hpp>
 
 extern "C" {
     #include <raylib.h>
 }
 
+// Forward declaration en lugar de include
+class MainMenuState;
+
 class GameOverState : public GameState
 {
 public:
-    GameOverState(bool isVictory = false);
+    GameOverState(bool victory = false);
     ~GameOverState() = default;
 
     void init() override;
     void handleInput() override;
     void update(float deltaTime) override;
     void render() override;
-    
-    void pause() override {};
-    void resume() override {};
+
+    void pause(){};
+    void resume(){};
 
 private:
-    Vector2 mousePos;
-    Rectangle optionsButton;
-    Rectangle exitButton;
-    bool mouseOverOptionsButton = false;
-    bool mouseOverExitButton = false;
+    bool victory;
+    Rectangle restartButton;
+    Rectangle menuButton;
     
-    
-    bool mouseExitedOptionsButton = true;
-    bool mouseExitedExitButton = true;
-    
-    bool isVictory; // true si ganó, false si perdió
+    bool mouseOverRestartButton = false;
+    bool mouseOverMenuButton = false;
+    bool mouseExitedRestartButton = true;
+    bool mouseExitedMenuButton = true;
 };

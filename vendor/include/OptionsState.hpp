@@ -1,15 +1,22 @@
 #pragma once
 
+#include <GameState.hpp>
+#include <Player.hpp>
+
 extern "C" {
     #include <raylib.h>
 }
 
-#include <GameState.hpp>
-
 class OptionsState : public GameState
 {
 public:
+    enum Language {
+        SPANISH = 0,
+        ENGLISH = 1
+    };
+
     OptionsState();
+    OptionsState(Player & firePlayer, Player & waterPlayer);
     ~OptionsState() = default;
 
     void init() override;
@@ -17,61 +24,44 @@ public:
     void update(float deltaTime) override;
     void render() override;
 
-    void pause() {};
+    void pause(){};
     void resume() {};
 
-public:
-    public:
-    enum Language {
-        SPANISH = 0,
-        ENGLISH = 1
-    };
+    static Language getLanguage();
 
 private:
-    // Variables de instancia para UI (NO son la fuente de verdad)
-    // La fuente de verdad es AudioManager
-    float masterVolume;      // Cache local del volumen general
-    float musicVolume;       // Cache local del volumen de música
-    float sfxVolume;         // Cache local del volumen de efectos
-    
     static Language currentLanguage;
 
-    Rectangle backButton;
-    Rectangle languageButton;
+    Player* firePlayer;
+    Player* waterPlayer;
     
-    // Sliders de volumen
+    // Botones
+    Rectangle languageButton;
+    Rectangle keyBindingsButton;
     Rectangle masterVolumeSlider;
-    Rectangle masterVolumeHandle;
     Rectangle musicVolumeSlider;
-    Rectangle musicVolumeHandle;
     Rectangle sfxVolumeSlider;
-    Rectangle sfxVolumeHandle;
+    Rectangle backButton;
 
-    // Estados de dragging
+    // Volúmenes (obtenidos de AudioManager)
+    float masterVolume;
+    float musicVolume;
+    float sfxVolume;
+
+    // Estados de arrastre
     bool draggingMasterVolume;
     bool draggingMusicVolume;
     bool draggingSfxVolume;
-    
-    Vector2 mousePos;
 
-    // Estados de hover
-    bool mouseOverBackButton = false;
+    // Mouse hover states
     bool mouseOverLanguageButton = false;
-    bool mouseOverMasterVolumeButton = false;
-    bool mouseOverMusicVolumeButton = false;
-    bool mouseOverSfxVolumeButton = false;
-
-    bool mouseExitedBackButton = true;
+    bool mouseOverKeyBindingsButton = false;
+    bool mouseOverBackButton = false;
     bool mouseExitedLanguageButton = true;
-    bool mouseExitedMasterVolumeButton = true;
-    bool mouseExitedMusicVolumeButton = true;
-    bool mouseExitedSfxVolumeButton = true;
+    bool mouseExitedKeyBindingsButton = true;
+    bool mouseExitedBackButton = true;
 
     void updateMasterVolumeSlider();
     void updateMusicVolumeSlider();
     void updateSfxVolumeSlider();
-    
-public:
-    // Función estática para acceder al idioma
-    static Language getLanguage();
 };

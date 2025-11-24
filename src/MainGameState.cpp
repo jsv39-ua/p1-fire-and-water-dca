@@ -1,14 +1,16 @@
 #include <MainGameState.hpp>
+#include <PauseMenuState.hpp>
+#include <GameOverState.hpp>
+#include <AudioManager.hpp>
 #include <iostream>
-#include <GameOverState.hpp> // Incluye la nueva clase
-#include <PauseMenuState.hpp> // Incluye el menú de pausa
-#include <StateMachine.hpp> // Asegúrate de incluirla
-#include <Player.hpp>
-
 
 extern "C" {
     #include <raylib.h>
 }
+
+// Inicializar los players estáticos globales con teclas por defecto
+Player MainGameState::static_fire_player = Player(0, 0, FIRE);
+Player MainGameState::static_water_player = Player(0, 0, WATER);
 
 MainGameState::MainGameState()
 {
@@ -21,22 +23,33 @@ void MainGameState::init()
 
     // Inicialización del personaje de Agua
     water_player = Player(150.0f, 300.0f, WATER);
+    
+    // Copiar las teclas desde los players estáticos a los de la partida
+    fire_player.setKeys(
+        static_fire_player.getKeyLeft(),
+        static_fire_player.getKeyRight(),
+        static_fire_player.getKeyJump()
+    );
+    
+    water_player.setKeys(
+        static_water_player.getKeyLeft(),
+        static_water_player.getKeyRight(),
+        static_water_player.getKeyJump()
+    );
 
     // Inicialización de la cámara
     camera = { 0 };
     camera.target = (Vector2){ 0, 0 };
-    camera.offset = (Vector2){ 640, 360 }; // Centro de pantalla 1280x720
+    camera.offset = (Vector2){ 640, 360 };
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f; // Escala 2x para hacer los tiles más grandes
+    camera.zoom = 1.0f;
 
     // Inicialización del MapLoader
     try {
         mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
         
-        // Extraer colisiones del mapa de Tiled
         std::vector<Rectangle> collisions = mapLoader.extractCollisions();
         
-        // Convertir las colisiones en plataformas
         for (const auto& collision : collisions) {
             Platform platform = { collision, NONE };
             level_platforms.push_back(platform);
@@ -46,22 +59,17 @@ void MainGameState::init()
         
     } catch (const std::runtime_error& e) {
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
-        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
-
 
     Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
     level_platforms.push_back(goal);
 
-
-    // Creación de peligros (ahora son plataformas con tipo FIRE/WATER)
     Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
     level_platforms.push_back(lava);
 
     Platform water = Platform({ 550, 350, 100, 50 }, WATER);
     level_platforms.push_back(water);
     
-    // Enemigos permanecen igual
     Enemy fire_enemy = { { 450, 270, 25, 25 }, FIRE, 60.0f };
     level_enemies.push_back(fire_enemy);
     
@@ -73,37 +81,13 @@ void MainGameState::handleInput()
 {
     // Abrir menú de pausa con Escape
     if (IsKeyPressed(KEY_ESCAPE)) {
-        this->state_machine->add_state(std::make_unique<PauseMenuState>(), false);
+        this->state_machine->add_state(std::make_unique<PauseMenuState>(fire_player, water_player), true);
         return; // No procesar más input si se abre el menú de pausa
     }
 
-    // Control del personaje de Fuego (teclas A y D)
-    if (IsKeyDown(KEY_A)) {
-        fire_player.walk(-1);
-    } else if (IsKeyDown(KEY_D)) {
-        fire_player.walk(1);
-    } else {
-        fire_player.walk(0);
-    }
-
-    // Salto del personaje de Fuego (tecla W)
-    if (IsKeyPressed(KEY_W) && fire_on_ground) {
-        fire_player.jump();
-    }
-
-    // Control del personaje de Agua (flechas izquierda y derecha)
-    if (IsKeyDown(KEY_LEFT)) {
-        water_player.walk(-1);
-    } else if (IsKeyDown(KEY_RIGHT)) {
-        water_player.walk(1);
-    } else {
-        water_player.walk(0);
-    }
-
-    // Salto del personaje de Agua (tecla FLECHA ARRIBA)
-    if (IsKeyPressed(KEY_UP) && water_on_ground) {
-        water_player.jump();
-    }
+    // Cada jugador maneja su propio input
+    fire_player.handleInput(fire_on_ground);
+    water_player.handleInput(water_on_ground);
 }
 
 void MainGameState::update(float deltaTime)
