@@ -12,7 +12,7 @@ class Animation{
         ~Animation();
 
         void animationUpdate(float deltaTime);
-        Rectangle animationFrame(int frames_por_columna, int tamanyo_tileset);
+        Rectangle animationFrame(int frames_por_columna, int frame_width, int frame_height);
         void reset(); // Reiniciar animación al primer frame
         int getCurrentFrame() const; // Obtener frame actual
 
