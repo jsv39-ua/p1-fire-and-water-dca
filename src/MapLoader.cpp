@@ -120,3 +120,18 @@ std::vector<Rectangle> MapLoader::extractCollisions() {
     TraceLog(LOG_INFO, "Colisiones extraídas del mapa: %d", collisions.size());
     return collisions;
 }
+
+// Obtener los límites del mapa en píxeles
+Rectangle MapLoader::getMapBounds() const {
+    if (this->mapa == nullptr) {
+        TraceLog(LOG_WARNING, "No hay mapa cargado para obtener límites.");
+        return {0, 0, 0, 0};
+    }
+    
+    return {
+        0.0f,
+        0.0f,
+        (float)(this->mapa->width * this->mapa->tileWidth),
+        (float)(this->mapa->height * this->mapa->tileHeight)
+    };
+}
