@@ -11,8 +11,9 @@ extern "C" {
 Player::Player() : Entity() {
 }
 
-Player::Player(float x, float y, ElementType t) 
-    : Entity({x, y}, {0.0f, 0.0f}, 30.0f, 30.0f, t) {
+Player::Player(float x, float y, float height, float width, ElementType t) 
+    : Entity({x, y}, {0.0f, 0.0f}, height, width, t) {
+    
 }
 
 void Player::update(float deltaTime) {

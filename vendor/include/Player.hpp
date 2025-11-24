@@ -6,7 +6,7 @@
 class Player : public Entity {
 public:
     Player();
-    Player(float x, float y, ElementType t);
+    Player(float x, float y, float height, float width, ElementType t);
     
     void update(float deltaTime) override;
     void render() override;
