@@ -1,0 +1,20 @@
+{
+    "audio": {
+        "masterVolume": 1,
+        "musicVolume": 0.8,
+        "sfxVolume": 0.7
+    },
+    "language": "spanish",
+    "controls": {
+        "firePlayer": {
+            "left": 65,
+            "right": 68,
+            "jump": 87
+        },
+        "waterPlayer": {
+            "left": 263,
+            "right": 262,
+            "jump": 265
+        }
+    }
+}
