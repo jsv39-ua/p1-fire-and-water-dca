@@ -79,21 +79,6 @@ void MainGameState::init()
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 
-    Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
-    level_platforms.push_back(goal);
-
-    Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
-    level_platforms.push_back(lava);
-
-    Platform water = Platform({ 550, 350, 100, 50 }, WATER);
-    level_platforms.push_back(water);
-    
-    Enemy fire_enemy = { { 450, 270, 25, 25 }, FIRE, 60.0f };
-    level_enemies.push_back(fire_enemy);
-    
-    Enemy water_enemy = { { 650, 370, 25, 25 }, WATER, 70.0f };
-    level_enemies.push_back(water_enemy);
-
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
     
