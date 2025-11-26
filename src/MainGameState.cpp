@@ -93,6 +93,12 @@ void MainGameState::handleInput()
         return;
     }
 
+    // TECLA DE PRUEBA: pulsar '1' fuerza Game Over (útil para testing)
+    if (IsKeyPressed(KEY_ONE)) {
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        return;
+    }
+
     // Obtener las teclas desde SettingsManager
     int fireLeft = SettingsManager::getInstance()->getFireLeft();
     int fireRight = SettingsManager::getInstance()->getFireRight();
