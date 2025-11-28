@@ -1,6 +1,6 @@
 #include <MapLoader.hpp>
 #include <ResourceManager.hpp>
-#include <raytmx.h>  // Incluir la implementación en el .cpp
+
 #include <unordered_set>
 
 
@@ -133,4 +133,62 @@ Rectangle MapLoader::getMapBounds() const {
         (float)(this->mapa->width * this->mapa->tileWidth),
         (float)(this->mapa->height * this->mapa->tileHeight)
     };
+}
+
+
+std::vector<Enemy> MapLoader::extractEnemies() {
+    std::vector<Enemy> enemies;
+    if (this->mapa == nullptr) return enemies;
+
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+
+        if (layer->type == LAYER_TYPE_TILE_LAYER) {
+            
+            // Verificar si es capa de enemigos
+            const char* typeStr = getPropertyStringFromLayer(layer, "elementType", nullptr);
+            
+            if (typeStr != nullptr) {
+                float range = getPropertyFloatFromLayer(layer, "patrolRange", 50.0f);
+                
+                ElementType eType = FIRE;
+                if (strcmp(typeStr, "WATER") == 0) eType = WATER;
+                else if (strcmp(typeStr, "GOAL") == 0) eType = GOAL;
+
+                TmxTileLayer* tileLayer = &layer->exact.tileLayer;
+
+                for (uint32_t y = 0; y < tileLayer->height; y++) {
+                    for (uint32_t x = 0; x < tileLayer->width; x++) {
+                        uint32_t index = y * tileLayer->width + x;
+                        uint32_t gid = tileLayer->tiles[index];
+
+                        if (gid > 0) {
+                            Rectangle bounds = {
+                                (float)(x * this->mapa->tileWidth),
+                                (float)(y * this->mapa->tileHeight),
+                                (float)this->mapa->tileWidth,
+                                (float)this->mapa->tileHeight
+                            };
+
+                            // --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE ---
+                            // Delegamos la lógica fea a la función auxiliar
+                            TileData tData = GetTileDataFromGID(gid);
+
+                            if (tData.valid) {
+                                // Constructor con textura (asegúrate de tenerlo en Enemy.hpp)
+                                enemies.push_back(Enemy(bounds, eType, range, tData.texture, tData.source));
+                            } else {
+                                // Constructor sin textura (fallback)
+                                enemies.push_back(Enemy(bounds, eType, range));
+                            }
+                        }
+                    }
+                }
+                
+                TraceLog(LOG_INFO, "Capa enemigos procesada: %s. Ocultando capa visual.", layer->name);
+                layer->visible = false; // ¡Muy buena idea esto!
+            }
+        }
+    }
+    return enemies;
 }
