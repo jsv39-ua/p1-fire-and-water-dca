@@ -58,6 +58,25 @@ private:
     bool mouseExitedSaveButton = true;
     bool mouseExitedCancelButton = true;
     
+    // Hover states para botones de teclas
+    bool mouseOverFireLeft = false;
+    bool mouseOverFireRight = false;
+    bool mouseOverFireJump = false;
+    bool mouseOverWaterLeft = false;
+    bool mouseOverWaterRight = false;
+    bool mouseOverWaterJump = false;
+    
+    bool mouseExitedFireLeft = true;
+    bool mouseExitedFireRight = true;
+    bool mouseExitedFireJump = true;
+    bool mouseExitedWaterLeft = true;
+    bool mouseExitedWaterRight = true;
+    bool mouseExitedWaterJump = true;
+    
+    // Estado de mensaje de confirmación
+    bool showSaveConfirmation = false;
+    float saveConfirmationTimer = 0.0f;
+    
     // Funciones privadas
     void saveKeys();
     void cancelChanges();
