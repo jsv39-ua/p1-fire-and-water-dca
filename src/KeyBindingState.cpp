@@ -37,7 +37,10 @@ const char* getKeyDisplayName(int key) {
     }
 }
 
-KeyBindingsState::KeyBindingsState() : currentlyEditing(NONE)
+KeyBindingsState::KeyBindingsState() : 
+    currentlyEditing(NONE),
+    showSaveConfirmation(false),
+    saveConfirmationTimer(0.0f)
 {
 }
 
@@ -95,12 +98,29 @@ bool KeyBindingsState::isKeyInUse(int key, EditingKey excludeThis) {
 void KeyBindingsState::handleInput() {
     // Si estamos editando una tecla, capturar la nueva tecla
     if (currentlyEditing != NONE) {
+        // Permitir cancelar la edición con ESC
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            AudioManager::getInstance()->playButtonClick();
+            currentlyEditing = NONE;
+            return;
+        }
+        
+        // Si se hace click en Guardar o Cancelar mientras se edita, cancelar la edición
+        Vector2 mouse = GetMousePosition();
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, saveButton) || CheckCollisionPointRec(mouse, cancelButton)) {
+                AudioManager::getInstance()->playButtonClick();
+                currentlyEditing = NONE;
+                return;
+            }
+        }
+        
         int key = GetKeyPressed();
         if (key != 0) {
             // Verificar si la tecla ya está en uso
             if (isKeyInUse(key, currentlyEditing)) {
                 // Reproducir sonido de error y no asignar la tecla
-                AudioManager::getInstance()->playButtonClick(); // Podrías usar un sonido de error
+                AudioManager::getInstance()->playButtonClick();
                 TraceLog(LOG_WARNING, "Key already in use!");
             } else {
                 AudioManager::getInstance()->playButtonClick();
@@ -127,7 +147,8 @@ void KeyBindingsState::handleInput() {
         if (CheckCollisionPointRec(mouse, saveButton)) {
             AudioManager::getInstance()->playButtonClick();
             saveKeys();
-            this->state_machine->remove_state(false);
+            showSaveConfirmation = true;
+            saveConfirmationTimer = 2.0f; // Mostrar mensaje por 2 segundos
         } else if (CheckCollisionPointRec(mouse, cancelButton)) {
             AudioManager::getInstance()->playButtonClick();
             cancelChanges();
@@ -164,11 +185,31 @@ void KeyBindingsState::handleInput() {
 void KeyBindingsState::update(float deltaTime) {
     Vector2 mousePos = GetMousePosition();
     
+    // Actualizar timer de confirmación
+    if (showSaveConfirmation) {
+        saveConfirmationTimer -= deltaTime;
+        if (saveConfirmationTimer <= 0.0f) {
+            showSaveConfirmation = false;
+            // Volver al estado anterior después de mostrar el mensaje
+            this->state_machine->remove_state(false);
+        }
+    }
+    
+    // Actualizar estados de hover para botones de acción
     mouseOverSaveButton = CheckCollisionPointRec(mousePos, saveButton);
     mouseOverCancelButton = CheckCollisionPointRec(mousePos, cancelButton);
     
+    // Actualizar estados de hover para botones de teclas
+    mouseOverFireLeft = CheckCollisionPointRec(mousePos, fireLeftButton);
+    mouseOverFireRight = CheckCollisionPointRec(mousePos, fireRightButton);
+    mouseOverFireJump = CheckCollisionPointRec(mousePos, fireJumpButton);
+    mouseOverWaterLeft = CheckCollisionPointRec(mousePos, waterLeftButton);
+    mouseOverWaterRight = CheckCollisionPointRec(mousePos, waterRightButton);
+    mouseOverWaterJump = CheckCollisionPointRec(mousePos, waterJumpButton);
+    
     AudioManager* audioMgr = AudioManager::getInstance();
     
+    // Hover para botón Guardar
     if (mouseOverSaveButton && mouseExitedSaveButton) {
         audioMgr->playButtonHover();
         mouseExitedSaveButton = false;
@@ -176,11 +217,56 @@ void KeyBindingsState::update(float deltaTime) {
         mouseExitedSaveButton = true;
     }
     
+    // Hover para botón Cancelar
     if (mouseOverCancelButton && mouseExitedCancelButton) {
         audioMgr->playButtonHover();
         mouseExitedCancelButton = false;
     } else if (!mouseOverCancelButton) {
         mouseExitedCancelButton = true;
+    }
+    
+    // Hover para botones de teclas - Fire
+    if (mouseOverFireLeft && mouseExitedFireLeft) {
+        audioMgr->playButtonHover();
+        mouseExitedFireLeft = false;
+    } else if (!mouseOverFireLeft) {
+        mouseExitedFireLeft = true;
+    }
+    
+    if (mouseOverFireRight && mouseExitedFireRight) {
+        audioMgr->playButtonHover();
+        mouseExitedFireRight = false;
+    } else if (!mouseOverFireRight) {
+        mouseExitedFireRight = true;
+    }
+    
+    if (mouseOverFireJump && mouseExitedFireJump) {
+        audioMgr->playButtonHover();
+        mouseExitedFireJump = false;
+    } else if (!mouseOverFireJump) {
+        mouseExitedFireJump = true;
+    }
+    
+    // Hover para botones de teclas - Water
+    if (mouseOverWaterLeft && mouseExitedWaterLeft) {
+        audioMgr->playButtonHover();
+        mouseExitedWaterLeft = false;
+    } else if (!mouseOverWaterLeft) {
+        mouseExitedWaterLeft = true;
+    }
+    
+    if (mouseOverWaterRight && mouseExitedWaterRight) {
+        audioMgr->playButtonHover();
+        mouseExitedWaterRight = false;
+    } else if (!mouseOverWaterRight) {
+        mouseExitedWaterRight = true;
+    }
+    
+    if (mouseOverWaterJump && mouseExitedWaterJump) {
+        audioMgr->playButtonHover();
+        mouseExitedWaterJump = false;
+    } else if (!mouseOverWaterJump) {
+        mouseExitedWaterJump = true;
     }
 }
 
@@ -201,12 +287,14 @@ void KeyBindingsState::render() {
     DrawText("JUGADOR AGUA", waterLeftButton.x, 120, 20, BLUE);
     
     // Función helper para dibujar botón de tecla
-    auto drawKeyButton = [&](Rectangle button, const char* label, int key, bool isEditing, bool isDuplicate) {
+    auto drawKeyButton = [&](Rectangle button, const char* label, int key, bool isEditing, bool isDuplicate, bool isHovered) {
         Color bgColor;
         if (isEditing) {
             bgColor = YELLOW;
         } else if (isDuplicate) {
             bgColor = (Color){ 255, 100, 100, 255 }; // Rojo claro para indicar duplicado
+        } else if (isHovered) {
+            bgColor = GRAY; // Color de hover
         } else {
             bgColor = LIGHTGRAY;
         }
@@ -244,14 +332,14 @@ void KeyBindingsState::render() {
     bool waterJumpDup = isKeyInUse(tempWaterJump, WATER_JUMP);
     
     // Dibujar botones de teclas - Fuego
-    drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup);
-    drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup);
-    drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup);
+    drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup, mouseOverFireLeft);
+    drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup, mouseOverFireRight);
+    drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup, mouseOverFireJump);
     
     // Dibujar botones de teclas - Agua
-    drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup);
-    drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup);
-    drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup);
+    drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup, mouseOverWaterLeft);
+    drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup, mouseOverWaterRight);
+    drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup, mouseOverWaterJump);
     
     // Botón Guardar
     DrawRectangleRec(saveButton, mouseOverSaveButton ? GRAY : DARKGRAY);
@@ -279,6 +367,25 @@ void KeyBindingsState::render() {
         const char* warning = "¡Advertencia: Tecla duplicada!";
         int warningWidth = MeasureText(warning, 20);
         DrawText(warning, centerX - warningWidth / 2, GetScreenHeight() - 80, 20, RED);
+    }
+    
+    // Mensaje de confirmación al guardar
+    if (showSaveConfirmation) {
+        // Fondo semi-transparente
+        DrawRectangle(0, 0, screenWidth, GetScreenHeight(), (Color){ 0, 0, 0, 150 });
+        
+        // Cuadro de confirmación
+        Rectangle confirmBox = { centerX - 200, GetScreenHeight() / 2.0f - 60, 400, 120 };
+        DrawRectangleRec(confirmBox, (Color){ 50, 200, 50, 255 }); // Verde
+        DrawRectangleLinesEx(confirmBox, 3, BLACK);
+        
+        const char* confirmText = "¡CONFIGURACION GUARDADA!";
+        int confirmWidth = MeasureText(confirmText, 25);
+        DrawText(confirmText, centerX - confirmWidth / 2, confirmBox.y + 35, 25, WHITE);
+        
+        const char* subText = "Volviendo...";
+        int subWidth = MeasureText(subText, 18);
+        DrawText(subText, centerX - subWidth / 2, confirmBox.y + 75, 18, WHITE);
     }
     
     EndDrawing();
