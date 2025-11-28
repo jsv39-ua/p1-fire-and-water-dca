@@ -1,6 +1,7 @@
 #include <MapLoader.hpp>
 #include <ResourceManager.hpp>
 #include <raytmx.h>  // Incluir la implementación en el .cpp
+#include <unordered_set>
 
 
 MapLoader::MapLoader(const char* filePath)
@@ -55,11 +56,8 @@ void MapLoader::draw(const Camera2D& camera) {
 
 
 
-// Este metodo de extraer las colisiones es muy ineficiente
-// porque asigna un rectangulo individual a cada tile.
-// Si hay muchos tiles con colision, esto puede ser un problema de rendimiento
-
 // Extrae las colisiones del mapa TMX cargado
+// OPTIMIZADO: Pre-cachea los GIDs sólidos para búsqueda O(1)
 std::vector<Rectangle> MapLoader::extractCollisions() {
     std::vector<Rectangle> collisions;
     
@@ -68,56 +66,57 @@ std::vector<Rectangle> MapLoader::extractCollisions() {
         return collisions;
     }
 
-    // Iterar por todas las capas del mapa
+    // PASO 1: Pre-cachear qué GIDs son sólidos.
+    // Esto elimina la necesidad de buscar en los tilesets dentro del bucle del mapa.
+    std::unordered_set<uint32_t> solidGids;
+
+    for (uint32_t t = 0; t < this->mapa->tilesetsLength; t++) {
+        TmxTileset* tileset = &this->mapa->tilesets[t];
+        
+        for (uint32_t tt = 0; tt < tileset->tilesLength; tt++) {
+            TmxTilesetTile* tile = &tileset->tiles[tt];
+            
+            // Si el tile tiene objetos definidos en Tiled, se considera sólido
+            if (tile->objectGroup.objectsLength > 0) {
+                // Calculamos el GID global real
+                uint32_t globalId = tileset->firstGid + tile->id;
+                solidGids.insert(globalId);
+            }
+        }
+    }
+
+    // PASO 2: Recorrer el mapa y generar rectángulos solo si el GID está en el set.
     for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
         TmxLayer* layer = &this->mapa->layers[i];
         
-        // Solo procesar capas de tipo tile
         if (layer->type == LAYER_TYPE_TILE_LAYER) {
+            // Opcional: Si tienes una capa específica llamada "Colisiones",
+            // descomenta esto para ignorar capas decorativas y ganar más rendimiento:
+            // if (strcmp(layer->name, "Colisiones") != 0) continue;
+
             TmxTileLayer* tileLayer = &layer->exact.tileLayer;
             
-            // Iterar por todos los tiles de la capa
             for (uint32_t y = 0; y < tileLayer->height; y++) {
                 for (uint32_t x = 0; x < tileLayer->width; x++) {
                     uint32_t index = y * tileLayer->width + x;
                     uint32_t gid = tileLayer->tiles[index];
                     
-                    // Si el tile no está vacío (gid > 0)
-                    if (gid > 0) {
-                        // Buscar el tileset que contiene este GID
-                        for (uint32_t t = 0; t < this->mapa->tilesetsLength; t++) {
-                            TmxTileset* tileset = &this->mapa->tilesets[t];
-                            
-                            // Si el GID está en el rango de este tileset
-                            if (gid >= tileset->firstGid && gid <= tileset->lastGid) {
-                                uint32_t localId = gid - tileset->firstGid;
-                                
-                                // Buscar el tile específico en el tileset
-                                for (uint32_t tt = 0; tt < tileset->tilesLength; tt++) {
-                                    TmxTilesetTile* tile = &tileset->tiles[tt];
-                                    
-                                    // Si encontramos el tile y tiene objetos de colisión
-                                    if (tile->id == localId && tile->objectGroup.objectsLength > 0) {
-                                        // Agregar un rectángulo de colisión por cada tile con colisión
-                                        Rectangle collision = {
-                                            (float)(x * this->mapa->tileWidth),
-                                            (float)(y * this->mapa->tileHeight),
-                                            (float)this->mapa->tileWidth,
-                                            (float)this->mapa->tileHeight
-                                        };
-                                        collisions.push_back(collision);
-                                    }
-                                }
-                                break; // Ya encontramos el tileset, salir del loop
-                            }
-                        }
+                    // Verificación O(1) gracias al unordered_set
+                    if (gid > 0 && solidGids.count(gid)) {
+                        Rectangle collision = {
+                            (float)(x * this->mapa->tileWidth),
+                            (float)(y * this->mapa->tileHeight),
+                            (float)this->mapa->tileWidth,
+                            (float)this->mapa->tileHeight
+                        };
+                        collisions.push_back(collision);
                     }
                 }
             }
         }
     }
     
-    TraceLog(LOG_INFO, "Colisiones extraídas del mapa: %d", collisions.size());
+    TraceLog(LOG_INFO, "Colisiones extraídas: %d (Optimizado)", collisions.size());
     return collisions;
 }
 
