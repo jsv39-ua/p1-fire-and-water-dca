@@ -136,6 +136,12 @@ void MainGameState::update(float deltaTime)
 
     fire_player.update(deltaTime);
     water_player.update(deltaTime);
+    
+    int fireJump = SettingsManager::getInstance()->getFireJump();
+    int waterJump = SettingsManager::getInstance()->getWaterJump();
+    
+    fire_player.updateJump(deltaTime, IsKeyDown(fireJump));
+    water_player.updateJump(deltaTime, IsKeyDown(waterJump));
 
     if (fire_player.velocity.x != 0) {
         fire_walk_animation.animationUpdate(deltaTime);
