@@ -22,17 +22,23 @@ public:
     // Métodos de control
     void walk(int direction); // -1 = izquierda, 0 = parar, 1 = derecha
     void jump();
+    void updateJump(float deltaTime, bool jumpKeyHeld); // Actualizar salto variable
     int checkPlatformCollision(const Platform & platform) const;
     bool resolvePlatformCollision(const Platform & platform); // Resuelve la física de colisión, retorna true si está en el suelo
     
 private:
     static constexpr float WALK_SPEED = 200.0f;
-    static constexpr float JUMP_FORCE = 500.0f;
+    static constexpr float JUMP_FORCE = 270.0f;
+    static constexpr float JUMP_BOOST = 600.0f; 
+    static constexpr float MAX_JUMP_HOLD_TIME = 0.25f; 
     
     // Teclas configurables
     int key_left;
     int key_right;
     int key_jump;
+    
+    // Timer para salto variable
+    float jump_hold_timer;
 };
 
 // Declaración de variables globales (extern)
