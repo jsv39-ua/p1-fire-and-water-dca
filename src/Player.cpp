@@ -1,6 +1,6 @@
 #include <MainGameState.hpp>
 #include <iostream>
-
+#include <ResourceManager.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -13,6 +13,9 @@ Player::Player() : Entity() {
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+    
+    jumpSound = ResourceManager::getInstance()->loadSound("assets/characters/sounds/Hero Jump.mp3");
+    SetSoundVolume(jumpSound, 1.0f);
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -22,6 +25,9 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+
+    jumpSound = ResourceManager::getInstance()->loadSound("assets/characters/sounds/Hero Jump.mp3");
+    SetSoundVolume(jumpSound, 1.0f);
 }
 
 void Player::setKeys(int left, int right, int jump) {
@@ -69,6 +75,7 @@ void Player::walk(int direction) {
 void Player::jump() {
     velocity.y = -JUMP_FORCE;
     jump_hold_timer = 0.0f; // Reiniciar timer al saltar
+
 }
 
 void Player::updateJump(float deltaTime, bool jumpKeyHeld) {

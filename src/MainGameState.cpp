@@ -19,8 +19,8 @@ MainGameState::MainGameState()
 void MainGameState::init()
 {
     // Cargar texturas primero para obtener sus dimensiones
-    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
-    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
+    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_A.png");
+    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_C.png");
     
     // Calcular dimensiones de cada frame del spritesheet
     int columns = 8; // 8 columnas en el spritesheet
@@ -121,6 +121,7 @@ void MainGameState::handleInput()
 
     if (IsKeyPressed(fireJump) && fire_on_ground) {
         fire_player.jump();
+        PlaySound(fire_player.jumpSound);
     }
 
     // Control del personaje de Agua
@@ -134,6 +135,7 @@ void MainGameState::handleInput()
 
     if (IsKeyPressed(waterJump) && water_on_ground) {
         water_player.jump();
+        PlaySound(water_player.jumpSound);
     }
 }
 

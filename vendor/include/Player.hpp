@@ -5,6 +5,12 @@
 
 class Player : public Entity {
 public:
+    // Sonidos para los personajes (salto, daño, caminar)
+
+    Sound jumpSound;
+    Sound damageSound;
+    Sound walkSound;
+
     Player();
     Player(float x, float y, float height, float width, ElementType t);
     
@@ -39,6 +45,8 @@ private:
     
     // Timer para salto variable
     float jump_hold_timer;
+
+    
 };
 
 // Declaración de variables globales (extern)
