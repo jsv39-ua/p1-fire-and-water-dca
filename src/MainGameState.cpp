@@ -71,6 +71,8 @@ void MainGameState::init()
             Platform platform = { collision, NONE };
             level_platforms.push_back(platform);
         }
+
+        level_enemies = mapLoader.extractEnemies();
         
         TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
         
