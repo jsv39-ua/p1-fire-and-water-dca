@@ -1,5 +1,37 @@
 # Fuego y Agua: La Aventura Elemental
 
+
+## Como ejecutar el Cmake
+
+desde Windows entramos en linux con wsl en la terminal
+
+luego ejecutamos:
+donde tengamos la carpeta del repo en windows
+```bash
+cd "/mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca"
+```
+borramos el build anterior
+```bash
+rm -rf build
+```
+```bash
+cmake -S . -B build -DRAYLIB_TAG=master -DCMAKE_BUILD_TYPE=Release
+```
+```bash
+cmake --build build -j4
+```
+
+### Ejecución CMake
+```bash
+./build/game
+```
+
+## Otra forma de ejecutar el CMake
+```bash
+cp build
+cpack
+```
+
 ## **Hito 1 - Versión Alpha (Práctica 1)**
 
 Este repositorio contiene el proyecto para la asignatura de **Desarrollo Colaborativo de Aplicaciones (DCA)**, enfocado en el desarrollo de un videojuego 2D cooperativo de plataformas y puzzles llamado "Fuego y Agua".
