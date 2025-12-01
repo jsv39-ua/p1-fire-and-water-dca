@@ -65,10 +65,9 @@ void MainGameState::init()
     try {
         mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
         
-        std::vector<Rectangle> collisions = mapLoader.extractCollisions();
+        std::vector<Platform> platforms = mapLoader.extractPlatforms();
         
-        for (const auto& collision : collisions) {
-            Platform platform = { collision, NONE };
+        for (const auto& platform : platforms) {
             level_platforms.push_back(platform);
         }
 
@@ -259,6 +258,18 @@ void MainGameState::update(float deltaTime)
     
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
+
+    // Comprobar si algún jugador se ha caido por debajo del mapa (p.ej. agua debajo del mapa)
+    float mapBottom = mapBounds.y + mapBounds.height;
+    bool fire_fell_below = (fire_player.bounds.y + fire_player.bounds.height) > (mapBottom + 1.0f);
+    bool water_fell_below = (water_player.bounds.y + water_player.bounds.height) > (mapBottom + 1.0f);
+    if (fire_fell_below || water_fell_below) {
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        return;
+    }
+
+    // (El chequeo para 2 jugadores ha sido sustituido por el chequeo para 1 jugador arriba.)
 }
 
 void MainGameState::render()

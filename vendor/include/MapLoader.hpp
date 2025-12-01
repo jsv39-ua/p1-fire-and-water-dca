@@ -11,6 +11,8 @@ extern "C" {
 #include <stdexcept>
 #include <vector>
 #include "Enemy.hpp"
+#include "Platform.hpp"
+#include "ElementType.hpp"
 #include <raytmx.h> 
 
 struct TileData {
@@ -42,7 +44,7 @@ public:
     void draw(const Camera2D& camera);
 
     
-    std::vector<Rectangle> extractCollisions();
+    std::vector<Platform> extractPlatforms();
 
     // Extraer enemigos desde las capas de objetos del mapa
     std::vector<Enemy> extractEnemies();
