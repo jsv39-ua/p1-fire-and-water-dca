@@ -149,6 +149,23 @@ void MainGameState::handleInput()
     if (IsKeyPressed(waterJump) && water_on_ground) {
         water_player.jump();
     }
+
+    // Debug: Spawn enemies during gameplay
+    if (IsKeyPressed(KEY_E)) {
+        // Spawn a FIRE enemy (affects Water player) near the Fire player, vertical movement
+        Rectangle b = { fire_player.position.x + 100, fire_player.position.y - 32, 32, 32 };
+        Enemy en(b, FIRE, 90.0f, /*vertical=*/true);
+        level_enemies.push_back(en);
+        TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
+    }
+
+    if (IsKeyPressed(KEY_R)) {
+        // Spawn a WATER enemy (affects Fire player) near the Water player, horizontal movement
+        Rectangle b = { water_player.position.x + 100, water_player.position.y - 32, 32, 32 };
+        Enemy en2(b, WATER, 150.0f, /*vertical=*/false);
+        level_enemies.push_back(en2);
+        TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
+    }
 }
 
 void MainGameState::update(float deltaTime)
@@ -231,6 +248,8 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+
+    // Debug: Check collisions and display logs for enemies (already handled below)
 
     Vector2 midPoint = {
         (fire_player.position.x + water_player.position.x) / 2.0f,
@@ -381,6 +400,15 @@ void MainGameState::render()
     
     for (auto& enemy : level_enemies) {
         enemy.render();
+    }
+    // Debug: draw outlines and labels for enemies
+    for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
+        Enemy &en = level_enemies[ei];
+        DrawRectangleLinesEx(en.bounds, 2, YELLOW);
+        const char* typeLabel = (en.type == FIRE) ? "FIRE" : (en.type == WATER ? "WATER" : "NONE");
+        std::string lab = "ENEMY(" + std::string(typeLabel) + ")";
+        int tw = MeasureText(lab.c_str(), 12);
+        DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
     }
     EndMode2D();
     
