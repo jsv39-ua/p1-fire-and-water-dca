@@ -3,6 +3,7 @@
 #include "AudioManager.hpp"
 #include <cctype>
 #include <string>
+#include "raylib_compat.h"
 
 extern "C" {
     #include <raylib.h>
