@@ -148,6 +148,9 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                         };
                         Platform platform = { collision, pType };
                         platforms.push_back(platform);
+                        if (pType == GOAL) {
+                            TraceLog(LOG_INFO, "GOAL platform found at x=%f y=%f w=%f h=%f", collision.x, collision.y, collision.width, collision.height);
+                        }
                     }
                 }
             }
