@@ -1,4 +1,6 @@
 #include <MapLoader.hpp>
+#include <Platform.hpp>
+#include <ElementType.hpp>
 #include <ResourceManager.hpp>
 
 #include <unordered_set>
@@ -58,12 +60,12 @@ void MapLoader::draw(const Camera2D& camera) {
 
 // Extrae las colisiones del mapa TMX cargado
 // OPTIMIZADO: Pre-cachea los GIDs sólidos para búsqueda O(1)
-std::vector<Rectangle> MapLoader::extractCollisions() {
-    std::vector<Rectangle> collisions;
+std::vector<Platform> MapLoader::extractPlatforms() {
+    std::vector<Platform> platforms;
     
     if (this->mapa == nullptr) {
-        TraceLog(LOG_WARNING, "No hay mapa cargado para extraer colisiones.");
-        return collisions;
+        TraceLog(LOG_WARNING, "No hay mapa cargado para extraer plataformas.");
+        return platforms;
     }
 
     // PASO 1: Pre-cachear qué GIDs son sólidos.
@@ -103,21 +105,57 @@ std::vector<Rectangle> MapLoader::extractCollisions() {
                     
                     // Verificación O(1) gracias al unordered_set
                     if (gid > 0 && solidGids.count(gid)) {
+                        // Mapear GID a tileset y tile local para obtener propiedades
+                        ElementType pType = NONE;
+                        for (uint32_t t = 0; t < this->mapa->tilesetsLength; t++) {
+                            TmxTileset* tileset = &this->mapa->tilesets[t];
+                            if (gid >= tileset->firstGid && (t == this->mapa->tilesetsLength - 1 || gid < this->mapa->tilesets[t+1].firstGid)) {
+                                uint32_t localId = gid - tileset->firstGid;
+                                // buscar el tile declarado en el tileset
+                                for (uint32_t tt = 0; tt < tileset->tilesLength; tt++) {
+                                    TmxTilesetTile* tile = &tileset->tiles[tt];
+                                    if (tile->id == localId) {
+                                        // Si tiene propiedades, buscar la property 'type'
+                                        if (tile->propertiesLength > 0) {
+                                            for (uint32_t pi = 0; pi < tile->propertiesLength; ++pi) {
+                                                TmxProperty* prop = &tile->properties[pi];
+                                                if (prop->type == PROPERTY_TYPE_STRING && strcmp(prop->name, "type") == 0) {
+                                                    if (strcmp(prop->stringValue, "water") == 0) pType = WATER;
+                                                    else if (strcmp(prop->stringValue, "fire") == 0) pType = FIRE;
+                                                    else if (strcmp(prop->stringValue, "goal") == 0) pType = GOAL;
+                                                }
+                                            }
+                                        }
+                                        break; // Encontrado tile correspondiente
+                                    }
+                                }
+                                break; // Encontrado tileset correcto
+                            }
+                        }
+
+                        // fallback: si la capa tiene nombre, usarlo
+                        if (pType == NONE && layer->name != NULL) {
+                            if (strcmp(layer->name, "Water") == 0) pType = WATER;
+                            else if (strcmp(layer->name, "Fire") == 0) pType = FIRE;
+                            else if (strcmp(layer->name, "Goal") == 0) pType = GOAL;
+                        }
+
                         Rectangle collision = {
                             (float)(x * this->mapa->tileWidth),
                             (float)(y * this->mapa->tileHeight),
                             (float)this->mapa->tileWidth,
                             (float)this->mapa->tileHeight
                         };
-                        collisions.push_back(collision);
+                        Platform platform = { collision, pType };
+                        platforms.push_back(platform);
                     }
                 }
             }
         }
     }
     
-    TraceLog(LOG_INFO, "Colisiones extraídas: %d (Optimizado)", collisions.size());
-    return collisions;
+    TraceLog(LOG_INFO, "Plataformas extraídas: %d (Optimizado)", platforms.size());
+    return platforms;
 }
 
 // Obtener los límites del mapa en píxeles
