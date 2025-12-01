@@ -1,33 +1,47 @@
 #include <Enemy.hpp>
 
-Enemy::Enemy() : Entity(), patrolRange(50.0f), originalX(0.0f), movingRight(true), hasTexture(false) {
+Enemy::Enemy() : Entity(), patrolRange(50.0f), originalX(0.0f), movingRight(true), verticalMovement(false), originalY(0.0f), movingDown(true), hasTexture(false) {
     texture = { 0 };
     sourceRect = { 0 };
 }
 
-Enemy::Enemy(Rectangle b, ElementType t, float range) 
-    : Entity({b.x, b.y}, {30.0f, 0.0f}, b.width, b.height, t),
-      patrolRange(range), originalX(b.x), movingRight(true), hasTexture(false) {
+Enemy::Enemy(Rectangle b, ElementType t, float range, bool vertical) 
+        : Entity({b.x, b.y}, {vertical ? 0.0f : 30.0f, vertical ? 30.0f : 0.0f}, b.width, b.height, t),
+            patrolRange(range), originalX(b.x), movingRight(true), verticalMovement(vertical), originalY(b.y), movingDown(true), hasTexture(false) {
     texture = { 0 };
     sourceRect = { 0 };
 }
 
-Enemy::Enemy(Rectangle b, ElementType t, float range, Texture2D tex, Rectangle src)
-    : Entity({b.x, b.y}, {30.0f, 0.0f}, b.width, b.height, t),
-      patrolRange(range), originalX(b.x), movingRight(true), hasTexture(true), texture(tex), sourceRect(src) {
+Enemy::Enemy(Rectangle b, ElementType t, float range, Texture2D tex, Rectangle src, bool vertical)
+        : Entity({b.x, b.y}, {vertical ? 0.0f : 30.0f, vertical ? 30.0f : 0.0f}, b.width, b.height, t),
+            patrolRange(range), originalX(b.x), movingRight(true), verticalMovement(vertical), originalY(b.y), movingDown(true), hasTexture(true), texture(tex), sourceRect(src) {
 }
 
 void Enemy::update(float deltaTime) {
-    // Lógica de patrullaje
-    if (movingRight) {
-        position.x += velocity.x * deltaTime;
-        if (position.x >= originalX + patrolRange) {
-            movingRight = false;
+    // Lógica de patrullaje (horizontal o vertical)
+    if (!verticalMovement) {
+        if (movingRight) {
+            position.x += velocity.x * deltaTime;
+            if (position.x >= originalX + patrolRange) {
+                movingRight = false;
+            }
+        } else {
+            position.x -= velocity.x * deltaTime;
+            if (position.x <= originalX) {
+                movingRight = true;
+            }
         }
     } else {
-        position.x -= velocity.x * deltaTime;
-        if (position.x <= originalX) {
-            movingRight = true;
+        if (movingDown) {
+            position.y += velocity.y * deltaTime;
+            if (position.y >= originalY + patrolRange) {
+                movingDown = false;
+            }
+        } else {
+            position.y -= velocity.y * deltaTime;
+            if (position.y <= originalY) {
+                movingDown = true;
+            }
         }
     }
     
