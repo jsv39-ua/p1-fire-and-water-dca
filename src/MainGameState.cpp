@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <GameOverState.hpp>
+#include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
 #include <StateMachine.hpp>
 #include <Player.hpp>
@@ -71,6 +72,16 @@ void MainGameState::init()
             level_platforms.push_back(platform);
         }
 
+        // Debug: Log GOAL platforms found
+        int goalCount = 0;
+        for (const auto& p : level_platforms) {
+            if (p.type == GOAL) {
+                goalCount++;
+                TraceLog(LOG_INFO, "GOAL platform in level_platforms at x=%f y=%f w=%f h=%f", p.bounds.x, p.bounds.y, p.bounds.width, p.bounds.height);
+            }
+        }
+        TraceLog(LOG_INFO, "Total GOAL platforms: %d", goalCount);
+
         level_enemies = mapLoader.extractEnemies();
         
         TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
@@ -79,7 +90,11 @@ void MainGameState::init()
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
-
+    // Coordenadas X=400, Y=300 (ajústalo para que sea visible en tu pantalla)
+    Platform debugGoal = Platform({ 400, 300, 64, 64 }, GOAL); 
+    level_platforms.push_back(debugGoal);
+    TraceLog(LOG_INFO, "Puerta manual creada en 400,300 para pruebas.");
+    
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
     
@@ -193,7 +208,9 @@ void MainGameState::update(float deltaTime)
         }
 
         if (fire_collision == 3 && water_collision == 3) {
-            this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
+            // Ambos jugadores han llegado a la puerta (GOAL): avanzar a siguiente nivel placeholder
+            TraceLog(LOG_INFO, "Ambos jugadores han alcanzado la GOAL: cambiando a SimpleLevelState");
+            this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
         }
     }
 
@@ -347,7 +364,12 @@ void MainGameState::render()
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
         if(platform.type == GOAL){
-            DrawRectangleRec(platform.bounds, YELLOW);
+            // Dibujamos la puerta como rectángulo negro relleno, borde y etiqueta para depuración
+            DrawRectangleRec(platform.bounds, BLACK);
+            DrawRectangleLinesEx(platform.bounds, 3, MAGENTA);
+            std::string label = "PUERTA";
+            int textW = MeasureText(label.c_str(), 10);
+            DrawText(label.c_str(), platform.bounds.x + (platform.bounds.width - textW) / 2, platform.bounds.y - 12, 10, MAGENTA);
         }
         else if(platform.type == FIRE){
             DrawRectangleRec(platform.bounds, MAROON);
