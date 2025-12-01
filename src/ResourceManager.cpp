@@ -4,6 +4,7 @@
 ResourceManager* ResourceManager::instance = nullptr;
 
 ResourceManager::ResourceManager() {}
+#include "raylib_compat.h"
 
 ResourceManager* ResourceManager::getInstance() {
     if (instance == nullptr) {
