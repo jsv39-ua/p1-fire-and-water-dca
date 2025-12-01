@@ -191,6 +191,8 @@ std::vector<Enemy> MapLoader::extractEnemies() {
             
             if (typeStr != nullptr) {
                 float range = getPropertyFloatFromLayer(layer, "patrolRange", 50.0f);
+                const char* movementStr = getPropertyStringFromLayer(layer, "movement", "horizontal");
+                bool vertical = (movementStr != NULL && strcmp(movementStr, "vertical") == 0);
                 
                 ElementType eType = FIRE;
                 if (strcmp(typeStr, "WATER") == 0) eType = WATER;
@@ -217,10 +219,12 @@ std::vector<Enemy> MapLoader::extractEnemies() {
 
                             if (tData.valid) {
                                 // Constructor con textura (asegúrate de tenerlo en Enemy.hpp)
-                                enemies.push_back(Enemy(bounds, eType, range, tData.texture, tData.source));
+                                enemies.push_back(Enemy(bounds, eType, range, tData.texture, tData.source, vertical));
+                                TraceLog(LOG_INFO, "Enemy spawned at x=%f y=%f type=%d vertical=%d", bounds.x, bounds.y, eType, vertical);
                             } else {
                                 // Constructor sin textura (fallback)
-                                enemies.push_back(Enemy(bounds, eType, range));
+                                enemies.push_back(Enemy(bounds, eType, range, vertical));
+                                TraceLog(LOG_INFO, "Enemy spawned at x=%f y=%f type=%d vertical=%d", bounds.x, bounds.y, eType, vertical);
                             }
                         }
                     }
