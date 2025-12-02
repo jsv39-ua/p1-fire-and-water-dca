@@ -34,8 +34,6 @@ void MainGameState::init()
    
     // Inicialización del personaje de Fuego con tamaño basado en el asset
     fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
-    // Inicialización del personaje de Fuego
-    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
     
     // Cargar teclas desde SettingsManager
     fire_player.setKeys(
@@ -121,7 +119,8 @@ void MainGameState::handleInput()
 
     if (IsKeyPressed(fireJump) && fire_on_ground) {
         fire_player.jump();
-        PlaySound(fire_player.jumpSound);
+        TraceLog(LOG_INFO, "[MainGameState] Fire player jumping!");
+        fire_player.jumpSound.play();
     }
 
     // Control del personaje de Agua
@@ -135,7 +134,8 @@ void MainGameState::handleInput()
 
     if (IsKeyPressed(waterJump) && water_on_ground) {
         water_player.jump();
-        PlaySound(water_player.jumpSound);
+        TraceLog(LOG_INFO, "[MainGameState] Water player jumping!");
+        water_player.jumpSound.play();
     }
 }
 
