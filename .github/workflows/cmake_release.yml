@@ -14,96 +14,6 @@ on:
         default: 'dev-build'
 
 jobs:
-  build-windows:
-    name: Build Windows (CMake)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup CMake
-        uses: lukka/get-cmake@latest
-
-      - name: Configure CMake
-        run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-
-      - name: Build
-        run: |
-          cmake --build build --config Release --parallel
-
-      - name: Package Windows Release
-        shell: pwsh
-        run: |
-          $version = if ($env:GITHUB_REF -match 'refs/tags/(.*)') { $matches[1] } else { "${{ github.event.inputs.version }}" }
-          $packageName = "fire-and-water-dca-windows-$version"
-          
-          New-Item -ItemType Directory -Force -Path "$packageName"
-          
-          # Copiar ejecutable desde build
-          if (Test-Path "build/game.exe") {
-            Copy-Item "build/game.exe" "$packageName/"
-          } elseif (Test-Path "build/Release/game.exe") {
-            Copy-Item "build/Release/game.exe" "$packageName/"
-          }
-          
-          # Copiar assets
-          Copy-Item -Recurse "assets" "$packageName/"
-          
-          # Copiar DLLs si existen
-          if (Test-Path "build/*.dll") {
-            Copy-Item "build/*.dll" "$packageName/"
-          }
-          if (Test-Path "vendor/lib/windows/*.dll") {
-            Copy-Item "vendor/lib/windows/*.dll" "$packageName/"
-          }
-          
-          # Crear README
-          @"
-          # Fire and Water DCA - Windows Release
-          
-          Version: $version
-          Build: CMake Release
-          Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
-          
-          ## Instrucciones
-          
-          1. Ejecuta game.exe
-          2. ¡Disfruta del juego!
-          
-          ## Requisitos del Sistema
-          
-          - Windows 10 o superior (64-bit)
-          - DirectX compatible graphics card
-          - Visual C++ Redistributable (incluido si es necesario)
-          
-          ## Controles
-          
-          Jugador 1 (Fuego):
-          - Movimiento: W, A, S, D
-          - Saltar: W
-          
-          Jugador 2 (Agua):
-          - Movimiento: Flechas
-          - Saltar: Flecha Arriba
-          
-          "@ | Out-File -FilePath "$packageName/README.txt" -Encoding UTF8
-          
-          # Crear ZIP
-          Compress-Archive -Path "$packageName" -DestinationPath "$packageName.zip" -Force
-          
-          echo "PACKAGE_NAME=$packageName" >> $env:GITHUB_ENV
-          echo "PACKAGE_FILE=$packageName.zip" >> $env:GITHUB_ENV
-
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-release
-          path: ${{ env.PACKAGE_FILE }}
-          retention-days: 90
-
   build-linux:
     name: Build Linux (CMake)
     runs-on: ubuntu-latest
@@ -149,16 +59,16 @@ jobs:
           
           mkdir -p "${PACKAGE_NAME}"
           
-          # Copiar ejecutable
+          
           if [ -f "build/game" ]; then
             cp "build/game" "${PACKAGE_NAME}/"
           fi
           chmod +x "${PACKAGE_NAME}/game"
           
-          # Copiar assets
+          
           cp -r assets "${PACKAGE_NAME}/"
           
-          # Crear README
+         
           cat > "${PACKAGE_NAME}/README.txt" << EOF
           # Fire and Water DCA - Linux Release
           
@@ -170,7 +80,7 @@ jobs:
           
           1. Abre una terminal en esta carpeta
           2. Ejecuta: ./game
-          3. ¡Disfruta del juego!
+          
           
           ## Requisitos del Sistema
           
@@ -207,15 +117,9 @@ jobs:
   publish-release:
     name: Publish Release Assets
     runs-on: ubuntu-latest
-    needs: [build-windows, build-linux]
+    needs: build-linux
     if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-release
-          path: artifacts
-
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
@@ -225,14 +129,13 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          sha256sum *.zip *.tar.gz > SHA256SUMS.txt
+          sha256sum *.tar.gz > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/*.zip
             artifacts/*.tar.gz
             artifacts/SHA256SUMS.txt
           fail_on_unmatched_files: false
