@@ -10,7 +10,8 @@ public:
 
     SoundPlayer jumpSound;
     SoundPlayer damageSound;
-    SoundPlayer walkSound;
+    Music walkMusic;
+    bool isWalkMusicPlaying;
 
     Player();
     Player(float x, float y, float height, float width, ElementType t);
