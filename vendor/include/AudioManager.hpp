@@ -15,7 +15,7 @@ private:
     
     // Volúmenes base (valores configurados por el usuario, rango 0.0 - 1.0)
     float masterVolume = 0.5f;      // Volumen general (multiplica a los demás)
-    float musicBaseVolume = 0.5f;   // Volumen de música (sin multiplicar)
+    float musicBaseVolume = 0.3f;   // Volumen de música (sin multiplicar)
     float sfxBaseVolume = 0.5f;     // Volumen de efectos de sonido
     
     AudioManager(); // Constructor privado para Singleton
