@@ -77,6 +77,8 @@ private:
 
    const int TILE_SIZE = 18; // Tamaño de los tiles en pixeles
 
+   void drawTileLayer(TmxLayer* layer, TmxTileLayer* tileLayer);
+
    // En la sección private de MapLoader.hpp
 
     const char* getPropertyStringFromLayer(TmxLayer* layer, const char* propName, const char* defaultValue) {

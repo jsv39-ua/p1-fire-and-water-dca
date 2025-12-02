@@ -285,12 +285,15 @@ void MainGameState::handleTransitions() {
         Vector2 water_vel = players[1].velocity;
         
         // Load new level
-        std::string fullPath = "assets/levels/niveles/nivel-tutorial/" + active_transition->targetMap;
+        std::string fullPath = active_transition->targetMap;
+        if (fullPath.find("assets/") == std::string::npos) {
+            fullPath = LEVEL_BASE_PATH + fullPath;
+        }
         loadLevel(fullPath);
         
         // Set positions
         players[0].position = active_transition->targetSpawn;
-        players[1].position = { active_transition->targetSpawn.x + 40, active_transition->targetSpawn.y }; 
+        players[1].position = { active_transition->targetSpawn.x + PLAYER_SPAWN_OFFSET, active_transition->targetSpawn.y }; 
 
         // Restore velocity
         players[0].velocity = fire_vel;
@@ -374,7 +377,7 @@ void MainGameState::updateCamera(float deltaTime) {
 void MainGameState::checkFallDeath() {
     Rectangle mapBounds = mapLoader.getMapBounds();
     float mapBottom = mapBounds.y + mapBounds.height;
-    float deathThreshold = 200.0f;
+    float deathThreshold = FALL_DEATH_THRESHOLD;
 
     bool fire_fell_below = (players[0].bounds.y) > (mapBottom + deathThreshold);
     bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
