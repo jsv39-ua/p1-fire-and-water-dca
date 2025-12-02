@@ -10,6 +10,7 @@ extern "C" {
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <string>
 #include "Enemy.hpp"
 #include "Platform.hpp"
 #include "ElementType.hpp"
@@ -19,6 +20,14 @@ struct TileData {
     Texture2D texture;
     Rectangle source;
     bool valid;
+};
+
+struct MapTransition {
+    Rectangle bounds;
+    std::string targetMap;
+    Vector2 targetSpawn;
+    std::string direction;
+    std::string transitionType;
 };
 
 // Forward declaration - evita incluir raytmx.h en el header
@@ -52,10 +61,13 @@ public:
     
     std::vector<Platform> extractPlatforms();
 
-    // Extraer enemigos desde las capas de objetos del mapa
+    // Extraer enemigos del mapa
     std::vector<Enemy> extractEnemies();
 
-    // Obtener las dimensiones del mapa en pixeles
+    // Extraer transiciones del mapa
+    std::vector<MapTransition> extractTransitions();
+
+    // Obtener los límites del mapa en píxeles
     Rectangle getMapBounds() const;
 
 private:

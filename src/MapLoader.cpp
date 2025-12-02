@@ -384,3 +384,51 @@ std::vector<Enemy> MapLoader::extractEnemies() {
     }
     return enemies;
 }
+
+std::vector<MapTransition> MapLoader::extractTransitions() {
+    std::vector<MapTransition> transitions;
+    if (this->mapa == nullptr) return transitions;
+
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+
+        if (layer->type == LAYER_TYPE_OBJECT_GROUP) {
+            if (strcmp(layer->name, "Transitions") == 0) {
+                TmxObjectGroup* objGroup = &layer->exact.objectGroup;
+                
+                for (uint32_t j = 0; j < objGroup->objectsLength; j++) {
+                    TmxObject* obj = &objGroup->objects[j];
+                    
+                    MapTransition transition;
+                    transition.bounds = { (float)obj->x, (float)obj->y, (float)obj->width, (float)obj->height };
+                    
+                    // Default values
+                    transition.targetMap = "";
+                    transition.targetSpawn = { 0, 0 };
+                    transition.direction = "none";
+                    transition.transitionType = "instant";
+
+                    for (uint32_t k = 0; k < obj->propertiesLength; k++) {
+                        TmxProperty* prop = &obj->properties[k];
+                        
+                        if (strcmp(prop->name, "targetMap") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                            transition.targetMap = prop->stringValue;
+                        } else if (strcmp(prop->name, "targetSpawnX") == 0 && prop->type == PROPERTY_TYPE_FLOAT) {
+                            transition.targetSpawn.x = prop->floatValue;
+                        } else if (strcmp(prop->name, "targetSpawnY") == 0 && prop->type == PROPERTY_TYPE_FLOAT) {
+                            transition.targetSpawn.y = prop->floatValue;
+                        } else if (strcmp(prop->name, "direction") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                            transition.direction = prop->stringValue;
+                        } else if (strcmp(prop->name, "transitionType") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                            transition.transitionType = prop->stringValue;
+                        }
+                    }
+                    
+                    transitions.push_back(transition);
+                    TraceLog(LOG_INFO, "Transition loaded: target=%s spawn=(%f,%f)", transition.targetMap.c_str(), transition.targetSpawn.x, transition.targetSpawn.y);
+                }
+            }
+        }
+    }
+    return transitions;
+}

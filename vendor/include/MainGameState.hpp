@@ -36,6 +36,9 @@ private:
     bool fire_on_ground = false;
     bool water_on_ground = false;
     std::vector<Enemy> level_enemies;
+    std::vector<MapTransition> level_transitions;
+
+    void loadLevel(const std::string& mapPath);
 
     Texture2D character1;
     Texture2D character2;
