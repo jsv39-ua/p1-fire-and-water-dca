@@ -5,13 +5,18 @@ ifeq ($(OS),Windows_NT)
     LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
     EXT = .exe
     RM = del /Q
-    # Fix para limpiar carpetas en Windows si es necesario, o usar rm de git bash
+    MKDIR = if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+    # En Windows, usar una lista explícita de archivos .cpp
+    SRC := $(wildcard src/*.cpp)
 else
     DETECTED_OS := Linux
     LIB_DIR = vendor/lib/linux
     LIBS = -lraylib -lGL -lm -lpthread -lrt -lX11
     EXT =
     RM = rm -rf
+    MKDIR = mkdir -p
+    # En Linux, búsqueda recursiva
+    SRC := $(shell find src -name '*.cpp')
 endif
 
 # Configuración del compilador
@@ -20,9 +25,8 @@ CXX = g++
 CXXFLAGS = -I vendor/include/ -Wall -MMD -MP
 LDFLAGS = -L $(LIB_DIR)
 
-# --- CORRECCIÓN 1: Búsqueda Recursiva ---
-# Busca todos los .cpp dentro de src y cualquier subcarpeta
-SRC := $(shell find src -name '*.cpp')
+# Archivos fuente
+SRC := $(wildcard src/*.cpp)
 
 # --- CORRECCIÓN 2: Archivos Objeto ---
 # Convierte la lista de .cpp (src/main.cpp) en .o (obj/main.o)
@@ -49,7 +53,7 @@ $(TARGET): $(OBJ)
 # Regla de Compilación Individual (Para que funcione el multihilo -jN)
 # Crea la carpeta necesaria y compila de .cpp a .o
 $(OBJ_DIR)/%.o: src/%.cpp
-	@mkdir -p $(dir $@)
+	@$(MKDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Incluir dependencias (detecta si cambias un .hpp)
