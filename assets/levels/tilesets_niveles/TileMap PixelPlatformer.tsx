@@ -21,19 +21,15 @@
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="9">
+ <tile id="4">
   <objectgroup draworder="index" id="2">
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+   <object id="1" x="9.90909" y="9.45455" height="0.0909091"/>
+   <object id="2" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="10">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
-  </objectgroup>
- </tile>
- <tile id="11">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="5">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
  <tile id="20">
@@ -56,19 +52,14 @@
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="29">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="24">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="30">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
-  </objectgroup>
- </tile>
- <tile id="31">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="25">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
  <tile id="40">
