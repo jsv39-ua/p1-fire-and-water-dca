@@ -90,11 +90,7 @@ void MainGameState::init()
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
-    // Coordenadas X=400, Y=300 (ajústalo para que sea visible en tu pantalla)
-    Platform debugGoal = Platform({ 400, 300, 64, 64 }, GOAL); 
-    level_platforms.push_back(debugGoal);
-    TraceLog(LOG_INFO, "Puerta manual creada en 400,300 para pruebas.");
-    
+
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
     
