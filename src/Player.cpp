@@ -1,6 +1,7 @@
 #include <MainGameState.hpp>
 #include <iostream>
-
+#include <ResourceManager.hpp>
+#include <AudioManager.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -13,6 +14,10 @@ Player::Player() : Entity() {
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+    isWalkMusicPlaying = false;
+    
+    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
+    jumpSound.setVolume(1.0f);
     life_count = 3;
     invincibility_timer = 0.0f;
 }
@@ -24,6 +29,21 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+    isWalkMusicPlaying = false;
+
+    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
+    jumpSound.setVolume(1.0f);
+    
+    walkMusic = ResourceManager::getInstance()->loadMusic("assets/characters/sounds/Hero Walk Footsteps Stone.mp3");
+    
+    if (IsMusicValid(walkMusic)) {
+        walkMusic.looping = true;
+        // Establecer volumen alto para los pasos - no usar volumen de SFX porque es música
+        SetMusicVolume(walkMusic, 0.8f); // Volumen directo sin multiplicadores
+        TraceLog(LOG_INFO, "[Player] Walk music loaded successfully with volume: 0.8");
+    } else {
+        TraceLog(LOG_ERROR, "[Player] Failed to load walk music");
+    }
     life_count = 3;
     invincibility_timer = 0.0f;
 }
@@ -60,6 +80,9 @@ void Player::update(float deltaTime) {
     // Actualizar bounds
     bounds.x = position.x;
     bounds.y = position.y;
+    
+    // Actualizar música de caminar
+    UpdateMusicStream(walkMusic);
 }
 
 void Player::render() {
@@ -81,6 +104,7 @@ void Player::walk(int direction) {
 void Player::jump() {
     velocity.y = -JUMP_FORCE;
     jump_hold_timer = 0.0f; // Reiniciar timer al saltar
+
 }
 
 void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
