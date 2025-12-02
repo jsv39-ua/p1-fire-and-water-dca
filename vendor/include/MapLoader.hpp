@@ -10,6 +10,7 @@ extern "C" {
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <string>
 #include "Enemy.hpp"
 #include "Platform.hpp"
 #include "ElementType.hpp"
@@ -19,6 +20,14 @@ struct TileData {
     Texture2D texture;
     Rectangle source;
     bool valid;
+};
+
+struct MapTransition {
+    Rectangle bounds;
+    std::string targetMap;
+    Vector2 targetSpawn;
+    std::string direction;
+    std::string transitionType;
 };
 
 // Forward declaration - evita incluir raytmx.h en el header
@@ -42,14 +51,23 @@ public:
     void unloadMapa();
 
     void draw(const Camera2D& camera);
+    
+    // Dibujar solo las capas de parallax (fondos)
+    void drawParallaxLayers(const Camera2D& camera);
+    
+    // Dibujar las capas de tiles y objetos
+    void drawTileLayers();
 
     
     std::vector<Platform> extractPlatforms();
 
-    // Extraer enemigos desde las capas de objetos del mapa
+    // Extraer enemigos del mapa
     std::vector<Enemy> extractEnemies();
 
-    // Obtener las dimensiones del mapa en pixeles
+    // Extraer transiciones del mapa
+    std::vector<MapTransition> extractTransitions();
+
+    // Obtener los límites del mapa en píxeles
     Rectangle getMapBounds() const;
 
 private:
@@ -58,6 +76,8 @@ private:
   
 
    const int TILE_SIZE = 18; // Tamaño de los tiles en pixeles
+
+   void drawTileLayer(TmxLayer* layer, TmxTileLayer* tileLayer);
 
    // En la sección private de MapLoader.hpp
 

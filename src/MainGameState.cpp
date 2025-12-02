@@ -35,8 +35,8 @@ void MainGameState::init()
     float hitboxHeight = frameHeight;
    
     // Inicializar jugadores: [0] = FIRE, [1] = WATER
-    players[0] = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
-    players[1] = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
+    players[0] = Player(100.0f, 275.0f, hitboxWidth, hitboxHeight, FIRE);
+    players[1] = Player(150.0f, 275.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
     players[0].setKeys(
@@ -54,41 +54,15 @@ void MainGameState::init()
     // Inicialización de la cámara (se configurará después de cargar el mapa)
 
     // Inicialización del MapLoader
-    try {
-        mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
-        
-        std::vector<Platform> platforms = mapLoader.extractPlatforms();
-        
-        for (const auto& platform : platforms) {
-            level_platforms.push_back(platform);
-        }
+    loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
 
-        // Debug: Log GOAL platforms found
-        int goalCount = 0;
-        for (const auto& p : level_platforms) {
-            if (p.type == GOAL) {
-                goalCount++;
-                TraceLog(LOG_INFO, "GOAL platform in level_platforms at x=%f y=%f w=%f h=%f", p.bounds.x, p.bounds.y, p.bounds.width, p.bounds.height);
-            }
-        }
-        TraceLog(LOG_INFO, "Total GOAL platforms: %d", goalCount);
-
-        level_enemies = mapLoader.extractEnemies();
-        
-        TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
-        
-        // Inicializar cámara con bounds del mapa
-        Rectangle mapBounds = mapLoader.getMapBounds();
-        camera.init({640, 360}, 2.0f, mapBounds);
-        camera.setSmoothSpeed(5.0f);
-        camera.setZoomSmoothSpeed(3.0f);
-        camera.setZoomLimits(1.0f, 3.0f);
-        camera.setDynamicZoom(true);
-        
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
-        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
-    }
+    // Inicializar cámara con bounds del mapa
+    Rectangle mapBounds = mapLoader.getMapBounds();
+    camera.init({640, 360}, 2.0f, mapBounds);
+    camera.setSmoothSpeed(5.0f);
+    camera.setZoomSmoothSpeed(3.0f);
+    camera.setZoomLimits(1.0f, 3.0f);
+    camera.setDynamicZoom(true);
 
     // Inicializar animaciones para ambos jugadores
     idle_animations[0] = Animation(5, 0.2f, true, character_textures[0], 9, 12);
@@ -187,7 +161,7 @@ void MainGameState::update(float deltaTime)
     }
 
     // Verificar colisiones con plataformas
-    bool bothOnGoal = true;
+    // bool bothOnGoal = true;
     for (const auto& platform : level_platforms) {
         bool fireOnGoal = false;
         bool waterOnGoal = false;
@@ -274,32 +248,186 @@ void MainGameState::update(float deltaTime)
         }
     }
 
+    handleTransitions();
+    handleMapBoundaries();
+    updateCamera(deltaTime);
+    checkFallDeath();
+}
+
+void MainGameState::handleTransitions() {
+    bool fire_in_transition = false;
+    bool water_in_transition = false;
+    MapTransition* active_transition = nullptr;
+
+    for (auto& transition : level_transitions) {
+        if (CheckCollisionRecs(players[0].bounds, transition.bounds)) {
+            fire_in_transition = true;
+        }
+        if (CheckCollisionRecs(players[1].bounds, transition.bounds)) {
+            water_in_transition = true;
+        }
+        
+        if (fire_in_transition && water_in_transition) {
+            active_transition = &transition;
+            break;
+        } else {
+            // Reset if not both in the same transition
+            fire_in_transition = false;
+            water_in_transition = false;
+        }
+    }
+
+    if (active_transition) {
+        TraceLog(LOG_INFO, "Transition triggered to %s", active_transition->targetMap.c_str());
+        
+        // Store velocities to preserve momentum
+        Vector2 fire_vel = players[0].velocity;
+        Vector2 water_vel = players[1].velocity;
+        
+        // Load new level
+        std::string fullPath = active_transition->targetMap;
+        if (fullPath.find("assets/") == std::string::npos) {
+            fullPath = LEVEL_BASE_PATH + fullPath;
+        }
+        loadLevel(fullPath);
+        
+        // Set positions
+        players[0].position = active_transition->targetSpawn;
+        players[1].position = { active_transition->targetSpawn.x + PLAYER_SPAWN_OFFSET, active_transition->targetSpawn.y }; 
+
+        // Restore velocity
+        players[0].velocity = fire_vel;
+        players[1].velocity = water_vel;
+        
+        // Update bounds immediately
+        players[0].update(0); 
+        players[1].update(0);
+    }
+}
+
+void MainGameState::handleMapBoundaries() {
+    Rectangle mapBounds = mapLoader.getMapBounds();
+
+    for (int i = 0; i < 2; i++) {
+        bool inTransition = false;
+        Rectangle tBounds = {0,0,0,0};
+
+        for (const auto& t : level_transitions) {
+            if (CheckCollisionRecs(players[i].bounds, t.bounds)) {
+                inTransition = true;
+                tBounds = t.bounds;
+                break;
+            }
+        }
+
+        if (inTransition) {
+            // Simular suelo en transiciones laterales: si sale del mapa horizontalmente,
+            // anulamos la gravedad para que no caiga al vacío.
+            if (players[i].position.x < mapBounds.x || 
+                players[i].position.x + players[i].width > mapBounds.x + mapBounds.width) {
+                if (players[i].velocity.y > 0) players[i].velocity.y = 0;
+            }
+
+            // Límite Izquierdo (si la transición está a la izquierda)
+            if (tBounds.x < mapBounds.x) {
+                if (players[i].position.x < tBounds.x) {
+                    players[i].position.x = tBounds.x;
+                    players[i].velocity.x = 0;
+                }
+            }
+            
+            // Límite Derecho (si la transición está a la derecha)
+            if (tBounds.x + tBounds.width > mapBounds.x + mapBounds.width) {
+                if (players[i].position.x + players[i].width > tBounds.x + tBounds.width) {
+                    players[i].position.x = tBounds.x + tBounds.width - players[i].width;
+                    players[i].velocity.x = 0;
+                }
+            }
+
+            // Límite Superior (si la transición está arriba)
+            if (tBounds.y < mapBounds.y) {
+                if (players[i].position.y < tBounds.y) {
+                    players[i].position.y = tBounds.y;
+                    players[i].velocity.y = 0;
+                }
+            }
+
+            // Límite Inferior (si la transición está abajo)
+            if (tBounds.y + tBounds.height > mapBounds.y + mapBounds.height) {
+                // Permitir caer hasta el fondo de la transición
+                if (players[i].position.y > tBounds.y + tBounds.height - players[i].height) {
+                    players[i].position.y = tBounds.y + tBounds.height - players[i].height;
+                    players[i].velocity.y = 0; // Detener caída (quedarse flotando)
+                }
+            }
+        }
+
+        // Actualizar bounds tras modificar posición
+        players[i].update(0); 
+    }
+}
+
+void MainGameState::updateCamera(float deltaTime) {
     // Actualizar cámara para seguir ambos jugadores
     std::vector<Vector2> playerPositions = {players[0].position, players[1].position};
     camera.setMultipleTargets(playerPositions);
     camera.update(deltaTime);
+}
 
-    // Comprobar si algún jugador se ha caido por debajo del mapa
+void MainGameState::checkFallDeath() {
     Rectangle mapBounds = mapLoader.getMapBounds();
     float mapBottom = mapBounds.y + mapBounds.height;
-    bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
-    bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
+    float deathThreshold = FALL_DEATH_THRESHOLD;
+
+    bool fire_fell_below = (players[0].bounds.y) > (mapBottom + deathThreshold);
+    bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
+    
     if (fire_fell_below || water_fell_below) {
-        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-        // Activar timer de muerte en vez de cambiar inmediatamente
-        playerDying = true;
-        deathTimer = 0.0f;
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         return;
     }
 }
 
+void MainGameState::loadLevel(const std::string& mapPath) {
+    level_platforms.clear();
+    level_enemies.clear();
+    level_transitions.clear();
+
+    try {
+        mapLoader.loadMapa(mapPath.c_str());
+        
+        std::vector<Platform> platforms = mapLoader.extractPlatforms();
+        for (const auto& platform : platforms) {
+            level_platforms.push_back(platform);
+        }
+
+        level_enemies = mapLoader.extractEnemies();
+        level_transitions = mapLoader.extractTransitions();
+        
+        TraceLog(LOG_INFO, "Nivel cargado: %s", mapPath.c_str());
+        TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 
+            (int)level_platforms.size(), (int)level_enemies.size(), (int)level_transitions.size());
+        
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+    }
+}
+
+
 void MainGameState::render()
 {
     BeginDrawing();
+    ClearBackground(RAYWHITE);
+    
+    // Dibujar capas de parallax ANTES de BeginMode2D
+    mapLoader.drawParallaxLayers(camera.getRaylibCamera());
 
     BeginMode2D(camera.getRaylibCamera());
-    ClearBackground(RAYWHITE);
-    mapLoader.draw(camera.getRaylibCamera());
+    
+    // Dibujar las capas de tiles (plataformas, decoraciones)
+    mapLoader.drawTileLayers();
 
     // Renderizar jugadores con animaciones
     float spriteScale = 1.5f;  
@@ -387,7 +515,7 @@ void MainGameState::render()
     int topMargin = 20;
     
     // Colores para cada jugador
-    Color playerColors[2] = {RED, BLUE};
+    // Color playerColors[2] = {RED, BLUE};
     int screenWidth = GetScreenWidth();
     
     // Jugador FIRE (izquierda)

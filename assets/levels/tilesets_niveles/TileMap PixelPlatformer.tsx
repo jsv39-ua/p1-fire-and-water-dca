@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="TileMap PixelPlatformer" tilewidth="18" tileheight="18" spacing="1" tilecount="180" columns="20">
+<tileset version="1.10" tiledversion="1.11.1-99-gec89c545" name="TileMap PixelPlatformer" tilewidth="18" tileheight="18" spacing="1" tilecount="180" columns="20">
  <image source="kenney_pixel-platformer/Tilemap/tilemap.png" width="379" height="170"/>
  <tile id="0">
   <objectgroup>
@@ -21,19 +21,14 @@
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="9">
+ <tile id="4">
   <objectgroup draworder="index" id="2">
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+   <object id="2" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="10">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
-  </objectgroup>
- </tile>
- <tile id="11">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="5">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
  <tile id="20">
@@ -56,19 +51,14 @@
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="29">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="24">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
- <tile id="30">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
-  </objectgroup>
- </tile>
- <tile id="31">
-  <objectgroup>
-   <object id="1" type="Bloque" x="0" y="0" width="18" height="18"/>
+ <tile id="25">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
  <tile id="40">
@@ -149,6 +139,21 @@
  <tile id="83">
   <objectgroup>
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="84">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="message" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="85">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="message" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="86">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="message" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
  <tile id="100">
