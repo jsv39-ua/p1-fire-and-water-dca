@@ -2,6 +2,8 @@
 #include <iostream>
 #include <ResourceManager.hpp>
 #include <AudioManager.hpp>
+#include <filesystem>
+#include <vector>
 
 extern "C" {
     #include <raylib.h>
@@ -16,7 +18,7 @@ Player::Player() : Entity() {
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
     
-    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
+    jumpSound.init("assets/characters/sounds/Hero Damage.mp3");
     jumpSound.setVolume(1.0f);
     life_count = 3;
     invincibility_timer = 0.0f;
@@ -31,8 +33,71 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
 
-    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
-    jumpSound.setVolume(1.0f);
+    // Función helper para cargar todos los archivos de una carpeta
+    auto loadSoundsFromDirectory = [](const std::string& path, std::vector<std::string>& soundList) {
+        try {
+            if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+                for (const auto& entry : std::filesystem::directory_iterator(path)) {
+                    if (entry.is_regular_file()) {
+                        std::string extension = entry.path().extension().string();
+                        // Verificar que sea un archivo de audio válido
+                        if (extension == ".mp3" || extension == ".ogg" || extension == ".wav") {
+                            soundList.push_back(entry.path().string());
+                        }
+                    }
+                }
+            }
+        } catch (const std::filesystem::filesystem_error& e) {
+            TraceLog(LOG_WARNING, "[Player] Error reading directory %s: %s", path.c_str(), e.what());
+        }
+    };
+
+    std::vector<std::string> sonidosDamage;
+    std::vector<std::string> sonidosJump;
+    std::vector<std::string> sonidosDeath;
+
+    switch (t) {
+        case FIRE:
+            loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/damage", sonidosDamage);
+            loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/jump", sonidosJump);
+            loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/death", sonidosDeath);
+            break;
+        case WATER:
+            loadSoundsFromDirectory("assets/characters/sounds/water_sounds/damage", sonidosDamage);
+            loadSoundsFromDirectory("assets/characters/sounds/water_sounds/jump", sonidosJump);
+            loadSoundsFromDirectory("assets/characters/sounds/water_sounds/death", sonidosDeath);
+            
+            // Fallback: si no hay sonidos específicos de agua, usar los de fuego
+            if (sonidosJump.empty()) {
+                loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/jump", sonidosJump);
+                TraceLog(LOG_INFO, "[Player] Water player using fire jump sounds as fallback");
+            }
+            if (sonidosDamage.empty()) {
+                loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/damage", sonidosDamage);
+                TraceLog(LOG_INFO, "[Player] Water player using fire damage sounds as fallback");
+            }
+            if (sonidosDeath.empty()) {
+                loadSoundsFromDirectory("assets/characters/sounds/fire_sounds/death", sonidosDeath);
+                TraceLog(LOG_INFO, "[Player] Water player using fire death sounds as fallback");
+            }
+            break;
+        default:
+            // Fallback para tipo NONE
+            sonidosJump.push_back("assets/characters/sounds/Hero Jump.mp3");
+            break;
+    }
+
+    // Inicializar sonidos solo si hay archivos cargados
+    if (!sonidosDamage.empty()) {
+        damageSound.init(sonidosDamage);
+    }
+    if (!sonidosJump.empty()) {
+        jumpSound.init(sonidosJump);
+        jumpSound.setVolume(1.0f);
+    }
+    if (!sonidosDeath.empty()) {
+        deathSound.init(sonidosDeath);
+    }
     
     walkMusic = ResourceManager::getInstance()->loadMusic("assets/characters/sounds/Hero Walk Footsteps Stone.mp3");
     
@@ -116,6 +181,7 @@ void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
 
 void Player::updateLifeCount(int change) {
     life_count += change;
+    
     if (life_count < 0) {
         life_count = 0;
     }
