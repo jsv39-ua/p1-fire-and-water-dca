@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 extern "C" {
     #include <raylib.h>
@@ -23,6 +24,9 @@ class SoundPlayer {
         // Inicializa el sistema de audio concurrente cargando el sonido desde el archivo
         void init(const std::string& filePath);
         
+        // Inicializa con múltiples archivos de sonido (se elegirá uno aleatorio al reproducir)
+        void init(const std::vector<std::string>& filePaths);
+        
         // Reproduce el sonido usando uno de los canales disponibles
         void play();
         
@@ -34,10 +38,12 @@ class SoundPlayer {
 
     private:
         static const int MAX_SOUNDS = 10;
-        Sound soundArray[MAX_SOUNDS];
+        static const int MAX_VARIANTS = 5;  // Máximo de variantes de sonido
+        Sound soundArray[MAX_VARIANTS][MAX_SOUNDS];  // [variante][canal]
         int currentSound;
+        int numVariants;  // Número de variantes cargadas
         bool initialized;
-        std::string loadedFilePath;
+        std::vector<std::string> loadedFilePaths;
         float currentVolume;  // Rastrear el volumen actual
         
         // Método privado para limpiar recursos

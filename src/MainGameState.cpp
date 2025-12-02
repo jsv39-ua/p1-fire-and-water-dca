@@ -252,7 +252,11 @@ void MainGameState::update(float deltaTime)
                 
                 if (enemy.type == dangerousType && !players[i].isInvincible()) {
                     players[i].updateLifeCount(-1);
-                    players[i].damageSound.play();
+
+                    // Para no reproducir sonido de daño y muerte a la vez
+                    if(players[i].getLifeCount() > 0)
+                        players[i].damageSound.play();
+
                     if (players[i].getLifeCount() <= 0) {
                         // Activar timer de muerte en vez de cambiar inmediatamente
                         playerDying = true;

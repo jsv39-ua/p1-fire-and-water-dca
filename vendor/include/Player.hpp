@@ -10,6 +10,7 @@ public:
 
     SoundPlayer jumpSound;
     SoundPlayer damageSound;
+    SoundPlayer deathSound;
     Music walkMusic;
     bool isWalkMusicPlaying;
 
