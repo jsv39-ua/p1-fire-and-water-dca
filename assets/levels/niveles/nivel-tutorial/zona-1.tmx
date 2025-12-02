@@ -21,7 +21,7 @@
    </properties>
   </object>
  </objectgroup>
- <imagelayer id="4" name="Capa fondo" offsetx="-481.333" offsety="-155.333" parallaxy="0.8">
+ <imagelayer id="4" name="Capa fondo" offsetx="-481.333" offsety="-177.333" parallaxy="0.8">
   <image source="../../../backgrounds/background1.png" width="942" height="514"/>
  </imagelayer>
  <layer id="2" name="Capa decorativos" width="49" height="23">
