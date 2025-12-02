@@ -2,12 +2,12 @@
 <map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="49" height="22" tilewidth="18" tileheight="18" infinite="0" nextlayerid="6" nextobjectid="6">
  <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
  <objectgroup id="5" name="Transitions">
-  <object id="5" x="340" y="-70" width="430" height="69">
+  <object id="5" x="339.938" y="-87.0313" width="430" height="69">
    <properties>
     <property name="direction" value="up"/>
     <property name="targetMap" value="zona-2.tmx"/>
-    <property name="targetSpawnX" type="float" value="50"/>
-    <property name="targetSpawnY" type="float" value="450"/>
+    <property name="targetSpawnX" type="float" value="180"/>
+    <property name="targetSpawnY" type="float" value="230"/>
     <property name="transitionType" value="instant"/>
    </properties>
   </object>

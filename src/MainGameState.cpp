@@ -61,33 +61,7 @@ void MainGameState::init()
     camera.zoom = 2.0f;
 
     // Inicialización del MapLoader
-    try {
-        mapLoader.loadMapa("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
-        
-        std::vector<Platform> platforms = mapLoader.extractPlatforms();
-        
-        for (const auto& platform : platforms) {
-            level_platforms.push_back(platform);
-        }
-
-        // Debug: Log GOAL platforms found
-        int goalCount = 0;
-        for (const auto& p : level_platforms) {
-            if (p.type == GOAL) {
-                goalCount++;
-                TraceLog(LOG_INFO, "GOAL platform in level_platforms at x=%f y=%f w=%f h=%f", p.bounds.x, p.bounds.y, p.bounds.width, p.bounds.height);
-            }
-        }
-        TraceLog(LOG_INFO, "Total GOAL platforms: %d", goalCount);
-
-        level_enemies = mapLoader.extractEnemies();
-        
-        TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
-        
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
-        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
-    }
+    loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
 
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
@@ -243,6 +217,53 @@ void MainGameState::update(float deltaTime)
         }
     }
 
+    // Check for transitions
+    bool fire_in_transition = false;
+    bool water_in_transition = false;
+    MapTransition* active_transition = nullptr;
+
+    for (auto& transition : level_transitions) {
+        if (CheckCollisionRecs(fire_player.bounds, transition.bounds)) {
+            fire_in_transition = true;
+        }
+        if (CheckCollisionRecs(water_player.bounds, transition.bounds)) {
+            water_in_transition = true;
+        }
+        
+        if (fire_in_transition && water_in_transition) {
+            active_transition = &transition;
+            break;
+        } else {
+            // Reset if not both in the same transition
+            fire_in_transition = false;
+            water_in_transition = false;
+        }
+    }
+
+    if (active_transition) {
+        TraceLog(LOG_INFO, "Transition triggered to %s", active_transition->targetMap.c_str());
+        
+        // Store velocities to preserve momentum
+        Vector2 fire_vel = fire_player.velocity;
+        Vector2 water_vel = water_player.velocity;
+        
+        // Load new level
+        std::string fullPath = "assets/levels/niveles/nivel-tutorial/" + active_transition->targetMap;
+        loadLevel(fullPath);
+        
+        // Set positions
+        fire_player.position = active_transition->targetSpawn;
+        water_player.position = { active_transition->targetSpawn.x + 40, active_transition->targetSpawn.y }; 
+
+        // Restore velocity
+        fire_player.velocity = fire_vel;
+        water_player.velocity = water_vel;
+        
+        // Update bounds immediately
+        fire_player.update(0); 
+        water_player.update(0);
+    }
+
     // Debug: Check collisions and display logs for enemies (already handled below)
 
     Vector2 midPoint = {
@@ -290,17 +311,42 @@ void MainGameState::update(float deltaTime)
     camera.target.y = roundf(camera.target.y);
 
     // Comprobar si algún jugador se ha caido por debajo del mapa (p.ej. agua debajo del mapa)
-    float mapBottom = mapBounds.y + mapBounds.height;
-    bool fire_fell_below = (fire_player.bounds.y + fire_player.bounds.height) > (mapBottom + 1.0f);
-    bool water_fell_below = (water_player.bounds.y + water_player.bounds.height) > (mapBottom + 1.0f);
-    if (fire_fell_below || water_fell_below) {
-        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-        return;
-    }
-
-    // (El chequeo para 2 jugadores ha sido sustituido por el chequeo para 1 jugador arriba.)
+    //float mapBottom = mapBounds.y + mapBounds.height;
+    //bool fire_fell_below = (fire_player.bounds.y + fire_player.bounds.height) > (mapBottom + 1.0f);
+    //bool water_fell_below = (water_player.bounds.y + water_player.bounds.height) > (mapBottom + 1.0f);
+    //if (fire_fell_below || water_fell_below) {
+    //    TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+    //    this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+    //    return;
+    //}
 }
+
+void MainGameState::loadLevel(const std::string& mapPath) {
+    level_platforms.clear();
+    level_enemies.clear();
+    level_transitions.clear();
+
+    try {
+        mapLoader.loadMapa(mapPath.c_str());
+        
+        std::vector<Platform> platforms = mapLoader.extractPlatforms();
+        for (const auto& platform : platforms) {
+            level_platforms.push_back(platform);
+        }
+
+        level_enemies = mapLoader.extractEnemies();
+        level_transitions = mapLoader.extractTransitions();
+        
+        TraceLog(LOG_INFO, "Nivel cargado: %s", mapPath.c_str());
+        TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 
+            (int)level_platforms.size(), (int)level_enemies.size(), (int)level_transitions.size());
+        
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
+        this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
+    }
+}
+
 
 void MainGameState::render()
 {
