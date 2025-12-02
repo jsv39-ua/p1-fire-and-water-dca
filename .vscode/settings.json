@@ -75,6 +75,7 @@
         "charconv": "cpp",
         "format": "cpp",
         "cinttypes": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "unordered_set": "cpp"
     }
 }

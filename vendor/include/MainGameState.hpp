@@ -50,4 +50,9 @@ private:
 
     MapLoader mapLoader;
     Camera2D camera;
+    
+    // Timer para muerte del jugador
+    bool playerDying = false;
+    float deathTimer = 0.0f;
+    static constexpr float DEATH_DELAY = 1.5f; // 1.5 segundos antes de Game Over
 };
