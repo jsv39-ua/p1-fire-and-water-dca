@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <GameOverState.hpp>
+#include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
 #include <StateMachine.hpp>
 #include <Player.hpp>
@@ -65,12 +66,23 @@ void MainGameState::init()
     try {
         mapLoader.loadMapa("assets/levels/niveles/nivel-tutorial/nivel-tutorial.tmx");
         
-        std::vector<Rectangle> collisions = mapLoader.extractCollisions();
+        std::vector<Platform> platforms = mapLoader.extractPlatforms();
         
-        for (const auto& collision : collisions) {
-            Platform platform = { collision, NONE };
+        for (const auto& platform : platforms) {
             level_platforms.push_back(platform);
         }
+
+        // Debug: Log GOAL platforms found
+        int goalCount = 0;
+        for (const auto& p : level_platforms) {
+            if (p.type == GOAL) {
+                goalCount++;
+                TraceLog(LOG_INFO, "GOAL platform in level_platforms at x=%f y=%f w=%f h=%f", p.bounds.x, p.bounds.y, p.bounds.width, p.bounds.height);
+            }
+        }
+        TraceLog(LOG_INFO, "Total GOAL platforms: %d", goalCount);
+
+        level_enemies = mapLoader.extractEnemies();
         
         TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
         
@@ -78,21 +90,6 @@ void MainGameState::init()
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
-
-    Platform goal = Platform({ 400, 390, 100, 50 }, GOAL);
-    level_platforms.push_back(goal);
-
-    Platform lava = Platform({ 200, 350, 100, 50 }, FIRE);
-    level_platforms.push_back(lava);
-
-    Platform water = Platform({ 550, 350, 100, 50 }, WATER);
-    level_platforms.push_back(water);
-    
-    Enemy fire_enemy = { { 450, 270, 25, 25 }, FIRE, 60.0f };
-    level_enemies.push_back(fire_enemy);
-    
-    Enemy water_enemy = { { 650, 370, 25, 25 }, WATER, 70.0f };
-    level_enemies.push_back(water_enemy);
 
     fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
     fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
@@ -105,6 +102,12 @@ void MainGameState::handleInput()
 {
     if (IsKeyPressed(KEY_ESCAPE)) {
         this->state_machine->add_state(std::make_unique<PauseMenuState>(), false);
+        return;
+    }
+
+    // TECLA DE PRUEBA: pulsar '1' fuerza Game Over (útil para testing)
+    if (IsKeyPressed(KEY_ONE)) {
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         return;
     }
 
@@ -142,6 +145,23 @@ void MainGameState::handleInput()
     if (IsKeyPressed(waterJump) && water_on_ground) {
         water_player.jump();
     }
+
+    // Debug: Spawn enemies during gameplay
+    if (IsKeyPressed(KEY_E)) {
+        // Spawn a FIRE enemy (affects Water player) near the Fire player, vertical movement
+        Rectangle b = { fire_player.position.x + 100, fire_player.position.y - 32, 32, 32 };
+        Enemy en(b, FIRE, 90.0f, /*vertical=*/true);
+        level_enemies.push_back(en);
+        TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
+    }
+
+    if (IsKeyPressed(KEY_R)) {
+        // Spawn a WATER enemy (affects Fire player) near the Water player, horizontal movement
+        Rectangle b = { water_player.position.x + 100, water_player.position.y - 32, 32, 32 };
+        Enemy en2(b, WATER, 150.0f, /*vertical=*/false);
+        level_enemies.push_back(en2);
+        TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
+    }
 }
 
 void MainGameState::update(float deltaTime)
@@ -151,6 +171,12 @@ void MainGameState::update(float deltaTime)
 
     fire_player.update(deltaTime);
     water_player.update(deltaTime);
+    
+    int fireJump = SettingsManager::getInstance()->getFireJump();
+    int waterJump = SettingsManager::getInstance()->getWaterJump();
+    
+    fire_player.updateJump(deltaTime, IsKeyDown(fireJump));
+    water_player.updateJump(deltaTime, IsKeyDown(waterJump));
 
     if (fire_player.velocity.x != 0) {
         fire_walk_animation.animationUpdate(deltaTime);
@@ -195,7 +221,9 @@ void MainGameState::update(float deltaTime)
         }
 
         if (fire_collision == 3 && water_collision == 3) {
-            this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
+            // Ambos jugadores han llegado a la puerta (GOAL): avanzar a siguiente nivel placeholder
+            TraceLog(LOG_INFO, "Ambos jugadores han alcanzado la GOAL: cambiando a SimpleLevelState");
+            this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
         }
     }
 
@@ -216,6 +244,8 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+
+    // Debug: Check collisions and display logs for enemies (already handled below)
 
     Vector2 midPoint = {
         (fire_player.position.x + water_player.position.x) / 2.0f,
@@ -260,6 +290,18 @@ void MainGameState::update(float deltaTime)
     
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
+
+    // Comprobar si algún jugador se ha caido por debajo del mapa (p.ej. agua debajo del mapa)
+    float mapBottom = mapBounds.y + mapBounds.height;
+    bool fire_fell_below = (fire_player.bounds.y + fire_player.bounds.height) > (mapBottom + 1.0f);
+    bool water_fell_below = (water_player.bounds.y + water_player.bounds.height) > (mapBottom + 1.0f);
+    if (fire_fell_below || water_fell_below) {
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        return;
+    }
+
+    // (El chequeo para 2 jugadores ha sido sustituido por el chequeo para 1 jugador arriba.)
 }
 
 void MainGameState::render()
@@ -337,7 +379,12 @@ void MainGameState::render()
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
         if(platform.type == GOAL){
-            DrawRectangleRec(platform.bounds, YELLOW);
+            // Dibujamos la puerta como rectángulo negro relleno, borde y etiqueta para depuración
+            DrawRectangleRec(platform.bounds, BLACK);
+            DrawRectangleLinesEx(platform.bounds, 3, MAGENTA);
+            std::string label = "PUERTA";
+            int textW = MeasureText(label.c_str(), 10);
+            DrawText(label.c_str(), platform.bounds.x + (platform.bounds.width - textW) / 2, platform.bounds.y - 12, 10, MAGENTA);
         }
         else if(platform.type == FIRE){
             DrawRectangleRec(platform.bounds, MAROON);
@@ -349,6 +396,15 @@ void MainGameState::render()
     
     for (auto& enemy : level_enemies) {
         enemy.render();
+    }
+    // Debug: draw outlines and labels for enemies
+    for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
+        Enemy &en = level_enemies[ei];
+        DrawRectangleLinesEx(en.bounds, 2, YELLOW);
+        const char* typeLabel = (en.type == FIRE) ? "FIRE" : (en.type == WATER ? "WATER" : "NONE");
+        std::string lab = "ENEMY(" + std::string(typeLabel) + ")";
+        int tw = MeasureText(lab.c_str(), 12);
+        DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
     }
     EndMode2D();
     

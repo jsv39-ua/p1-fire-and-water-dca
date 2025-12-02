@@ -12,6 +12,7 @@ Player::Player() : Entity() {
     key_left = 0;
     key_right = 0;
     key_jump = 0;
+    jump_hold_timer = 0.0f;
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -20,6 +21,7 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_left = 0;
     key_right = 0;
     key_jump = 0;
+    jump_hold_timer = 0.0f;
 }
 
 void Player::setKeys(int left, int right, int jump) {
@@ -66,6 +68,14 @@ void Player::walk(int direction) {
 
 void Player::jump() {
     velocity.y = -JUMP_FORCE;
+    jump_hold_timer = 0.0f; // Reiniciar timer al saltar
+}
+
+void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
+    if (jumpKeyHeld && velocity.y < 0 && jump_hold_timer < MAX_JUMP_HOLD_TIME) {
+        velocity.y -= JUMP_BOOST * deltaTime; 
+        jump_hold_timer += deltaTime;
+    }
 }
 
 /*

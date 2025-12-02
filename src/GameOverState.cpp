@@ -71,8 +71,7 @@ void GameOverState::render() {
     DrawText(message2, x2, y2, 20, DARKGRAY);
     DrawText(message, x, y, 30, YELLOW);
 
-    DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText("MENU DE PAUSA", optionsButton.x + 10, optionsButton.y + 12, 20, BLACK);
+
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
     DrawText("MENU PRINCIPAL", exitButton.x + 10, exitButton.y + 12, 20, BLACK);
 
