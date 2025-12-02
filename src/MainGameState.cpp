@@ -244,7 +244,13 @@ void MainGameState::update(float deltaTime)
         }
     }
 
-    // Check for transitions
+    handleTransitions();
+    handleMapBoundaries();
+    updateCamera(deltaTime);
+    checkFallDeath();
+}
+
+void MainGameState::handleTransitions() {
     bool fire_in_transition = false;
     bool water_in_transition = false;
     MapTransition* active_transition = nullptr;
@@ -290,22 +296,11 @@ void MainGameState::update(float deltaTime)
         players[0].update(0); 
         players[1].update(0);
     }
+}
 
-    // Actualizar cámara (punto medio entre ambos jugadores)
-    Vector2 midPoint = {
-        (players[0].position.x + players[1].position.x) / 2.0f,
-        (players[0].position.y + players[1].position.y) / 2.0f
-    };
-    
-    float cameraSpeed = 3.0f * deltaTime;
-    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
-    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
-    
-    // Aplicar límites de la cámara
+void MainGameState::handleMapBoundaries() {
     Rectangle mapBounds = mapLoader.getMapBounds();
 
-    // Restringir jugadores a los límites laterales del mapa (Clamp X)
-    // Solo si están dentro de una transición (esperando al compañero).
     for (int i = 0; i < 2; i++) {
         bool inTransition = false;
         Rectangle tBounds = {0,0,0,0};
@@ -326,9 +321,6 @@ void MainGameState::update(float deltaTime)
                 if (players[i].velocity.y > 0) players[i].velocity.y = 0;
             }
 
-            // Si está en transición, permitimos que salga del mapa pero lo limitamos
-            // a los bordes de la zona de transición.
-            
             // Límite Izquierdo (si la transición está a la izquierda)
             if (tBounds.x < mapBounds.x) {
                 if (players[i].position.x < tBounds.x) {
@@ -366,6 +358,19 @@ void MainGameState::update(float deltaTime)
         // Actualizar bounds tras modificar posición
         players[i].update(0); 
     }
+}
+
+void MainGameState::updateCamera(float deltaTime) {
+    Vector2 midPoint = {
+        (players[0].position.x + players[1].position.x) / 2.0f,
+        (players[0].position.y + players[1].position.y) / 2.0f
+    };
+    
+    float cameraSpeed = 3.0f * deltaTime;
+    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
+    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
+    
+    Rectangle mapBounds = mapLoader.getMapBounds();
     
     float screenWidth = 1280.0f;  
     float screenHeight = 720.0f;
@@ -392,9 +397,10 @@ void MainGameState::update(float deltaTime)
     
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
+}
 
-    // Comprobar si algún jugador se ha caido por debajo del mapa
-    // Se permite caer hasta 200px por debajo antes de morir
+void MainGameState::checkFallDeath() {
+    Rectangle mapBounds = mapLoader.getMapBounds();
     float mapBottom = mapBounds.y + mapBounds.height;
     float deathThreshold = 200.0f;
 
@@ -406,6 +412,7 @@ void MainGameState::update(float deltaTime)
         this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         return;
     }
+}
 }
 
 void MainGameState::loadLevel(const std::string& mapPath) {
