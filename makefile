@@ -1,44 +1,37 @@
-# Detectar sistema operativo
-ifeq ($(OS),Windows_NT)
-    # Windows
-    DETECTED_OS := Windows
-    LIB_DIR = vendor/lib/windows
-    LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
-    EXT = .exe
-    RM = rm
-    MKDIR = mkdir
-else
-    # Linux
-    DETECTED_OS := Linux
-    LIB_DIR = vendor/lib/linux
-    LIBS = -lraylib -lGL -lm -lpthread -lrt -lX11
-    EXT =
-    RM = rm -f
-    MKDIR = mkdir -p
+# Makefile Todo Terreno (Busca en todas partes)
+CXX      := g++
+CXXFLAGS := -Iinclude -Ivendor/include -Wall -std=c++17 -MMD -MP
+LDFLAGS  := -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+
+# Configuración de CCACHE
+ifdef CCACHE
+    CXX := ccache g++
 endif
 
-# Configuración común
-CXX = g++
-CXXFLAGS = -I vendor/include/
-LDFLAGS = -L $(LIB_DIR)
-SRC = $(wildcard src/*.cpp)
-TARGET = game$(EXT)
+OBJ_DIR  := obj
+BIN      := game
 
-# Regla principal
-all: info $(TARGET)
+# BUSCAR TODOS LOS .cpp recursivamente en src, core y graphics
+SOURCES  := $(shell find src core graphics -name "*.cpp" 2>/dev/null)
+OBJECTS  := $(SOURCES:%.cpp=$(OBJ_DIR)/%.o)
 
-info:
-	@echo "Compilando para $(DETECTED_OS)..."
-	@echo "Usando librerías de: $(LIB_DIR)"
+# Regla Principal
+all: $(BIN)
 
-$(TARGET): $(SRC)
-	$(CXX) -o $(TARGET) $(SRC) $(CXXFLAGS) $(LDFLAGS) $(LIBS)
-	@echo "Compilación exitosa!"
+$(BIN): $(OBJECTS)
+	@echo "Enlazando ejecutable..."
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
+# Compilación de objetos (Mantiene estructura de carpetas en obj/)
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Limpieza
 clean:
-	$(RM) $(TARGET)
+	rm -rf $(OBJ_DIR) $(BIN)
 
-run: $(TARGET)
-	./$(TARGET)
+run: $(BIN)
+	./$(BIN)
 
-.PHONY: all clean run info
+-include $(OBJECTS:.o=.d)

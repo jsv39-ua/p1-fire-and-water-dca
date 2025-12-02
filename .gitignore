@@ -48,3 +48,6 @@ apunte.txt
 
 game
 build/
+obj/
+lib/
+benchmark_results.txt

@@ -91,12 +91,12 @@ endif()
 # - The library (game_core) contains game logic, states, entities and helpers
 # - The executable contains only the entry point 'main.cpp' and the linking
 
-file(GLOB_RECURSE ALL_SRC CONFIGURE_DEPENDS
-    ${CMAKE_SOURCE_DIR}/src/*.cpp
-)
+file(GLOB_RECURSE SRC_CORE CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/core/*.cpp)
+file(GLOB_RECURSE SRC_GRAPHICS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/graphics/*.cpp)
+set(ALL_SRC ${SRC_CORE} ${SRC_GRAPHICS})
 
 # Exclude main.cpp from the library (it belongs to the executable)
-set(MAIN_SOURCE "${CMAKE_SOURCE_DIR}/src/main.cpp")
+set(MAIN_SOURCE "${CMAKE_SOURCE_DIR}/src/core/main.cpp")
 set(GAME_CORE_SOURCES)
 foreach(_src IN LISTS ALL_SRC)
     if (NOT _src STREQUAL MAIN_SOURCE)

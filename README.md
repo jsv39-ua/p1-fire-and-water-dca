@@ -10,6 +10,31 @@ donde tengamos la carpeta del repo en windows
 ```bash
 cd "/mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca"
 ```
+## Manual Makefile build (opcional)
+
+Se ha añadido un `Makefile` al proyecto para compilar sin usar CMake. Características:
+
+- Detecta automáticamente fuentes en `src/core` y `src/graphics`.
+- Construye `lib/libgame_core.a` y el ejecutable `game`.
+- Soporta `make`, `make -jN` y `make clean`.
+
+Ejemplo de uso:
+
+```bash
+make -j4
+./game
+make clean
+```
+
+Benchmarking: hay un script en `scripts/benchmark.sh` que realiza pruebas con distintos `-j` y con/sin `ccache`.
+Recuerda marcar el script como ejecutable: `chmod +x scripts/benchmark.sh`.
+
+Si deseas usar `ccache` activamente con el Makefile, ejecuta:
+
+```bash
+CCACHE=1 make -j$(nproc)
+```
+
 borramos el build anterior
 ```bash
 rm -rf build
