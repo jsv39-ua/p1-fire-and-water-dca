@@ -303,6 +303,69 @@ void MainGameState::update(float deltaTime)
     
     // Aplicar límites de la cámara
     Rectangle mapBounds = mapLoader.getMapBounds();
+
+    // Restringir jugadores a los límites laterales del mapa (Clamp X)
+    // Solo si están dentro de una transición (esperando al compañero).
+    for (int i = 0; i < 2; i++) {
+        bool inTransition = false;
+        Rectangle tBounds = {0,0,0,0};
+
+        for (const auto& t : level_transitions) {
+            if (CheckCollisionRecs(players[i].bounds, t.bounds)) {
+                inTransition = true;
+                tBounds = t.bounds;
+                break;
+            }
+        }
+
+        if (inTransition) {
+            // Simular suelo en transiciones laterales: si sale del mapa horizontalmente,
+            // anulamos la gravedad para que no caiga al vacío.
+            if (players[i].position.x < mapBounds.x || 
+                players[i].position.x + players[i].width > mapBounds.x + mapBounds.width) {
+                if (players[i].velocity.y > 0) players[i].velocity.y = 0;
+            }
+
+            // Si está en transición, permitimos que salga del mapa pero lo limitamos
+            // a los bordes de la zona de transición.
+            
+            // Límite Izquierdo (si la transición está a la izquierda)
+            if (tBounds.x < mapBounds.x) {
+                if (players[i].position.x < tBounds.x) {
+                    players[i].position.x = tBounds.x;
+                    players[i].velocity.x = 0;
+                }
+            }
+            
+            // Límite Derecho (si la transición está a la derecha)
+            if (tBounds.x + tBounds.width > mapBounds.x + mapBounds.width) {
+                if (players[i].position.x + players[i].width > tBounds.x + tBounds.width) {
+                    players[i].position.x = tBounds.x + tBounds.width - players[i].width;
+                    players[i].velocity.x = 0;
+                }
+            }
+
+            // Límite Superior (si la transición está arriba)
+            if (tBounds.y < mapBounds.y) {
+                if (players[i].position.y < tBounds.y) {
+                    players[i].position.y = tBounds.y;
+                    players[i].velocity.y = 0;
+                }
+            }
+
+            // Límite Inferior (si la transición está abajo)
+            if (tBounds.y + tBounds.height > mapBounds.y + mapBounds.height) {
+                // Permitir caer hasta el fondo de la transición
+                if (players[i].position.y > tBounds.y + tBounds.height - players[i].height) {
+                    players[i].position.y = tBounds.y + tBounds.height - players[i].height;
+                    players[i].velocity.y = 0; // Detener caída (quedarse flotando)
+                }
+            }
+        }
+
+        // Actualizar bounds tras modificar posición
+        players[i].update(0); 
+    }
     
     float screenWidth = 1280.0f;  
     float screenHeight = 720.0f;
@@ -330,17 +393,19 @@ void MainGameState::update(float deltaTime)
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
 
-    /** Comprobar si algún jugador se ha caido por debajo del mapa
+    // Comprobar si algún jugador se ha caido por debajo del mapa
+    // Se permite caer hasta 200px por debajo antes de morir
     float mapBottom = mapBounds.y + mapBounds.height;
-    bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
-    bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
+    float deathThreshold = 200.0f;
+
+    bool fire_fell_below = (players[0].bounds.y) > (mapBottom + deathThreshold);
+    bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
+    
     if (fire_fell_below || water_fell_below) {
-        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-        // Activar timer de muerte en vez de cambiar inmediatamente
-        playerDying = true;
-        deathTimer = 0.0f;
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         return;
-    } */
+    }
 }
 
 void MainGameState::loadLevel(const std::string& mapPath) {
