@@ -9,13 +9,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g., v1.0.0)'
+        description: 'Etiqueta de version (e.g., v1.0.0)'
         required: false
         default: 'dev-build'
 
 jobs:
   build-linux:
-    name: Build Linux (CMake)
+    name: Build Linux
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -28,7 +28,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
-            cmake \
             libgl1-mesa-dev \
             libx11-dev \
             libxrandr-dev \
