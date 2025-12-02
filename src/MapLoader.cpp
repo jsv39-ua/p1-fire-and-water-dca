@@ -46,6 +46,40 @@ void MapLoader::unloadMapa() {
     this->mapa = nullptr;
 }
 
+void MapLoader::drawTileLayer(TmxLayer* layer, TmxTileLayer* tileLayer) {
+    for (uint32_t y = 0; y < tileLayer->height; y++) {
+        for (uint32_t x = 0; x < tileLayer->width; x++) {
+            uint32_t index = y * tileLayer->width + x;
+            uint32_t gid = tileLayer->tiles[index];
+            
+            if (gid == 0) continue; // Tile vacío
+            
+            TileData tData = GetTileDataFromGID(gid);
+            
+            if (tData.valid) {
+                Vector2 position = {
+                    (float)(x * this->mapa->tileWidth) + layer->offsetX,
+                    (float)(y * this->mapa->tileHeight) + layer->offsetY
+                };
+                
+                Rectangle dest = {
+                    position.x,
+                    position.y,
+                    (float)this->mapa->tileWidth,
+                    (float)this->mapa->tileHeight
+                };
+                
+                DrawTexturePro(tData.texture, 
+                              tData.source, 
+                              dest, 
+                              (Vector2){0, 0}, 
+                              0.0f, 
+                              WHITE);
+            }
+        }
+    }
+}
+
 void MapLoader::draw(const Camera2D& camera) {
     if (this->mapa == nullptr) {
         TraceLog(LOG_WARNING, "No hay mapa cargado para dibujar.");
@@ -83,38 +117,7 @@ void MapLoader::draw(const Camera2D& camera) {
         // Renderizar capas de tiles normalmente
         else if (layer->type == LAYER_TYPE_TILE_LAYER) {
             TmxTileLayer* tileLayer = &layer->exact.tileLayer;
-            
-            for (uint32_t y = 0; y < tileLayer->height; y++) {
-                for (uint32_t x = 0; x < tileLayer->width; x++) {
-                    uint32_t index = y * tileLayer->width + x;
-                    uint32_t gid = tileLayer->tiles[index];
-                    
-                    if (gid == 0) continue; // Tile vacío
-                    
-                    TileData tData = GetTileDataFromGID(gid);
-                    
-                    if (tData.valid) {
-                        Vector2 position = {
-                            (float)(x * this->mapa->tileWidth) + layer->offsetX,
-                            (float)(y * this->mapa->tileHeight) + layer->offsetY
-                        };
-                        
-                        Rectangle dest = {
-                            position.x,
-                            position.y,
-                            (float)this->mapa->tileWidth,
-                            (float)this->mapa->tileHeight
-                        };
-                        
-                        DrawTexturePro(tData.texture, 
-                                      tData.source, 
-                                      dest, 
-                                      (Vector2){0, 0}, 
-                                      0.0f, 
-                                      WHITE);
-                    }
-                }
-            }
+            drawTileLayer(layer, tileLayer);
         }
     }
 }
@@ -167,38 +170,7 @@ void MapLoader::drawTileLayers() {
 
         if (layer->type == LAYER_TYPE_TILE_LAYER) {
             TmxTileLayer* tileLayer = &layer->exact.tileLayer;
-            
-            for (uint32_t y = 0; y < tileLayer->height; y++) {
-                for (uint32_t x = 0; x < tileLayer->width; x++) {
-                    uint32_t index = y * tileLayer->width + x;
-                    uint32_t gid = tileLayer->tiles[index];
-                    
-                    if (gid == 0) continue;
-                    
-                    TileData tData = GetTileDataFromGID(gid);
-                    
-                    if (tData.valid) {
-                        Vector2 position = {
-                            (float)(x * this->mapa->tileWidth) + layer->offsetX,
-                            (float)(y * this->mapa->tileHeight) + layer->offsetY
-                        };
-                        
-                        Rectangle dest = {
-                            position.x,
-                            position.y,
-                            (float)this->mapa->tileWidth,
-                            (float)this->mapa->tileHeight
-                        };
-                        
-                        DrawTexturePro(tData.texture, 
-                                      tData.source, 
-                                      dest, 
-                                      (Vector2){0, 0}, 
-                                      0.0f, 
-                                      WHITE);
-                    }
-                }
-            }
+            drawTileLayer(layer, tileLayer);
         }
     }
 }
