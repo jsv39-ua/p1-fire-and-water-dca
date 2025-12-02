@@ -206,6 +206,40 @@ void MainGameState::update(float deltaTime)
             return;
         }
     }
+    
+    // Controlar música de pasos del jugador de fuego
+    if (fire_player.velocity.x != 0 && fire_on_ground) {
+        if (!fire_player.isWalkMusicPlaying) {
+            if (IsMusicValid(fire_player.walkMusic)) {
+                PlayMusicStream(fire_player.walkMusic);
+                fire_player.isWalkMusicPlaying = true;
+                TraceLog(LOG_INFO, "[MainGameState] Fire player walk music started");
+            }
+        }
+    } else {
+        if (fire_player.isWalkMusicPlaying) {
+            StopMusicStream(fire_player.walkMusic);
+            fire_player.isWalkMusicPlaying = false;
+            TraceLog(LOG_INFO, "[MainGameState] Fire player walk music stopped");
+        }
+    }
+    
+    // Controlar música de pasos del jugador de agua
+    if (water_player.velocity.x != 0 && water_on_ground) {
+        if (!water_player.isWalkMusicPlaying) {
+            if (IsMusicValid(water_player.walkMusic)) {
+                PlayMusicStream(water_player.walkMusic);
+                water_player.isWalkMusicPlaying = true;
+                TraceLog(LOG_INFO, "[MainGameState] Water player walk music started");
+            }
+        }
+    } else {
+        if (water_player.isWalkMusicPlaying) {
+            StopMusicStream(water_player.walkMusic);
+            water_player.isWalkMusicPlaying = false;
+            TraceLog(LOG_INFO, "[MainGameState] Water player walk music stopped");
+        }
+    }
 
     // Verificar colisiones con enemigos
     for (auto& enemy : level_enemies) {
