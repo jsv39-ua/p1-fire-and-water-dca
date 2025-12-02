@@ -2,7 +2,6 @@
 
 #include <Entity.hpp>
 #include <Platform.hpp>
-#include <SoundPlayer.hpp>
 
 class Player : public Entity {
 public:
