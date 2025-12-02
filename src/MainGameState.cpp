@@ -230,16 +230,23 @@ void MainGameState::update(float deltaTime)
     for (auto& enemy : level_enemies) {
         enemy.update(deltaTime);
         
+        // Solo aplicar daño si el jugador NO está invencible
         if (CheckCollisionRecs(fire_player.bounds, enemy.bounds)) {
-            if (enemy.type == WATER) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+            if (enemy.type == WATER && !fire_player.isInvincible()) {
+                fire_player.updateLifeCount(-1);
+                if( fire_player.getLifeCount() <= 0 ) {
+                    this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                }
                 return;
             }
         }
         
         if (CheckCollisionRecs(water_player.bounds, enemy.bounds)) {
-            if (enemy.type == FIRE) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+            if (enemy.type == FIRE && !water_player.isInvincible()) {
+                water_player.updateLifeCount(-1);
+                if( water_player.getLifeCount() <= 0 ) {   
+                    this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                }
                 return;
             }
         }
@@ -338,12 +345,15 @@ void MainGameState::render()
     float fireRenderX = fire_player.position.x + (fire_player.width / 2.0f) - (renderWidth / 2.0f);
     float fireRenderY = fire_player.position.y + fire_player.height - renderHeight;
     
-    DrawTexturePro(character1, 
-                   fireSourceRect,  
-                   (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
-                   (Vector2){0, 0}, 
-                   0.0f, 
-                   WHITE);
+    // Dibujar solo si debe ser visible (parpadeo durante invencibilidad)
+    if (fire_player.shouldRenderVisible()) {
+        DrawTexturePro(character1, 
+                       fireSourceRect,  
+                       (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
+                       (Vector2){0, 0}, 
+                       0.0f, 
+                       WHITE);
+    }
     
     
     Rectangle waterSourceRect;
@@ -363,12 +373,15 @@ void MainGameState::render()
     float waterRenderX = water_player.position.x + (water_player.width / 2.0f) - (renderWidth / 2.0f);
     float waterRenderY = water_player.position.y + water_player.height - renderHeight;
     
-    DrawTexturePro(character2, 
-                   waterSourceRect,
-                   (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
-                   (Vector2){0, 0}, 
-                   0.0f, 
-                   WHITE);
+    // Dibujar solo si debe ser visible (parpadeo durante invencibilidad)
+    if (water_player.shouldRenderVisible()) {
+        DrawTexturePro(character2, 
+                       waterSourceRect,
+                       (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
+                       (Vector2){0, 0}, 
+                       0.0f, 
+                       WHITE);
+    }
 
     // Debug
     DrawRectangleLinesEx(fire_player.bounds, 2, GREEN);
@@ -407,6 +420,49 @@ void MainGameState::render()
         DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
     }
     EndMode2D();
+    
+    // Dibujar vidas de los jugadores (UI fija en pantalla)
+    int maxLives = 3;
+    int heartSize = 30;
+    int heartSpacing = 5;
+    int marginFromEdge = 20;
+    int topMargin = 20;
+    
+    // Vidas del jugador de FUEGO (esquina superior izquierda, en rojo)
+    int fireLives = fire_player.getLifeCount();
+    for (int i = 0; i < maxLives; i++) {
+        int x = marginFromEdge + i * (heartSize + heartSpacing);
+        int y = topMargin;
+        
+        if (i < fireLives) {
+            // Vida llena - rojo
+            DrawRectangle(x, y, heartSize, heartSize, RED);
+            DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+        } else {
+            // Vida vacía - gris
+            DrawRectangle(x, y, heartSize, heartSize, GRAY);
+            DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+        }
+    }
+    
+    // Vidas del jugador de AGUA (esquina superior derecha, en azul)
+    int waterLives = water_player.getLifeCount();
+    int screenWidth = GetScreenWidth();
+    for (int i = 0; i < maxLives; i++) {
+        // Dibujamos de derecha a izquierda
+        int x = screenWidth - marginFromEdge - (i + 1) * (heartSize + heartSpacing) + heartSpacing;
+        int y = topMargin;
+        
+        if (i < waterLives) {
+            // Vida llena - azul
+            DrawRectangle(x, y, heartSize, heartSize, BLUE);
+            DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+        } else {
+            // Vida vacía - gris
+            DrawRectangle(x, y, heartSize, heartSize, GRAY);
+            DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+        }
+    }
     
     renderGlobalUI();
     
