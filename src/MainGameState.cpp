@@ -13,15 +13,15 @@ extern "C" {
     #include <raylib.h>
 }
 
-MainGameState::MainGameState()
+MainGameState::MainGameState() : playerDying(false), deathTimer(0.0f)
 {
 }
 
 void MainGameState::init()
 {
     // Cargar texturas de personajes
-    character_textures[0] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
-    character_textures[1] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
+    character_textures[0] = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_A.png");
+    character_textures[1] = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_C.png");
     
     // Calcular dimensiones de cada frame del spritesheet
     int columns = 8; // 8 columnas en el spritesheet
@@ -127,6 +127,7 @@ void MainGameState::handleInput()
         // Control de salto
         if (IsKeyPressed(playerKeys[i][2]) && on_ground[i]) {
             players[i].jump();
+            players[i].jumpSound.play();
         }
     }
 
@@ -150,6 +151,17 @@ void MainGameState::handleInput()
 
 void MainGameState::update(float deltaTime)
 {
+    // Si un jugador está muriendo, contar el timer
+    if (playerDying) {
+        deathTimer += deltaTime;
+        if (deathTimer >= DEATH_DELAY) {
+            this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+            return;
+        }
+        // No actualizar el resto del juego durante la muerte
+        return;
+    }
+    
     // Resetear flags de suelo
     on_ground[0] = false;
     on_ground[1] = false;
@@ -194,7 +206,10 @@ void MainGameState::update(float deltaTime)
                     else waterOnGoal = true;
                     break;
                 case 1:  // Muerte
-                    this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                    // Activar timer de muerte en vez de cambiar inmediatamente
+                    playerDying = true;
+                    deathTimer = 0.0f;
+                    TraceLog(LOG_INFO, "[MainGameState] Player hit deadly platform, starting death timer");
                     return;
             }
         }
@@ -207,37 +222,22 @@ void MainGameState::update(float deltaTime)
         }
     }
     
-    // Controlar música de pasos del jugador de fuego
-    if (fire_player.velocity.x != 0 && fire_on_ground) {
-        if (!fire_player.isWalkMusicPlaying) {
-            if (IsMusicValid(fire_player.walkMusic)) {
-                PlayMusicStream(fire_player.walkMusic);
-                fire_player.isWalkMusicPlaying = true;
-                TraceLog(LOG_INFO, "[MainGameState] Fire player walk music started");
+    // Controlar música de pasos para ambos jugadores
+    for (int i = 0; i < 2; i++) {
+        if (players[i].velocity.x != 0 && on_ground[i]) {
+            if (!players[i].isWalkMusicPlaying) {
+                if (IsMusicValid(players[i].walkMusic)) {
+                    PlayMusicStream(players[i].walkMusic);
+                    players[i].isWalkMusicPlaying = true;
+                    TraceLog(LOG_INFO, "[MainGameState] Player %d walk music started", i);
+                }
             }
-        }
-    } else {
-        if (fire_player.isWalkMusicPlaying) {
-            StopMusicStream(fire_player.walkMusic);
-            fire_player.isWalkMusicPlaying = false;
-            TraceLog(LOG_INFO, "[MainGameState] Fire player walk music stopped");
-        }
-    }
-    
-    // Controlar música de pasos del jugador de agua
-    if (water_player.velocity.x != 0 && water_on_ground) {
-        if (!water_player.isWalkMusicPlaying) {
-            if (IsMusicValid(water_player.walkMusic)) {
-                PlayMusicStream(water_player.walkMusic);
-                water_player.isWalkMusicPlaying = true;
-                TraceLog(LOG_INFO, "[MainGameState] Water player walk music started");
+        } else {
+            if (players[i].isWalkMusicPlaying) {
+                StopMusicStream(players[i].walkMusic);
+                players[i].isWalkMusicPlaying = false;
+                TraceLog(LOG_INFO, "[MainGameState] Player %d walk music stopped", i);
             }
-        }
-    } else {
-        if (water_player.isWalkMusicPlaying) {
-            StopMusicStream(water_player.walkMusic);
-            water_player.isWalkMusicPlaying = false;
-            TraceLog(LOG_INFO, "[MainGameState] Water player walk music stopped");
         }
     }
 
@@ -252,8 +252,13 @@ void MainGameState::update(float deltaTime)
                 
                 if (enemy.type == dangerousType && !players[i].isInvincible()) {
                     players[i].updateLifeCount(-1);
+                    players[i].damageSound.play();
                     if (players[i].getLifeCount() <= 0) {
-                        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                        // Activar timer de muerte en vez de cambiar inmediatamente
+                        playerDying = true;
+                        deathTimer = 0.0f;
+                        players[i].deathSound.play();
+                        TraceLog(LOG_INFO, "[MainGameState] Player %d died, starting death timer", i);
                         return;
                     }
                 }
@@ -306,7 +311,9 @@ void MainGameState::update(float deltaTime)
     bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
     if (fire_fell_below || water_fell_below) {
         TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        // Activar timer de muerte en vez de cambiar inmediatamente
+        playerDying = true;
+        deathTimer = 0.0f;
         return;
     }
 }
