@@ -34,9 +34,7 @@ void MainGameState::init()
     float hitboxHeight = frameHeight;
    
     // Inicialización del personaje de Fuego con tamaño basado en el asset
-    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
-    // Inicialización del personaje de Fuego
-    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
+    fire_player = Player(100.0f, 275.0f, hitboxWidth, hitboxHeight, FIRE);
     
     // Cargar teclas desde SettingsManager
     fire_player.setKeys(
@@ -46,7 +44,7 @@ void MainGameState::init()
     );
 
     // Inicialización del personaje de Agua con tamaño basado en el asset
-    water_player = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
+    water_player = Player(150.0f, 275.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
     water_player.setKeys(
@@ -307,10 +305,15 @@ void MainGameState::update(float deltaTime)
 void MainGameState::render()
 {
     BeginDrawing();
+    ClearBackground(RAYWHITE);
+    
+    // Dibujar capas de parallax ANTES de BeginMode2D
+    mapLoader.drawParallaxLayers(camera);
 
     BeginMode2D(camera);
-    ClearBackground(RAYWHITE);
-    mapLoader.draw(camera);
+    
+    // Dibujar las capas de tiles (plataformas, decoraciones)
+    mapLoader.drawTileLayers();
 
     // Renderizar jugadores con animaciones
     float spriteScale = 1.5f;  

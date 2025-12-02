@@ -42,6 +42,12 @@ public:
     void unloadMapa();
 
     void draw(const Camera2D& camera);
+    
+    // Dibujar solo las capas de parallax (fondos)
+    void drawParallaxLayers(const Camera2D& camera);
+    
+    // Dibujar las capas de tiles y objetos
+    void drawTileLayers();
 
     
     std::vector<Platform> extractPlatforms();

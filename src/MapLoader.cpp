@@ -52,8 +52,155 @@ void MapLoader::draw(const Camera2D& camera) {
         return;
     }
 
-    // Pasar NULL como cámara porque BeginMode2D ya aplica la transformación
-    DrawTMX(this->mapa, NULL, 0, 0, WHITE);
+    // Renderizar capas manualmente para aplicar parallax correctamente
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+        
+        if (!layer->visible) continue;
+
+        // Renderizar capas de imagen con efecto parallax
+        if (layer->type == LAYER_TYPE_IMAGE_LAYER) {
+            TmxImageLayer* imgLayer = &layer->exact.imageLayer;
+            
+            if (imgLayer->image.texture.id > 0) {
+                // Aplicar parallax usando parallaxX y parallaxY
+                float parallaxX = layer->parallaxX;
+                float parallaxY = layer->parallaxY;
+                
+                // Calcular offset con parallax
+                // La posición de la cámara afecta el fondo según el factor de parallax
+                float offsetX = layer->offsetX - (camera.target.x * (1.0f - parallaxX));
+                float offsetY = layer->offsetY - (camera.target.y * (1.0f - parallaxY));
+                
+                // Dibujar la imagen de fondo con el offset de parallax
+                DrawTextureEx(imgLayer->image.texture, 
+                             (Vector2){offsetX, offsetY}, 
+                             0.0f, 
+                             1.0f, 
+                             WHITE);
+            }
+        }
+        // Renderizar capas de tiles normalmente
+        else if (layer->type == LAYER_TYPE_TILE_LAYER) {
+            TmxTileLayer* tileLayer = &layer->exact.tileLayer;
+            
+            for (uint32_t y = 0; y < tileLayer->height; y++) {
+                for (uint32_t x = 0; x < tileLayer->width; x++) {
+                    uint32_t index = y * tileLayer->width + x;
+                    uint32_t gid = tileLayer->tiles[index];
+                    
+                    if (gid == 0) continue; // Tile vacío
+                    
+                    TileData tData = GetTileDataFromGID(gid);
+                    
+                    if (tData.valid) {
+                        Vector2 position = {
+                            (float)(x * this->mapa->tileWidth) + layer->offsetX,
+                            (float)(y * this->mapa->tileHeight) + layer->offsetY
+                        };
+                        
+                        Rectangle dest = {
+                            position.x,
+                            position.y,
+                            (float)this->mapa->tileWidth,
+                            (float)this->mapa->tileHeight
+                        };
+                        
+                        DrawTexturePro(tData.texture, 
+                                      tData.source, 
+                                      dest, 
+                                      (Vector2){0, 0}, 
+                                      0.0f, 
+                                      WHITE);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void MapLoader::drawParallaxLayers(const Camera2D& camera) {
+    if (this->mapa == nullptr) return;
+
+    // Solo dibujar capas de imagen con parallax
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+        
+        if (!layer->visible) continue;
+
+        if (layer->type == LAYER_TYPE_IMAGE_LAYER) {
+            TmxImageLayer* imgLayer = &layer->exact.imageLayer;
+            
+            if (imgLayer->image.texture.id > 0) {
+                float parallaxX = layer->parallaxX;
+                float parallaxY = layer->parallaxY;
+                
+                // Calcular posición con parallax considerando el zoom de la cámara
+                float parallaxOffsetX = camera.target.x * (1.0f - parallaxX);
+                float parallaxOffsetY = camera.target.y * (1.0f - parallaxY);
+                
+                // Ajustar por el offset de la capa y el zoom
+                float drawX = (layer->offsetX - parallaxOffsetX) * camera.zoom + camera.offset.x;
+                float drawY = (layer->offsetY - parallaxOffsetY) * camera.zoom + camera.offset.y;
+                
+                // Escalar la textura por el zoom de la cámara
+                float scale = camera.zoom;
+                
+                DrawTextureEx(imgLayer->image.texture, 
+                             (Vector2){drawX, drawY}, 
+                             0.0f, 
+                             scale, 
+                             WHITE);
+            }
+        }
+    }
+}
+
+void MapLoader::drawTileLayers() {
+    if (this->mapa == nullptr) return;
+
+    // Solo dibujar capas de tiles
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+        
+        if (!layer->visible) continue;
+
+        if (layer->type == LAYER_TYPE_TILE_LAYER) {
+            TmxTileLayer* tileLayer = &layer->exact.tileLayer;
+            
+            for (uint32_t y = 0; y < tileLayer->height; y++) {
+                for (uint32_t x = 0; x < tileLayer->width; x++) {
+                    uint32_t index = y * tileLayer->width + x;
+                    uint32_t gid = tileLayer->tiles[index];
+                    
+                    if (gid == 0) continue;
+                    
+                    TileData tData = GetTileDataFromGID(gid);
+                    
+                    if (tData.valid) {
+                        Vector2 position = {
+                            (float)(x * this->mapa->tileWidth) + layer->offsetX,
+                            (float)(y * this->mapa->tileHeight) + layer->offsetY
+                        };
+                        
+                        Rectangle dest = {
+                            position.x,
+                            position.y,
+                            (float)this->mapa->tileWidth,
+                            (float)this->mapa->tileHeight
+                        };
+                        
+                        DrawTexturePro(tData.texture, 
+                                      tData.source, 
+                                      dest, 
+                                      (Vector2){0, 0}, 
+                                      0.0f, 
+                                      WHITE);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
