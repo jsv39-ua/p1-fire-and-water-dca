@@ -14,6 +14,9 @@ extern "C" {
     #include <raylib.h>
 }
 
+const float DEFAULT_SCREEN_WIDTH = 1280.0f;
+const float DEFAULT_SCREEN_HEIGHT = 720.0f;
+
 MainGameState::MainGameState() : playerDying(false), deathTimer(0.0f)
 {
 }
@@ -58,7 +61,7 @@ void MainGameState::init()
 
     // Inicializar cámara con bounds del mapa
     Rectangle mapBounds = mapLoader.getMapBounds();
-    camera.init({640, 360}, 2.0f, mapBounds);
+    camera.init({DEFAULT_SCREEN_WIDTH / 2.0f, DEFAULT_SCREEN_HEIGHT / 2.0f}, 2.0f, mapBounds);
     camera.setSmoothSpeed(5.0f);
     camera.setZoomSmoothSpeed(3.0f);
 
@@ -429,8 +432,8 @@ void MainGameState::loadLevel(const std::string& mapPath) {
         float screenHeight = (float)GetScreenHeight();
         
         // Si la ventana no está inicializada o tiene tamaño 0 (al inicio), usar valores por defecto
-        if (screenWidth <= 0) screenWidth = 1280.0f;
-        if (screenHeight <= 0) screenHeight = 720.0f;
+        if (screenWidth <= 0) screenWidth = DEFAULT_SCREEN_WIDTH;
+        if (screenHeight <= 0) screenHeight = DEFAULT_SCREEN_HEIGHT;
 
         float minZoomX = screenWidth / mapBounds.width;
         float minZoomY = screenHeight / mapBounds.height;
