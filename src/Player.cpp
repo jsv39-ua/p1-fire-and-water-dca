@@ -1,9 +1,13 @@
 #include <MainGameState.hpp>
 #include <iostream>
+<<<<<<< HEAD
 #include <ResourceManager.hpp>
 #include <AudioManager.hpp>
 #include <filesystem>
 #include <vector>
+=======
+
+>>>>>>> main
 
 extern "C" {
     #include <raylib.h>
@@ -16,10 +20,13 @@ Player::Player() : Entity() {
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+<<<<<<< HEAD
     isWalkMusicPlaying = false;
     
     jumpSound.init("assets/characters/sounds/Hero Damage.mp3");
     jumpSound.setVolume(1.0f);
+=======
+>>>>>>> main
     life_count = 3;
     invincibility_timer = 0.0f;
 }
@@ -31,6 +38,7 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_right = 0;
     key_jump = 0;
     jump_hold_timer = 0.0f;
+<<<<<<< HEAD
     isWalkMusicPlaying = false;
 
     // Función helper para cargar todos los archivos de una carpeta
@@ -109,6 +117,8 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     } else {
         TraceLog(LOG_ERROR, "[Player] Failed to load walk music");
     }
+=======
+>>>>>>> main
     life_count = 3;
     invincibility_timer = 0.0f;
 }
@@ -145,9 +155,6 @@ void Player::update(float deltaTime) {
     // Actualizar bounds
     bounds.x = position.x;
     bounds.y = position.y;
-    
-    // Actualizar música de caminar
-    UpdateMusicStream(walkMusic);
 }
 
 void Player::render() {
@@ -169,7 +176,6 @@ void Player::walk(int direction) {
 void Player::jump() {
     velocity.y = -JUMP_FORCE;
     jump_hold_timer = 0.0f; // Reiniciar timer al saltar
-
 }
 
 void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
