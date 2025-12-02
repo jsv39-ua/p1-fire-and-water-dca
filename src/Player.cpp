@@ -18,7 +18,7 @@ Player::Player() : Entity() {
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
     
-    jumpSound.init("assets/characters/sounds/Hero Damage.mp3");
+    jumpSound.init("assets/characters/sounds/fire_sounds/damage/Fire-Player-Damage-2-2.mp3");
     jumpSound.setVolume(1.0f);
     life_count = 3;
     invincibility_timer = 0.0f;

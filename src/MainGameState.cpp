@@ -20,8 +20,8 @@ MainGameState::MainGameState() : playerDying(false), deathTimer(0.0f)
 void MainGameState::init()
 {
     // Cargar texturas de personajes
-    character_textures[0] = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_A.png");
-    character_textures[1] = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_C.png");
+    character_textures[0] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
+    character_textures[1] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
     
     // Calcular dimensiones de cada frame del spritesheet
     int columns = 8; // 8 columnas en el spritesheet
