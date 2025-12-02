@@ -14,8 +14,8 @@ Player::Player() : Entity() {
     key_jump = 0;
     jump_hold_timer = 0.0f;
     
-    jumpSound = ResourceManager::getInstance()->loadSound("assets/characters/sounds/Hero Jump.mp3");
-    SetSoundVolume(jumpSound, 1.0f);
+    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
+    jumpSound.setVolume(1.0f);
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -26,8 +26,8 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_jump = 0;
     jump_hold_timer = 0.0f;
 
-    jumpSound = ResourceManager::getInstance()->loadSound("assets/characters/sounds/Hero Jump.mp3");
-    SetSoundVolume(jumpSound, 1.0f);
+    jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
+    jumpSound.setVolume(1.0f);
 }
 
 void Player::setKeys(int left, int right, int jump) {
