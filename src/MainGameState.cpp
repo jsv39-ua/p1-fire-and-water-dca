@@ -1,6 +1,7 @@
 #include <MainGameState.hpp>
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include <GameOverState.hpp>
 #include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
@@ -50,12 +51,7 @@ void MainGameState::init()
         SettingsManager::getInstance()->getWaterJump()
     );
 
-    // Inicialización de la cámara
-    camera = { 0 };
-    camera.target = (Vector2){ 0, 0 };
-    camera.offset = (Vector2){ 640, 360 };
-    camera.rotation = 0.0f;
-    camera.zoom = 2.0f;
+    // Inicialización de la cámara (se configurará después de cargar el mapa)
 
     // Inicialización del MapLoader
     try {
@@ -80,6 +76,14 @@ void MainGameState::init()
         level_enemies = mapLoader.extractEnemies();
         
         TraceLog(LOG_INFO, "Plataformas cargadas desde Tiled: %d", level_platforms.size());
+        
+        // Inicializar cámara con bounds del mapa
+        Rectangle mapBounds = mapLoader.getMapBounds();
+        camera.init({640, 360}, 2.0f, mapBounds);
+        camera.setSmoothSpeed(5.0f);
+        camera.setZoomSmoothSpeed(3.0f);
+        camera.setZoomLimits(1.0f, 3.0f);
+        camera.setDynamicZoom(true);
         
     } catch (const std::runtime_error& e) {
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
@@ -270,46 +274,13 @@ void MainGameState::update(float deltaTime)
         }
     }
 
-    // Actualizar cámara (punto medio entre ambos jugadores)
-    Vector2 midPoint = {
-        (players[0].position.x + players[1].position.x) / 2.0f,
-        (players[0].position.y + players[1].position.y) / 2.0f
-    };
-    
-    float cameraSpeed = 3.0f * deltaTime;
-    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
-    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
-    
-    // Aplicar límites de la cámara
-    Rectangle mapBounds = mapLoader.getMapBounds();
-    
-    float screenWidth = 1280.0f;  
-    float screenHeight = 720.0f;
-    
-    float visibleWidth = screenWidth / camera.zoom;
-    float visibleHeight = screenHeight / camera.zoom;
-    
-    float minX = mapBounds.x + visibleWidth / 2.0f;
-    float maxX = mapBounds.x + mapBounds.width - visibleWidth / 2.0f;
-    float minY = mapBounds.y + visibleHeight / 2.0f;
-    float maxY = mapBounds.y + mapBounds.height - visibleHeight / 2.0f;
-    
-    if (mapBounds.width > visibleWidth) {
-        camera.target.x = fmaxf(minX, fminf(camera.target.x, maxX));
-    } else {
-        camera.target.x = mapBounds.x + mapBounds.width / 2.0f;
-    }
-    
-    if (mapBounds.height > visibleHeight) {
-        camera.target.y = fmaxf(minY, fminf(camera.target.y, maxY));
-    } else {
-        camera.target.y = mapBounds.y + mapBounds.height / 2.0f;
-    }
-    
-    camera.target.x = roundf(camera.target.x);
-    camera.target.y = roundf(camera.target.y);
+    // Actualizar cámara para seguir ambos jugadores
+    std::vector<Vector2> playerPositions = {players[0].position, players[1].position};
+    camera.setMultipleTargets(playerPositions);
+    camera.update(deltaTime);
 
     // Comprobar si algún jugador se ha caido por debajo del mapa
+    Rectangle mapBounds = mapLoader.getMapBounds();
     float mapBottom = mapBounds.y + mapBounds.height;
     bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
     bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
@@ -326,9 +297,9 @@ void MainGameState::render()
 {
     BeginDrawing();
 
-    BeginMode2D(camera);
+    BeginMode2D(camera.getRaylibCamera());
     ClearBackground(RAYWHITE);
-    mapLoader.draw(camera);
+    mapLoader.draw(camera.getRaylibCamera());
 
     // Renderizar jugadores con animaciones
     float spriteScale = 1.5f;  
