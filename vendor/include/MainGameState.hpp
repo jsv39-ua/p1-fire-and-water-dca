@@ -6,6 +6,7 @@
 #include <Enemy.hpp>
 #include <Platform.hpp>
 #include <Animation.hpp>
+#include <Camera.hpp>
 #include <vector>
 #include <string>
 #include <MapLoader.hpp>
@@ -49,7 +50,7 @@ private:
     Animation walk_animations[2];
 
     MapLoader mapLoader;
-    Camera2D camera;
+    GameCamera camera;
     
     // Timer para muerte del jugador
     bool playerDying = false;
