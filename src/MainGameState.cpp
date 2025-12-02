@@ -420,6 +420,24 @@ void MainGameState::loadLevel(const std::string& mapPath) {
         TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 
             (int)level_platforms.size(), (int)level_enemies.size(), (int)level_transitions.size());
         
+        // Actualizar límites de la cámara con el nuevo mapa
+        Rectangle mapBounds = mapLoader.getMapBounds();
+        camera.setMapBounds(mapBounds);
+
+        // Recalcular zoom mínimo
+        float screenWidth = (float)GetScreenWidth();
+        float screenHeight = (float)GetScreenHeight();
+        
+        // Si la ventana no está inicializada o tiene tamaño 0 (al inicio), usar valores por defecto
+        if (screenWidth <= 0) screenWidth = 1280.0f;
+        if (screenHeight <= 0) screenHeight = 720.0f;
+
+        float minZoomX = screenWidth / mapBounds.width;
+        float minZoomY = screenHeight / mapBounds.height;
+        
+        float minZoom = fmaxf(1.0f, fmaxf(minZoomX, minZoomY));
+        camera.setZoomLimits(minZoom, 3.0f);
+        
     } catch (const std::runtime_error& e) {
         std::cerr << "Error al cargar el mapa: " << e.what() << std::endl;
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
