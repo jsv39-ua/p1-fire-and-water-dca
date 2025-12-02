@@ -239,10 +239,9 @@ std::vector<Platform> MapLoader::extractPlatforms() {
         TmxLayer* layer = &this->mapa->layers[i];
         
         if (layer->type == LAYER_TYPE_TILE_LAYER) {
-            // Ignorar capas decorativas que no deben tener colisiones
-            if (layer->name != NULL && (strcmp(layer->name, "Capa decorativos") == 0)) {
-                continue;
-            }
+            // Opcional: Si tienes una capa específica llamada "Colisiones",
+            // descomenta esto para ignorar capas decorativas y ganar más rendimiento:
+            // if (strcmp(layer->name, "Colisiones") != 0) continue;
 
             TmxTileLayer* tileLayer = &layer->exact.tileLayer;
             
