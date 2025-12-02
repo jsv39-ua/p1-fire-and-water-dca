@@ -53,7 +53,7 @@ $(TARGET): $(OBJ)
 # Regla de Compilación Individual (Para que funcione el multihilo -jN)
 # Crea la carpeta necesaria y compila de .cpp a .o
 $(OBJ_DIR)/%.o: src/%.cpp
-	@$(MKDIR)
+	@$(MKDIR) $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Incluir dependencias (detecta si cambias un .hpp)
