@@ -2,17 +2,9 @@
 
 #include <Entity.hpp>
 #include <Platform.hpp>
-#include <SoundPlayer.hpp>
 
 class Player : public Entity {
 public:
-    // Sonidos para los personajes (salto, daño, caminar)
-
-    SoundPlayer jumpSound;
-    SoundPlayer damageSound;
-    Music walkMusic;
-    bool isWalkMusicPlaying;
-
     Player();
     Player(float x, float y, float height, float width, ElementType t);
     
