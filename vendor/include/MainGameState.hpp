@@ -30,25 +30,32 @@ public:
 
 private:
     char entered_key;
-    Player fire_player;
-    Player water_player;
+    
+    // Usar array para los dos jugadores: [0] = FIRE, [1] = WATER
+    Player players[2];
+    
     std::vector<Platform> level_platforms;
-    bool fire_on_ground = false;
-    bool water_on_ground = false;
+    
+    // Flags de suelo para cada jugador
+    bool on_ground[2] = {false, false}; // [0] = fire, [1] = water
+    
     std::vector<Enemy> level_enemies;
     std::vector<MapTransition> level_transitions;
 
     void loadLevel(const std::string& mapPath);
 
-    Texture2D character1;
-    Texture2D character2;
+    // Texturas de personajes
+    Texture2D character_textures[2];
     
-    // Animaciones para los personajes
-    Animation fire_idle_animation;
-    Animation fire_walk_animation;
-    Animation water_idle_animation;
-    Animation water_walk_animation;
+    // Animaciones para los personajes [0] = fire, [1] = water
+    Animation idle_animations[2];
+    Animation walk_animations[2];
 
     MapLoader mapLoader;
     Camera2D camera;
+    
+    // Timer para muerte del jugador
+    bool playerDying = false;
+    float deathTimer = 0.0f;
+    static constexpr float DEATH_DELAY = 1.5f; // 1.5 segundos antes de Game Over
 };
