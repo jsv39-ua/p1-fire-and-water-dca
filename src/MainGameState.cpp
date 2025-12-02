@@ -62,7 +62,7 @@ void MainGameState::init()
 
     // Inicialización del MapLoader
     try {
-        mapLoader.loadMapa("assets/levels/niveles/nivel-tutorial/nivel-tutorial.tmx");
+        mapLoader.loadMapa("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
         
         std::vector<Platform> platforms = mapLoader.extractPlatforms();
         
