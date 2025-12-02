@@ -18,6 +18,8 @@ Player::Player() : Entity() {
     
     jumpSound.init("assets/characters/sounds/Hero Jump.mp3");
     jumpSound.setVolume(1.0f);
+    life_count = 3;
+    invincibility_timer = 0.0f;
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -42,6 +44,8 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     } else {
         TraceLog(LOG_ERROR, "[Player] Failed to load walk music");
     }
+    life_count = 3;
+    invincibility_timer = 0.0f;
 }
 
 void Player::setKeys(int left, int right, int jump) {
@@ -51,6 +55,14 @@ void Player::setKeys(int left, int right, int jump) {
 }
 
 void Player::update(float deltaTime) {
+    // Actualizar timer de invencibilidad
+    if (invincibility_timer > 0.0f) {
+        invincibility_timer -= deltaTime;
+        if (invincibility_timer < 0.0f) {
+            invincibility_timer = 0.0f;
+        }
+    }
+    
     // Aplicar gravedad y actualizar posición basada en velocidad
     static const float gravity = 800.0f;
     static const float MAX_FALL_SPEED = 900.0f;
@@ -99,6 +111,18 @@ void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
     if (jumpKeyHeld && velocity.y < 0 && jump_hold_timer < MAX_JUMP_HOLD_TIME) {
         velocity.y -= JUMP_BOOST * deltaTime; 
         jump_hold_timer += deltaTime;
+    }
+}
+
+void Player::updateLifeCount(int change) {
+    life_count += change;
+    if (life_count < 0) {
+        life_count = 0;
+    }
+    
+    // Activar invencibilidad cuando pierde vida
+    if (change < 0) {
+        activateInvincibility();
     }
 }
 
@@ -155,4 +179,17 @@ int Player::checkPlatformCollision(const Platform & platform) const {
 
 
     return 4;
+}
+
+// Determina si el jugador debe ser visible (para el efecto de parpadeo)
+bool Player::shouldRenderVisible() const {
+    if (!isInvincible()) {
+        return true; // Siempre visible si no está invencible
+    }
+    
+    // Usar el tiempo del juego para un parpadeo consistente
+    // Parpadea cada BLINK_INTERVAL segundos
+    float currentTime = GetTime();
+    int blinkCycle = (int)(currentTime / BLINK_INTERVAL);
+    return (blinkCycle % 2) == 0; // Alterna entre visible/invisible
 }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <GameOverState.hpp>
+#include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
 #include <StateMachine.hpp>
 #include <Player.hpp>
@@ -18,35 +19,32 @@ MainGameState::MainGameState()
 
 void MainGameState::init()
 {
-    // Cargar texturas primero para obtener sus dimensiones
-    character1 = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_A.png");
-    character2 = ResourceManager::getInstance()->loadTexture("assets/characters/tilesets/Wizzart_C.png");
+    // Cargar texturas de personajes
+    character_textures[0] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_A.png");
+    character_textures[1] = ResourceManager::getInstance()->loadTexture("assets/characters/Wizzart_C.png");
     
     // Calcular dimensiones de cada frame del spritesheet
     int columns = 8; // 8 columnas en el spritesheet
     int rows = 4;    // 4 filas en el spritesheet
-    float frameWidth = character1.width / (float)columns;
-    float frameHeight = character1.height / (float)rows;
+    float frameWidth = character_textures[0].width / (float)columns;
+    float frameHeight = character_textures[0].height / (float)rows;
     
-    // Ajustar el tamaño de la hitbox (aproximadamente la mitad del ancho del frame)
+    // Ajustar el tamaño de la hitbox
     float hitboxWidth = frameWidth * 0.5f;
     float hitboxHeight = frameHeight;
    
-    // Inicialización del personaje de Fuego con tamaño basado en el asset
-    fire_player = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
+    // Inicializar jugadores: [0] = FIRE, [1] = WATER
+    players[0] = Player(100.0f, 300.0f, hitboxWidth, hitboxHeight, FIRE);
+    players[1] = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
-    fire_player.setKeys(
+    players[0].setKeys(
         SettingsManager::getInstance()->getFireLeft(),
         SettingsManager::getInstance()->getFireRight(),
         SettingsManager::getInstance()->getFireJump()
     );
-
-    // Inicialización del personaje de Agua con tamaño basado en el asset
-    water_player = Player(150.0f, 300.0f, hitboxWidth, hitboxHeight, WATER);
     
-    // Cargar teclas desde SettingsManager
-    water_player.setKeys(
+    players[1].setKeys(
         SettingsManager::getInstance()->getWaterLeft(),
         SettingsManager::getInstance()->getWaterRight(),
         SettingsManager::getInstance()->getWaterJump()
@@ -63,12 +61,21 @@ void MainGameState::init()
     try {
         mapLoader.loadMapa("assets/levels/level_prueba/nivel1-pantalla2.tmx");
         
-        std::vector<Rectangle> collisions = mapLoader.extractCollisions();
+        std::vector<Platform> platforms = mapLoader.extractPlatforms();
         
-        for (const auto& collision : collisions) {
-            Platform platform = { collision, NONE };
+        for (const auto& platform : platforms) {
             level_platforms.push_back(platform);
         }
+
+        // Debug: Log GOAL platforms found
+        int goalCount = 0;
+        for (const auto& p : level_platforms) {
+            if (p.type == GOAL) {
+                goalCount++;
+                TraceLog(LOG_INFO, "GOAL platform in level_platforms at x=%f y=%f w=%f h=%f", p.bounds.x, p.bounds.y, p.bounds.width, p.bounds.height);
+            }
+        }
+        TraceLog(LOG_INFO, "Total GOAL platforms: %d", goalCount);
 
         level_enemies = mapLoader.extractEnemies();
         
@@ -79,11 +86,12 @@ void MainGameState::init()
         this->state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 
-    fire_idle_animation = Animation(5, 0.2f, true, character1, 9, 12);
-    fire_walk_animation = Animation(8, 0.1f, true, character1, 0, 8);
+    // Inicializar animaciones para ambos jugadores
+    idle_animations[0] = Animation(5, 0.2f, true, character_textures[0], 9, 12);
+    walk_animations[0] = Animation(8, 0.1f, true, character_textures[0], 0, 8);
     
-    water_idle_animation = Animation(5, 0.2f, true, character2, 9, 12);
-    water_walk_animation = Animation(8, 0.1f, true, character2, 0, 8);
+    idle_animations[1] = Animation(5, 0.2f, true, character_textures[1], 9, 12);
+    walk_animations[1] = Animation(8, 0.1f, true, character_textures[1], 0, 8);
 }
 
 void MainGameState::handleInput()
@@ -100,103 +108,102 @@ void MainGameState::handleInput()
     }
 
     // Obtener las teclas desde SettingsManager
-    int fireLeft = SettingsManager::getInstance()->getFireLeft();
-    int fireRight = SettingsManager::getInstance()->getFireRight();
-    int fireJump = SettingsManager::getInstance()->getFireJump();
-    
-    int waterLeft = SettingsManager::getInstance()->getWaterLeft();
-    int waterRight = SettingsManager::getInstance()->getWaterRight();
-    int waterJump = SettingsManager::getInstance()->getWaterJump();
+    int playerKeys[2][3] = {
+        {SettingsManager::getInstance()->getFireLeft(), SettingsManager::getInstance()->getFireRight(), SettingsManager::getInstance()->getFireJump()},
+        {SettingsManager::getInstance()->getWaterLeft(), SettingsManager::getInstance()->getWaterRight(), SettingsManager::getInstance()->getWaterJump()}
+    };
 
-    // Control del personaje de Fuego
-    if (IsKeyDown(fireLeft)) {
-        fire_player.walk(-1);
-    } else if (IsKeyDown(fireRight)) {
-        fire_player.walk(1);
-    } else {
-        fire_player.walk(0);
+    // Control de ambos jugadores con un bucle
+    for (int i = 0; i < 2; i++) {
+        // Control de movimiento
+        if (IsKeyDown(playerKeys[i][0])) {
+            players[i].walk(-1);
+        } else if (IsKeyDown(playerKeys[i][1])) {
+            players[i].walk(1);
+        } else {
+            players[i].walk(0);
+        }
+
+        // Control de salto
+        if (IsKeyPressed(playerKeys[i][2]) && on_ground[i]) {
+            players[i].jump();
+        }
     }
 
-    if (IsKeyPressed(fireJump) && fire_on_ground) {
-        fire_player.jump();
-        TraceLog(LOG_INFO, "[MainGameState] Fire player jumping!");
-        fire_player.jumpSound.play();
+    // Debug: Spawn enemies during gameplay
+    if (IsKeyPressed(KEY_E)) {
+        // Spawn a FIRE enemy (affects Water player) near the Fire player, vertical movement
+        Rectangle b = { players[0].position.x + 100, players[0].position.y - 32, 32, 32 };
+        Enemy en(b, FIRE, 90.0f, /*vertical=*/true);
+        level_enemies.push_back(en);
+        TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
     }
 
-    // Control del personaje de Agua
-    if (IsKeyDown(waterLeft)) {
-        water_player.walk(-1);
-    } else if (IsKeyDown(waterRight)) {
-        water_player.walk(1);
-    } else {
-        water_player.walk(0);
-    }
-
-    if (IsKeyPressed(waterJump) && water_on_ground) {
-        water_player.jump();
-        TraceLog(LOG_INFO, "[MainGameState] Water player jumping!");
-        water_player.jumpSound.play();
+    if (IsKeyPressed(KEY_R)) {
+        // Spawn a WATER enemy (affects Fire player) near the Water player, horizontal movement
+        Rectangle b = { players[1].position.x + 100, players[1].position.y - 32, 32, 32 };
+        Enemy en2(b, WATER, 150.0f, /*vertical=*/false);
+        level_enemies.push_back(en2);
+        TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
     }
 }
 
 void MainGameState::update(float deltaTime)
 {
-    fire_on_ground = false;
-    water_on_ground = false;
+    // Resetear flags de suelo
+    on_ground[0] = false;
+    on_ground[1] = false;
 
-    fire_player.update(deltaTime);
-    water_player.update(deltaTime);
-    
-    int fireJump = SettingsManager::getInstance()->getFireJump();
-    int waterJump = SettingsManager::getInstance()->getWaterJump();
-    
-    fire_player.updateJump(deltaTime, IsKeyDown(fireJump));
-    water_player.updateJump(deltaTime, IsKeyDown(waterJump));
+    // Actualizar ambos jugadores
+    for (int i = 0; i < 2; i++) {
+        players[i].update(deltaTime);
+        
+        int jumpKey = (i == 0) ? SettingsManager::getInstance()->getFireJump() 
+                               : SettingsManager::getInstance()->getWaterJump();
+        players[i].updateJump(deltaTime, IsKeyDown(jumpKey));
 
-    if (fire_player.velocity.x != 0) {
-        fire_walk_animation.animationUpdate(deltaTime);
-    } else {
-        fire_idle_animation.animationUpdate(deltaTime);
-    }
-    
-    if (water_player.velocity.x != 0) {
-        water_walk_animation.animationUpdate(deltaTime);
-    } else {
-        water_idle_animation.animationUpdate(deltaTime);
+        // Actualizar animaciones
+        if (players[i].velocity.x != 0) {
+            walk_animations[i].animationUpdate(deltaTime);
+        } else {
+            idle_animations[i].animationUpdate(deltaTime);
+        }
     }
 
+    // Verificar colisiones con plataformas
+    bool bothOnGoal = true;
     for (const auto& platform : level_platforms) {
-        int fire_collision = fire_player.checkPlatformCollision(platform);
-        int water_collision = water_player.checkPlatformCollision(platform);
+        bool fireOnGoal = false;
+        bool waterOnGoal = false;
+        
+        for (int i = 0; i < 2; i++) {
+            int collision = players[i].checkPlatformCollision(platform);
 
-        switch (fire_collision) {
-            case 0:
-            case 2:
-            case 3:
-                if (fire_player.resolvePlatformCollision(platform)) {
-                    fire_on_ground = true;
-                }
-                break;
-            case 1:
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-                return;
+            switch (collision) {
+                case 0:
+                case 2:
+                    if (players[i].resolvePlatformCollision(platform)) {
+                        on_ground[i] = true;
+                    }
+                    break;
+                case 3:  // GOAL
+                    if (players[i].resolvePlatformCollision(platform)) {
+                        on_ground[i] = true;
+                    }
+                    if (i == 0) fireOnGoal = true;
+                    else waterOnGoal = true;
+                    break;
+                case 1:  // Muerte
+                    this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                    return;
+            }
         }
-
-        switch (water_collision) {
-            case 0:
-            case 2:
-            case 3:
-                if (water_player.resolvePlatformCollision(platform)) {
-                    water_on_ground = true;
-                }
-                break;
-            case 1:
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-                return;
-        }
-
-        if (fire_collision == 3 && water_collision == 3) {
-            this->state_machine->add_state(std::make_unique<GameOverState>(true), true);
+        
+        // Verificar si ambos están en la puerta
+        if (fireOnGoal && waterOnGoal) {
+            TraceLog(LOG_INFO, "Ambos jugadores han alcanzado la GOAL: cambiando a SimpleLevelState");
+            this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
+            return;
         }
     }
     
@@ -234,67 +241,74 @@ void MainGameState::update(float deltaTime)
         }
     }
 
+    // Verificar colisiones con enemigos
     for (auto& enemy : level_enemies) {
         enemy.update(deltaTime);
         
-        if (CheckCollisionRecs(fire_player.bounds, enemy.bounds)) {
-            if (enemy.type == WATER) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-                return;
-            }
-        }
-        
-        if (CheckCollisionRecs(water_player.bounds, enemy.bounds)) {
-            if (enemy.type == FIRE) {
-                this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-                return;
+        for (int i = 0; i < 2; i++) {
+            if (CheckCollisionRecs(players[i].bounds, enemy.bounds)) {
+                // FIRE player (i=0) muere con enemigos WATER, WATER player (i=1) muere con enemigos FIRE
+                ElementType dangerousType = (i == 0) ? WATER : FIRE;
+                
+                if (enemy.type == dangerousType && !players[i].isInvincible()) {
+                    players[i].updateLifeCount(-1);
+                    if (players[i].getLifeCount() <= 0) {
+                        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+                        return;
+                    }
+                }
             }
         }
     }
 
+    // Actualizar cámara (punto medio entre ambos jugadores)
     Vector2 midPoint = {
-        (fire_player.position.x + water_player.position.x) / 2.0f,
-        (fire_player.position.y + water_player.position.y) / 2.0f
+        (players[0].position.x + players[1].position.x) / 2.0f,
+        (players[0].position.y + players[1].position.y) / 2.0f
     };
     
     float cameraSpeed = 3.0f * deltaTime;
     camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
     camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
     
-    
+    // Aplicar límites de la cámara
     Rectangle mapBounds = mapLoader.getMapBounds();
     
-    // Calcular los límites de la cámara basados en el tamaño de la pantalla y el zoom
     float screenWidth = 1280.0f;  
     float screenHeight = 720.0f;
     
-    // Calcular el área visible de la cámara en el mundo (dividido por el zoom)
     float visibleWidth = screenWidth / camera.zoom;
     float visibleHeight = screenHeight / camera.zoom;
     
-    // Calcular los límites mínimos y máximos para el target de la cámara
     float minX = mapBounds.x + visibleWidth / 2.0f;
     float maxX = mapBounds.x + mapBounds.width - visibleWidth / 2.0f;
     float minY = mapBounds.y + visibleHeight / 2.0f;
     float maxY = mapBounds.y + mapBounds.height - visibleHeight / 2.0f;
     
-    // Aplicar los límites a la posición de la cámara
     if (mapBounds.width > visibleWidth) {
         camera.target.x = fmaxf(minX, fminf(camera.target.x, maxX));
     } else {
-        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
         camera.target.x = mapBounds.x + mapBounds.width / 2.0f;
     }
     
     if (mapBounds.height > visibleHeight) {
         camera.target.y = fmaxf(minY, fminf(camera.target.y, maxY));
     } else {
-        // Si el mapa es más pequeño que la pantalla, centrar en el mapa
         camera.target.y = mapBounds.y + mapBounds.height / 2.0f;
     }
     
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
+
+    // Comprobar si algún jugador se ha caido por debajo del mapa
+    float mapBottom = mapBounds.y + mapBounds.height;
+    bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
+    bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
+    if (fire_fell_below || water_fell_below) {
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        return;
+    }
 }
 
 void MainGameState::render()
@@ -310,69 +324,56 @@ void MainGameState::render()
     int frameWidth = 64;  // Ancho de cada frame en el spritesheet (512/8)
     int frameHeight = 48; // Alto de cada frame en el spritesheet (192/4)
     
-    
     float renderWidth = frameWidth * spriteScale;
     float renderHeight = frameHeight * spriteScale;
     
-    
-    Rectangle fireSourceRect;
-    if (fire_player.velocity.x != 0) {
+    // Renderizar ambos jugadores en un bucle
+    for (int i = 0; i < 2; i++) {
+        Rectangle sourceRect;
         
-        fireSourceRect = fire_walk_animation.animationFrame(8, frameWidth, frameHeight);
-        fire_player.facingRight = fire_player.velocity.x > 0;
-    } else {
-        fireSourceRect = fire_idle_animation.animationFrame(8, frameWidth, frameHeight);
+        // Seleccionar animación según movimiento
+        if (players[i].velocity.x != 0) {
+            sourceRect = walk_animations[i].animationFrame(8, frameWidth, frameHeight);
+            players[i].facingRight = players[i].velocity.x > 0;
+        } else {
+            sourceRect = idle_animations[i].animationFrame(8, frameWidth, frameHeight);
+        }
+        
+        // Voltear sprite si mira a la izquierda
+        if (!players[i].facingRight) {
+            sourceRect.width = -frameWidth;
+        }
+        
+        // Calcular posición de renderizado
+        float renderX = players[i].position.x + (players[i].width / 2.0f) - (renderWidth / 2.0f);
+        float renderY = players[i].position.y + players[i].height - renderHeight;
+        
+        // Dibujar solo si debe ser visible (parpadeo durante invencibilidad)
+        if (players[i].shouldRenderVisible()) {
+            DrawTexturePro(character_textures[i], 
+                           sourceRect,  
+                           (Rectangle){renderX, renderY, renderWidth, renderHeight}, 
+                           (Vector2){0, 0}, 
+                           0.0f, 
+                           WHITE);
+        }
     }
-    
-    if (!fire_player.facingRight) {
-        fireSourceRect.width = -frameWidth;
-    }
-    
-    float fireRenderX = fire_player.position.x + (fire_player.width / 2.0f) - (renderWidth / 2.0f);
-    float fireRenderY = fire_player.position.y + fire_player.height - renderHeight;
-    
-    DrawTexturePro(character1, 
-                   fireSourceRect,  
-                   (Rectangle){fireRenderX, fireRenderY, renderWidth, renderHeight}, 
-                   (Vector2){0, 0}, 
-                   0.0f, 
-                   WHITE);
-    
-    
-    Rectangle waterSourceRect;
-    if (water_player.velocity.x != 0) {
-        waterSourceRect = water_walk_animation.animationFrame(8, frameWidth, frameHeight);
-      
-        water_player.facingRight = water_player.velocity.x > 0;
-    } else {
-        waterSourceRect = water_idle_animation.animationFrame(8, frameWidth, frameHeight);
-    }
-    
-    
-    if (!water_player.facingRight) {
-        waterSourceRect.width = -frameWidth;
-    }
-    
-    float waterRenderX = water_player.position.x + (water_player.width / 2.0f) - (renderWidth / 2.0f);
-    float waterRenderY = water_player.position.y + water_player.height - renderHeight;
-    
-    DrawTexturePro(character2, 
-                   waterSourceRect,
-                   (Rectangle){waterRenderX, waterRenderY, renderWidth, renderHeight}, 
-                   (Vector2){0, 0}, 
-                   0.0f, 
-                   WHITE);
 
-    // Debug
-    DrawRectangleLinesEx(fire_player.bounds, 2, GREEN);
-    DrawRectangleLinesEx(water_player.bounds, 2, BLUE);
+    // Debug: bounds de jugadores
+    DrawRectangleLinesEx(players[0].bounds, 2, GREEN);
+    DrawRectangleLinesEx(players[1].bounds, 2, BLUE);
 
     
 
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
         if(platform.type == GOAL){
-            DrawRectangleRec(platform.bounds, YELLOW);
+            // Dibujamos la puerta como rectángulo negro relleno, borde y etiqueta para depuración
+            DrawRectangleRec(platform.bounds, BLACK);
+            DrawRectangleLinesEx(platform.bounds, 3, MAGENTA);
+            std::string label = "PUERTA";
+            int textW = MeasureText(label.c_str(), 10);
+            DrawText(label.c_str(), platform.bounds.x + (platform.bounds.width - textW) / 2, platform.bounds.y - 12, 10, MAGENTA);
         }
         else if(platform.type == FIRE){
             DrawRectangleRec(platform.bounds, MAROON);
@@ -385,7 +386,49 @@ void MainGameState::render()
     for (auto& enemy : level_enemies) {
         enemy.render();
     }
+    // Debug: draw outlines and labels for enemies
+    for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
+        Enemy &en = level_enemies[ei];
+        DrawRectangleLinesEx(en.bounds, 2, YELLOW);
+        const char* typeLabel = (en.type == FIRE) ? "FIRE" : (en.type == WATER ? "WATER" : "NONE");
+        std::string lab = "ENEMY(" + std::string(typeLabel) + ")";
+        int tw = MeasureText(lab.c_str(), 12);
+        DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
+    }
     EndMode2D();
+    
+    // Dibujar vidas de los jugadores (UI fija en pantalla)
+    int maxLives = 3;
+    int heartSize = 30;
+    int heartSpacing = 5;
+    int marginFromEdge = 20;
+    int topMargin = 20;
+    
+    // Colores para cada jugador
+    Color playerColors[2] = {RED, BLUE};
+    int screenWidth = GetScreenWidth();
+    
+    // Jugador FIRE (izquierda)
+    int fireLives = players[0].getLifeCount();
+    for (int i = 0; i < maxLives; i++) {
+        int x = marginFromEdge + i * (heartSize + heartSpacing);
+        int y = topMargin;
+        
+        Color color = (i < fireLives) ? RED : GRAY;
+        DrawRectangle(x, y, heartSize, heartSize, color);
+        DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+    }
+    
+    // Jugador WATER (derecha)
+    int waterLives = players[1].getLifeCount();
+    for (int i = 0; i < maxLives; i++) {
+        int x = screenWidth - marginFromEdge - (i + 1) * (heartSize + heartSpacing) + heartSpacing;
+        int y = topMargin;
+        
+        Color color = (i < waterLives) ? BLUE : GRAY;
+        DrawRectangle(x, y, heartSize, heartSize, color);
+        DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+    }
     
     renderGlobalUI();
     
