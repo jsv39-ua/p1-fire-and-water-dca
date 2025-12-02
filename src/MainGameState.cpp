@@ -157,7 +157,7 @@ void MainGameState::update(float deltaTime)
     }
 
     // Verificar colisiones con plataformas
-    bool bothOnGoal = true;
+    // bool bothOnGoal = true;
     for (const auto& platform : level_platforms) {
         bool fireOnGoal = false;
         bool waterOnGoal = false;
@@ -413,7 +413,6 @@ void MainGameState::checkFallDeath() {
         return;
     }
 }
-}
 
 void MainGameState::loadLevel(const std::string& mapPath) {
     level_platforms.clear();
@@ -541,7 +540,7 @@ void MainGameState::render()
     int topMargin = 20;
     
     // Colores para cada jugador
-    Color playerColors[2] = {RED, BLUE};
+    // Color playerColors[2] = {RED, BLUE};
     int screenWidth = GetScreenWidth();
     
     // Jugador FIRE (izquierda)
