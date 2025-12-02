@@ -1,6 +1,7 @@
 #include <MainGameState.hpp>
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include <GameOverState.hpp>
 #include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
@@ -50,15 +51,18 @@ void MainGameState::init()
         SettingsManager::getInstance()->getWaterJump()
     );
 
-    // Inicialización de la cámara
-    camera = { 0 };
-    camera.target = (Vector2){ 0, 0 };
-    camera.offset = (Vector2){ 640, 360 };
-    camera.rotation = 0.0f;
-    camera.zoom = 2.0f;
+    // Inicialización de la cámara (se configurará después de cargar el mapa)
 
     // Inicialización del MapLoader
     loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+
+    // Inicializar cámara con bounds del mapa
+    Rectangle mapBounds = mapLoader.getMapBounds();
+    camera.init({640, 360}, 2.0f, mapBounds);
+    camera.setSmoothSpeed(5.0f);
+    camera.setZoomSmoothSpeed(3.0f);
+    camera.setZoomLimits(1.0f, 3.0f);
+    camera.setDynamicZoom(true);
 
     // Inicializar animaciones para ambos jugadores
     idle_animations[0] = Animation(5, 0.2f, true, character_textures[0], 9, 12);
@@ -361,42 +365,10 @@ void MainGameState::handleMapBoundaries() {
 }
 
 void MainGameState::updateCamera(float deltaTime) {
-    Vector2 midPoint = {
-        (players[0].position.x + players[1].position.x) / 2.0f,
-        (players[0].position.y + players[1].position.y) / 2.0f
-    };
-    
-    float cameraSpeed = 3.0f * deltaTime;
-    camera.target.x += (midPoint.x - camera.target.x) * cameraSpeed;
-    camera.target.y += (midPoint.y - camera.target.y) * cameraSpeed;
-    
-    Rectangle mapBounds = mapLoader.getMapBounds();
-    
-    float screenWidth = 1280.0f;  
-    float screenHeight = 720.0f;
-    
-    float visibleWidth = screenWidth / camera.zoom;
-    float visibleHeight = screenHeight / camera.zoom;
-    
-    float minX = mapBounds.x + visibleWidth / 2.0f;
-    float maxX = mapBounds.x + mapBounds.width - visibleWidth / 2.0f;
-    float minY = mapBounds.y + visibleHeight / 2.0f;
-    float maxY = mapBounds.y + mapBounds.height - visibleHeight / 2.0f;
-    
-    if (mapBounds.width > visibleWidth) {
-        camera.target.x = fmaxf(minX, fminf(camera.target.x, maxX));
-    } else {
-        camera.target.x = mapBounds.x + mapBounds.width / 2.0f;
-    }
-    
-    if (mapBounds.height > visibleHeight) {
-        camera.target.y = fmaxf(minY, fminf(camera.target.y, maxY));
-    } else {
-        camera.target.y = mapBounds.y + mapBounds.height / 2.0f;
-    }
-    
-    camera.target.x = roundf(camera.target.x);
-    camera.target.y = roundf(camera.target.y);
+    // Actualizar cámara para seguir ambos jugadores
+    std::vector<Vector2> playerPositions = {players[0].position, players[1].position};
+    camera.setMultipleTargets(playerPositions);
+    camera.update(deltaTime);
 }
 
 void MainGameState::checkFallDeath() {
@@ -447,9 +419,9 @@ void MainGameState::render()
     ClearBackground(RAYWHITE);
     
     // Dibujar capas de parallax ANTES de BeginMode2D
-    mapLoader.drawParallaxLayers(camera);
+    mapLoader.drawParallaxLayers(camera.getRaylibCamera());
 
-    BeginMode2D(camera);
+    BeginMode2D(camera.getRaylibCamera());
     
     // Dibujar las capas de tiles (plataformas, decoraciones)
     mapLoader.drawTileLayers();
