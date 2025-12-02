@@ -1,9 +1,12 @@
 #include <SoundPlayer.hpp>
 #include <ResourceManager.hpp>
+#include <cstdlib>  // Para rand()
 
-SoundPlayer::SoundPlayer() : currentSound(0), initialized(false), loadedFilePath(""), currentVolume(1.0f) {
-    for (int i = 0; i < MAX_SOUNDS; i++) {
-        soundArray[i] = { 0 };
+SoundPlayer::SoundPlayer() : currentSound(0), numVariants(0), initialized(false), currentVolume(1.0f) {
+    for (int v = 0; v < MAX_VARIANTS; v++) {
+        for (int i = 0; i < MAX_SOUNDS; i++) {
+            soundArray[v][i] = { 0 };
+        }
     }
 }
 
@@ -13,14 +16,16 @@ SoundPlayer::~SoundPlayer() {
 
 // Copy constructor
 SoundPlayer::SoundPlayer(const SoundPlayer& other) 
-    : currentSound(0), initialized(false), loadedFilePath(""), currentVolume(other.currentVolume) {
-    for (int i = 0; i < MAX_SOUNDS; i++) {
-        soundArray[i] = { 0 };
+    : currentSound(0), numVariants(0), initialized(false), currentVolume(other.currentVolume) {
+    for (int v = 0; v < MAX_VARIANTS; v++) {
+        for (int i = 0; i < MAX_SOUNDS; i++) {
+            soundArray[v][i] = { 0 };
+        }
     }
     
-    // Si el otro está inicializado, inicializamos este con el mismo archivo
-    if (other.initialized && !other.loadedFilePath.empty()) {
-        init(other.loadedFilePath);
+    // Si el otro está inicializado, inicializamos este con los mismos archivos
+    if (other.initialized && !other.loadedFilePaths.empty()) {
+        init(other.loadedFilePaths);
         // Aplicar el volumen del otro
         if (initialized) {
             setVolume(other.currentVolume);
@@ -36,9 +41,9 @@ SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
         
         currentVolume = other.currentVolume;
         
-        // Si el otro está inicializado, inicializamos este con el mismo archivo
-        if (other.initialized && !other.loadedFilePath.empty()) {
-            init(other.loadedFilePath);
+        // Si el otro está inicializado, inicializamos este con los mismos archivos
+        if (other.initialized && !other.loadedFilePaths.empty()) {
+            init(other.loadedFilePaths);
             // Aplicar el volumen del otro
             if (initialized) {
                 setVolume(other.currentVolume);
@@ -50,69 +55,112 @@ SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
 
 void SoundPlayer::cleanup() {
     if (initialized) {
-        // Descargar los aliases (solo los streams, no los datos del buffer)
-        for (int i = 0; i < MAX_SOUNDS; i++) {
-            if (soundArray[i].stream.buffer != nullptr) {
-                UnloadSoundAlias(soundArray[i]);
-                soundArray[i] = { 0 };
+        // Descargar los aliases de todas las variantes
+        for (int v = 0; v < numVariants; v++) {
+            for (int i = 0; i < MAX_SOUNDS; i++) {
+                if (soundArray[v][i].stream.buffer != nullptr) {
+                    UnloadSoundAlias(soundArray[v][i]);
+                    soundArray[v][i] = { 0 };
+                }
             }
         }
         initialized = false;
-        loadedFilePath = "";
+        numVariants = 0;
+        loadedFilePaths.clear();
     }
 }
 
 void SoundPlayer::init(const std::string& filePath) {
-    // Si ya está inicializado con otro archivo, limpiamos primero
-    if (initialized && loadedFilePath != filePath) {
+    // Convertir a vector y llamar al método con múltiples archivos
+    std::vector<std::string> paths = { filePath };
+    init(paths);
+}
+
+void SoundPlayer::init(const std::vector<std::string>& filePaths) {
+    // Si ya está inicializado con otros archivos, limpiamos primero
+    if (initialized && loadedFilePaths != filePaths) {
         cleanup();
     }
     
-    // Si ya está inicializado con el mismo archivo, no hacemos nada
-    if (initialized && loadedFilePath == filePath) {
+    // Si ya está inicializado con los mismos archivos, no hacemos nada
+    if (initialized && loadedFilePaths == filePaths) {
         return;
     }
-
-    // Obtenemos el sonido fuente del ResourceManager
-    // El ResourceManager mantiene la propiedad de los datos del sonido (buffer)
-    Sound source = ResourceManager::getInstance()->loadSound(filePath);
     
-    // Verificar que el sonido se cargó correctamente
-    if (!IsSoundValid(source)) {
-        TraceLog(LOG_ERROR, "[SoundPlayer] Failed to load sound: %s", filePath.c_str());
+    if (filePaths.empty()) {
+        TraceLog(LOG_ERROR, "[SoundPlayer] No file paths provided");
         return;
     }
+    
+    TraceLog(LOG_INFO, "[SoundPlayer] Initializing with %d file(s)", (int)filePaths.size());
+    
+    // Limitar el número de variantes
+    numVariants = (filePaths.size() > MAX_VARIANTS) ? MAX_VARIANTS : filePaths.size();
+    
+    int loadedVariants = 0;
 
-    // Creamos aliases para permitir reproducción simultánea
-    // LoadSoundAlias comparte los datos de audio pero tiene su propio stream
-    for (int i = 0; i < MAX_SOUNDS; i++) {
-        soundArray[i] = LoadSoundAlias(source);
-        if (!IsSoundValid(soundArray[i])) {
-            TraceLog(LOG_ERROR, "[SoundPlayer] Failed to create sound alias %d for: %s", i, filePath.c_str());
+    // Cargar cada variante de sonido
+    for (int v = 0; v < numVariants; v++) {
+        TraceLog(LOG_INFO, "[SoundPlayer] Loading variant %d: %s", v, filePaths[v].c_str());
+        
+        // Obtenemos el sonido fuente del ResourceManager
+        Sound source = ResourceManager::getInstance()->loadSound(filePaths[v]);
+        
+        // Verificar que el sonido se cargó correctamente
+        if (!IsSoundValid(source)) {
+            TraceLog(LOG_ERROR, "[SoundPlayer] Failed to load sound variant %d: %s", v, filePaths[v].c_str());
+            continue;
         }
+        
+        TraceLog(LOG_INFO, "[SoundPlayer] Source sound valid, creating %d aliases", MAX_SOUNDS);
+
+        // Creamos aliases para permitir reproducción simultánea
+        int validAliases = 0;
+        for (int i = 0; i < MAX_SOUNDS; i++) {
+            soundArray[v][i] = LoadSoundAlias(source);
+            if (IsSoundValid(soundArray[v][i])) {
+                validAliases++;
+            } else {
+                TraceLog(LOG_ERROR, "[SoundPlayer] Failed to create sound alias %d for variant %d: %s", i, v, filePaths[v].c_str());
+            }
+        }
+        
+        if (validAliases > 0) {
+            TraceLog(LOG_INFO, "[SoundPlayer] Created %d valid aliases for variant %d", validAliases, v);
+            loadedVariants++;
+        }
+    }
+
+    if (loadedVariants == 0) {
+        TraceLog(LOG_ERROR, "[SoundPlayer] No variants loaded successfully!");
+        initialized = false;
+        return;
     }
 
     currentSound = 0;
     initialized = true;
-    loadedFilePath = filePath;
+    loadedFilePaths = filePaths;
     
-    TraceLog(LOG_INFO, "[SoundPlayer] Initialized with %d sound channels for: %s", MAX_SOUNDS, filePath.c_str());
+    TraceLog(LOG_INFO, "[SoundPlayer] Successfully initialized with %d variants and %d channels per variant", loadedVariants, MAX_SOUNDS);
 }
 
 void SoundPlayer::play() {
-    if (!initialized) {
-        TraceLog(LOG_WARNING, "[SoundPlayer] Cannot play: not initialized");
+    if (!initialized || numVariants == 0) {
+        TraceLog(LOG_WARNING, "[SoundPlayer] Attempted to play uninitialized SoundPlayer");
         return;
     }
 
-    if (!IsSoundValid(soundArray[currentSound])) {
-        TraceLog(LOG_WARNING, "[SoundPlayer] Cannot play: sound alias %d is invalid", currentSound);
-        return;
-    }
-
-    PlaySound(soundArray[currentSound]);
-    TraceLog(LOG_INFO, "[SoundPlayer] Playing sound on channel %d", currentSound);
+    // Elegir una variante aleatoria
+    int variant = rand() % numVariants;
     
+    if (!IsSoundValid(soundArray[variant][currentSound])) {
+        TraceLog(LOG_WARNING, "[SoundPlayer] Cannot play: sound alias %d of variant %d is invalid", currentSound, variant);
+        return;
+    }
+
+    PlaySound(soundArray[variant][currentSound]);
+    
+    // Avanzar al siguiente canal (round-robin)
     currentSound++;
     if (currentSound >= MAX_SOUNDS) {
         currentSound = 0;
@@ -120,11 +168,18 @@ void SoundPlayer::play() {
 }
 
 void SoundPlayer::setVolume(float volume) {
-    if (!initialized) return;
+    currentVolume = volume;
     
-    currentVolume = volume;  // Guardar el volumen actual
+    if (!initialized) {
+        return;
+    }
     
-    for (int i = 0; i < MAX_SOUNDS; i++) {
-        SetSoundVolume(soundArray[i], volume);
+    // Aplicar volumen a todos los canales de todas las variantes
+    for (int v = 0; v < numVariants; v++) {
+        for (int i = 0; i < MAX_SOUNDS; i++) {
+            if (IsSoundValid(soundArray[v][i])) {
+                SetSoundVolume(soundArray[v][i], volume);
+            }
+        }
     }
 }
