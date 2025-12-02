@@ -12,8 +12,8 @@
    </properties>
   </object>
  </objectgroup>
- <imagelayer id="3" name="capa fondo" offsetx="-1414.18" offsety="-645.576" parallaxy="0.8">
-  <image source="../../../backgrounds/background-2.png" width="2590" height="1413"/>
+ <imagelayer id="3" name="capa fondo" offsetx="-516.18" offsety="-173.576" parallaxy="0.8">
+  <image source="../../../backgrounds/background-2.png" width="900" height="491"/>
  </imagelayer>
  <layer id="2" name="Capa decorativos" width="20" height="15">
   <data encoding="csv">
