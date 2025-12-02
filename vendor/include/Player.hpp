@@ -54,7 +54,3 @@ private:
     // Sistema de invencibilidad
     float invincibility_timer;
 };
-
-// Declaración de variables globales (extern)
-extern Player fire_player;
-extern Player water_player;
