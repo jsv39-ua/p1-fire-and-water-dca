@@ -330,17 +330,17 @@ void MainGameState::update(float deltaTime)
     camera.target.x = roundf(camera.target.x);
     camera.target.y = roundf(camera.target.y);
 
-    // Comprobar si algún jugador se ha caido por debajo del mapa
-    //float mapBottom = mapBounds.y + mapBounds.height;
-    //bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
-    //bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
-    //if (fire_fell_below || water_fell_below) {
-    //    TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-    //    // Activar timer de muerte en vez de cambiar inmediatamente
-    //    playerDying = true;
-    //    deathTimer = 0.0f;
-    //    return;
-    //}
+    /** Comprobar si algún jugador se ha caido por debajo del mapa
+    float mapBottom = mapBounds.y + mapBounds.height;
+    bool fire_fell_below = (players[0].bounds.y + players[0].bounds.height) > (mapBottom + 1.0f);
+    bool water_fell_below = (players[1].bounds.y + players[1].bounds.height) > (mapBottom + 1.0f);
+    if (fire_fell_below || water_fell_below) {
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        // Activar timer de muerte en vez de cambiar inmediatamente
+        playerDying = true;
+        deathTimer = 0.0f;
+        return;
+    } */
 }
 
 void MainGameState::loadLevel(const std::string& mapPath) {
