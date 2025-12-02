@@ -41,6 +41,15 @@ private:
     bool on_ground[2] = {false, false}; // [0] = fire, [1] = water
     
     std::vector<Enemy> level_enemies;
+    std::vector<MapTransition> level_transitions;
+
+    void loadLevel(const std::string& mapPath);
+    
+    // Métodos auxiliares para update()
+    void handleTransitions();
+    void updateCamera(float deltaTime);
+    void handleMapBoundaries();
+    void checkFallDeath();
 
     // Texturas de personajes
     Texture2D character_textures[2];
@@ -56,4 +65,7 @@ private:
     bool playerDying = false;
     float deathTimer = 0.0f;
     static constexpr float DEATH_DELAY = 1.5f; // 1.5 segundos antes de Game Over
+    static constexpr float PLAYER_SPAWN_OFFSET = 40.0f;
+    static constexpr float FALL_DEATH_THRESHOLD = 200.0f;
+    static constexpr const char* LEVEL_BASE_PATH = "assets/levels/niveles/nivel-tutorial/";
 };
