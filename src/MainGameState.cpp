@@ -61,7 +61,18 @@ void MainGameState::init()
     camera.init({640, 360}, 2.0f, mapBounds);
     camera.setSmoothSpeed(5.0f);
     camera.setZoomSmoothSpeed(3.0f);
-    camera.setZoomLimits(1.0f, 3.0f);
+
+    // Calcular zoom mínimo para evitar ver fuera del mapa
+    float screenWidth = (float)GetScreenWidth();
+    float screenHeight = (float)GetScreenHeight();
+    float minZoomX = screenWidth / mapBounds.width;
+    float minZoomY = screenHeight / mapBounds.height;
+    
+    // El zoom mínimo debe ser suficiente para cubrir la pantalla (evitar bordes negros)
+    // Y también respetamos un mínimo de 1.0f para no alejar demasiado la cámara en mapas grandes
+    float minZoom = fmaxf(1.0f, fmaxf(minZoomX, minZoomY));
+
+    camera.setZoomLimits(minZoom, 3.0f);
     camera.setDynamicZoom(true);
 
     // Inicializar animaciones para ambos jugadores
