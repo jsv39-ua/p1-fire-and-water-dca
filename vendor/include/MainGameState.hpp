@@ -43,6 +43,12 @@ private:
     std::vector<MapTransition> level_transitions;
 
     void loadLevel(const std::string& mapPath);
+    
+    // Métodos auxiliares para update()
+    void handleTransitions();
+    void updateCamera(float deltaTime);
+    void handleMapBoundaries();
+    void checkFallDeath();
 
     // Texturas de personajes
     Texture2D character_textures[2];
