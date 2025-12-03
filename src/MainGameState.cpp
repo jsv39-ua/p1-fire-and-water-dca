@@ -222,12 +222,12 @@ void MainGameState::update(float deltaTime)
                             // Activate targets
                             for (auto& target : level_platforms) {
                                 // Check ID match
-                                if (platform.targetId != -1 && target.id == platform.targetId) {
+                                if (platform.targetId != -1 && target.id == platform.targetId && target.id != platform.id) {
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by ID", platform.id, target.id);
                                 }
                                 // Check Tag match
-                                if (!platform.targetTag.empty() && !target.tag.empty() && target.tag == platform.targetTag) {
+                                if (!platform.targetTag.empty() && !target.tag.empty() && target.tag == platform.targetTag && target.id != platform.id) {
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by TAG", platform.id, target.id);
                                 }

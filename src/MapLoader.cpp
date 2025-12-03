@@ -316,7 +316,7 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                             if (strcmp(prop->name, "targetTag") == 0 && prop->type == PROPERTY_TYPE_STRING) {
                                 p.targetTag = prop->stringValue;
                             }
-                             if (strcmp(prop->name, "type") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                            if (strcmp(prop->name, "type") == 0 && prop->type == PROPERTY_TYPE_STRING) {
                                 if (strcmp(prop->stringValue, "water") == 0) p.type = WATER;
                                 else if (strcmp(prop->stringValue, "fire") == 0) p.type = FIRE;
                             }

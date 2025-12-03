@@ -253,7 +253,7 @@ bool Player::resolvePlatformCollision(const Platform & platform) {
      - 0: Colisión con plataforma neutra
      - 1: Colisión con plataforma de contraria
      - 2: Colisión con plataforma amiga
-     - 3: Colsión con plataforma meta
+     - 3: Colisión con plataforma meta
      - 4: No hay colisión
      - 5: Colisión con botón
      - -1: Error
