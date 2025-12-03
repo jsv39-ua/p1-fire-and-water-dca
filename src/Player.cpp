@@ -274,6 +274,8 @@ int Player::checkPlatformCollision(const Platform & platform) const {
                 return (this->type == FIRE) ? 2 : 1;
             case WATER:
                 return (this->type == WATER) ? 2 : 1;
+            case BUTTON:
+                return 5;
             default:
                 return -1; // Será una plataforma con tipo inválido
         }

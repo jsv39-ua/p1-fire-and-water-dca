@@ -274,6 +274,94 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                 }
             }
         }
+        
+        // PASO 3: Recorrer capas de objetos para plataformas interactivas y botones
+        if (layer->type == LAYER_TYPE_OBJECT_GROUP) {
+            TmxObjectGroup* objGroup = &layer->exact.objectGroup;
+            
+            for (uint32_t j = 0; j < objGroup->objectsLength; j++) {
+                TmxObject* obj = &objGroup->objects[j];
+                
+                // Check type/class
+                bool isButton = (obj->typeString && strcmp(obj->typeString, "button") == 0);
+                bool isPlatform = (obj->typeString && strcmp(obj->typeString, "platform") == 0);
+                
+                if (isButton || isPlatform) {
+                    Rectangle bounds = {
+                        (float)obj->x,
+                        (float)obj->y,
+                        (float)obj->width,
+                        (float)obj->height
+                    };
+                    
+                    Platform p(bounds, isButton ? BUTTON : NONE);
+                    p.id = obj->id;
+                    p.isButton = isButton;
+                    
+                    // Read properties
+                    if (obj->properties) {
+                        for (uint32_t k = 0; k < obj->propertiesLength; k++) {
+                            TmxProperty* prop = &obj->properties[k];
+                            
+                            if (strcmp(prop->name, "active") == 0 && prop->type == PROPERTY_TYPE_BOOL) {
+                                p.active = prop->boolValue;
+                            }
+                            if (strcmp(prop->name, "targetId") == 0 && prop->type == PROPERTY_TYPE_INT) {
+                                p.targetId = prop->intValue;
+                            }
+                            if (strcmp(prop->name, "tag") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                                p.tag = prop->stringValue;
+                            }
+                            if (strcmp(prop->name, "targetTag") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                                p.targetTag = prop->stringValue;
+                            }
+                             if (strcmp(prop->name, "type") == 0 && prop->type == PROPERTY_TYPE_STRING) {
+                                if (strcmp(prop->stringValue, "water") == 0) p.type = WATER;
+                                else if (strcmp(prop->stringValue, "fire") == 0) p.type = FIRE;
+                            }
+                        }
+                    }
+
+                    // Read Visuals from GID (Tile Objects)
+                    if (obj->gid > 0) {
+                        TileData tData = GetTileDataFromGID(obj->gid);
+                        if (tData.valid) {
+                            p.hasVisuals = true;
+                            p.texture = tData.texture;
+                            p.sourceRect = tData.source;
+                            // Adjust Y for Tile Objects (Tiled uses bottom-left, we want top-left)
+                            p.bounds.y -= p.bounds.height;
+                        }
+                    }
+                    
+                    platforms.push_back(p);
+                    TraceLog(LOG_INFO, "Added interactive object: ID=%d, Type=%s, Active=%d", p.id, isButton ? "BUTTON" : "PLATFORM", p.active);
+                }
+            }
+        }
+    }
+    
+    // Post-processing: Link buttons to their pressed state visuals
+    for (auto& p : platforms) {
+        if (p.isButton && p.targetId != -1) {
+            // Find the target platform
+            for (const auto& target : platforms) {
+                if (target.id == p.targetId) {
+                    // If target has visuals, copy them to pressed state
+                    if (target.hasVisuals) {
+                        p.hasPressedVisuals = true;
+                        p.pressedTexture = target.texture;
+                        p.pressedSourceRect = target.sourceRect;
+                        TraceLog(LOG_INFO, "Linked button %d to pressed visual from %d", p.id, target.id);
+                        
+                        // Clear targetId so we don't try to activate it as a logic platform
+                        // (Assuming targetId was ONLY for visuals in this case)
+                        p.targetId = -1; 
+                    }
+                    break;
+                }
+            }
+        }
     }
     
     TraceLog(LOG_INFO, "Plataformas extraídas: %d (Optimizado)", platforms.size());
