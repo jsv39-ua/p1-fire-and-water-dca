@@ -182,20 +182,69 @@ void Player::updateLifeCount(int change) {
 /*
     Resuelve la física de colisión con una plataforma sólida.
     Retorna true si el jugador está sobre la plataforma (en el suelo).
+    
+    Este método determina desde qué dirección viene la colisión y resuelve
+    el solapamiento de manera apropiada para cada caso.
 */
 bool Player::resolvePlatformCollision(const Platform & platform) {
-    // Solo corregir si viene desde arriba (cayendo)
-    if (this->velocity.y > 0) {
-        float playerBottom = this->position.y + this->height;
-        // Verificar que el jugador está encima de la plataforma (no dentro por los lados)
-        if (playerBottom > platform.bounds.y && playerBottom < platform.bounds.y + platform.bounds.height) {
-            this->velocity.y = 0;
-            this->position.y = platform.bounds.y - this->bounds.height;
-            this->bounds.y = this->position.y;
-            return true; // Está en el suelo
+    // Calcular el solapamiento en cada eje
+    float overlapLeft = (this->bounds.x + this->bounds.width) - platform.bounds.x;
+    float overlapRight = (platform.bounds.x + platform.bounds.width) - this->bounds.x;
+    float overlapTop = (this->bounds.y + this->bounds.height) - platform.bounds.y;
+    float overlapBottom = (platform.bounds.y + platform.bounds.height) - this->bounds.y;
+    
+    // Encontrar el solapamiento mínimo para determinar la dirección de la colisión
+    float minOverlap = fminf(fminf(overlapLeft, overlapRight), fminf(overlapTop, overlapBottom));
+    
+    // Definir un umbral de prioridad para colisiones laterales durante saltos
+    const float LATERAL_PRIORITY_THRESHOLD = 3.0f;
+    
+    bool isOnGround = false;
+    
+    // Si estamos saltando (velocity.y < 0), priorizar colisiones laterales sobre verticales
+    // para evitar que colisiones ambiguas corten el salto
+    if (this->velocity.y < 0) {
+        float minHorizontal = fminf(overlapLeft, overlapRight);
+        if (minHorizontal < overlapTop + LATERAL_PRIORITY_THRESHOLD && 
+            minHorizontal < overlapBottom + LATERAL_PRIORITY_THRESHOLD) {
+            minOverlap = minHorizontal;
         }
     }
-    return false; // No está en el suelo
+    
+    // Resolver según la dirección con menor solapamiento
+    if (minOverlap == overlapTop && this->velocity.y > 0) {
+        // Colisión desde ARRIBA (jugador cayendo sobre plataforma)
+        this->position.y = platform.bounds.y - this->bounds.height;
+        this->velocity.y = 0;
+        isOnGround = true;
+    }
+    else if (minOverlap == overlapBottom && this->velocity.y < 0) {
+        // Colisión desde ABAJO (jugador saltando contra plataforma)
+        this->position.y = platform.bounds.y + platform.bounds.height;
+        this->velocity.y = 0;
+    }
+    else if (minOverlap == overlapLeft) {
+        // Colisión desde la IZQUIERDA (jugador moviéndose a la derecha)
+        this->position.x = platform.bounds.x - this->bounds.width;
+        // Solo detener velocidad horizontal si NO está en medio de un salto activo
+        if (this->velocity.x > 0 && this->velocity.y >= -50.0f) {
+            this->velocity.x = 0;
+        }
+    }
+    else if (minOverlap == overlapRight) {
+        // Colisión desde la DERECHA (jugador moviéndose a la izquierda)
+        this->position.x = platform.bounds.x + platform.bounds.width;
+        // Solo detener velocidad horizontal si NO está en medio de un salto activo
+        if (this->velocity.x < 0 && this->velocity.y >= -50.0f) {
+            this->velocity.x = 0;
+        }
+    }
+    
+    // Actualizar bounds después de corregir la posición
+    this->bounds.x = this->position.x;
+    this->bounds.y = this->position.y;
+    
+    return isOnGround;
 }
 
 
