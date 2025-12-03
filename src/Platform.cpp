@@ -18,10 +18,12 @@ Platform::Platform() {
     tag = "";
     targetTag = "";
     hasVisuals = false;
+    texture = {0};
     sourceRect = {0,0,0,0};
     
     isPressed = false;
     hasPressedVisuals = false;
+    pressedTexture = {0};
     pressedSourceRect = {0,0,0,0};
 }
 
@@ -33,10 +35,12 @@ Platform::Platform(Rectangle b, ElementType t) : bounds(b), type(t) {
     tag = "";
     targetTag = "";
     hasVisuals = false;
+    texture = {0};
     sourceRect = {0,0,0,0};
 
     isPressed = false;
     hasPressedVisuals = false;
+    pressedTexture = {0};
     pressedSourceRect = {0,0,0,0};
 }
 
