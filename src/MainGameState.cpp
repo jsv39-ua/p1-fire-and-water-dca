@@ -198,6 +198,9 @@ void MainGameState::update(float deltaTime)
     // Verificar colisiones con plataformas
     // bool bothOnGoal = true;
     
+    // Reset active sign text
+    activeSignText = "";
+    
     // Optimization: Merged reset logic into the main collision loop to avoid double iteration
     for (auto& platform : level_platforms) {
         if (!platform.active) continue;
@@ -207,6 +210,13 @@ void MainGameState::update(float deltaTime)
         bool touchedByAny = false;
         
         for (int i = 0; i < 2; i++) {
+            // Lógica de Carteles (SIGN) - Solicitada por usuario
+            if (platform.type == SIGN) {
+                if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
+                    activeSignText = platform.text;
+                }
+            }
+
             int collision = players[i].checkPlatformCollision(platform);
 
             // Check if button is being touched (collision 5 is BUTTON)
@@ -723,6 +733,56 @@ void MainGameState::render()
         DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
     }
     
+    // --- UI FINAL (DIBUJADO FUERA DE LOS BUCLES) ---
+    if (!activeSignText.empty()) {
+        // 1. Configuración de estilo
+        int fontSize = 20;
+        int padding = 30;        // Más padding para que se vea más grande
+        Color boxColor = { 0, 0, 0, 220 }; 
+        Color borderColor = RAYWHITE;
+        
+        // 2. Medir dimensiones del texto multilínea manualmente
+        int maxLineWidth = 0;
+        int lineCount = 0;
+        
+        const char* textPtr = activeSignText.c_str();
+        const char* lineStart = textPtr;
+        
+        // Recorrer el texto para contar líneas y medir la más ancha
+        for (int i = 0; textPtr[i] != '\0'; i++) {
+            if (textPtr[i] == '\n') {
+                std::string line(lineStart, textPtr + i - lineStart);
+                int w = MeasureText(line.c_str(), fontSize);
+                if (w > maxLineWidth) maxLineWidth = w;
+                
+                lineCount++;
+                lineStart = textPtr + i + 1;
+            }
+        }
+        // Medir última línea
+        int w = MeasureText(lineStart, fontSize);
+        if (w > maxLineWidth) maxLineWidth = w;
+        lineCount++; 
+
+        int textWidth = maxLineWidth;
+        int textHeight = lineCount * fontSize + (lineCount * 2); // Altura basada en líneas
+
+        // 3. Calcular dimensiones de la caja
+        int boxWidth = textWidth + (padding * 2);
+        int boxHeight = textHeight + (padding * 2);
+
+        // 4. Calcular posición para centrarlo arriba en la pantalla
+        int screenWidth = GetScreenWidth();
+        int boxX = (screenWidth / 2) - (boxWidth / 2); 
+        int boxY = 50; 
+
+        // 5. DIBUJAR
+        DrawRectangle(boxX + 4, boxY + 4, boxWidth, boxHeight, Fade(BLACK, 0.5f));
+        DrawRectangle(boxX, boxY, boxWidth, boxHeight, boxColor);
+        DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, borderColor);
+        DrawText(activeSignText.c_str(), boxX + padding, boxY + padding, fontSize, WHITE);
+    }
+
     renderGlobalUI();
     
     EndDrawing();

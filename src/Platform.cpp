@@ -20,6 +20,7 @@ Platform::Platform() {
     hasVisuals = false;
     texture = {0};
     sourceRect = {0,0,0,0};
+    text="";
     
     isPressed = false;
     hasPressedVisuals = false;
@@ -37,6 +38,7 @@ Platform::Platform(Rectangle b, ElementType t) : bounds(b), type(t) {
     hasVisuals = false;
     texture = {0};
     sourceRect = {0,0,0,0};
+    text="";
 
     isPressed = false;
     hasPressedVisuals = false;
