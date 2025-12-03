@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 #include <GameOverState.hpp>
 #include <SimpleLevelState.hpp>
 #include <PauseMenuState.hpp>
@@ -41,17 +42,19 @@ void MainGameState::init()
     players[0] = Player(100.0f, 275.0f, hitboxWidth, hitboxHeight, FIRE);
     players[1] = Player(150.0f, 275.0f, hitboxWidth, hitboxHeight, WATER);
     
-    // Cargar teclas desde SettingsManager
+    // Cargar teclas desde SettingsManager (Updated)
     players[0].setKeys(
         SettingsManager::getInstance()->getFireLeft(),
         SettingsManager::getInstance()->getFireRight(),
-        SettingsManager::getInstance()->getFireJump()
+        SettingsManager::getInstance()->getFireJump(),
+        SettingsManager::getInstance()->getFireAttack()
     );
     
     players[1].setKeys(
         SettingsManager::getInstance()->getWaterLeft(),
         SettingsManager::getInstance()->getWaterRight(),
-        SettingsManager::getInstance()->getWaterJump()
+        SettingsManager::getInstance()->getWaterJump(),
+        SettingsManager::getInstance()->getWaterAttack()
     );
 
     // Inicialización de la cámara (se configurará después de cargar el mapa)
@@ -100,9 +103,9 @@ void MainGameState::handleInput()
     }
 
     // Obtener las teclas desde SettingsManager
-    int playerKeys[2][3] = {
-        {SettingsManager::getInstance()->getFireLeft(), SettingsManager::getInstance()->getFireRight(), SettingsManager::getInstance()->getFireJump()},
-        {SettingsManager::getInstance()->getWaterLeft(), SettingsManager::getInstance()->getWaterRight(), SettingsManager::getInstance()->getWaterJump()}
+    int playerKeys[2][4] = {
+        {SettingsManager::getInstance()->getFireLeft(), SettingsManager::getInstance()->getFireRight(), SettingsManager::getInstance()->getFireJump(), SettingsManager::getInstance()->getFireAttack()},
+        {SettingsManager::getInstance()->getWaterLeft(), SettingsManager::getInstance()->getWaterRight(), SettingsManager::getInstance()->getWaterJump(), SettingsManager::getInstance()->getWaterAttack()}
     };
 
     // Control de ambos jugadores con un bucle
@@ -120,6 +123,24 @@ void MainGameState::handleInput()
         if (IsKeyPressed(playerKeys[i][2]) && on_ground[i]) {
             players[i].jump();
             players[i].jumpSound.play();
+        }
+        
+        // Control de ataque
+        if (IsKeyPressed(playerKeys[i][3])) {
+            if (players[i].canAttack()) {
+                players[i].attack();
+                
+                // Crear proyectil
+                // Posición: centro del jugador
+                Vector2 pos = { players[i].position.x + players[i].width/2, players[i].position.y + players[i].height/2 };
+                
+                // Velocidad: Depende de la dirección
+                float speed = 400.0f;
+                Vector2 vel = { players[i].facingRight ? speed : -speed, 0 };
+                
+                // Tipo: El del jugador
+                projectiles.emplace_back(pos, vel, players[i].type);
+            }
         }
     }
 
@@ -232,6 +253,44 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
+
+    // Actualizar proyectiles y colisiones con enemigos
+    for (auto it = projectiles.begin(); it != projectiles.end(); ) {
+        it->update(deltaTime);
+        
+        bool hit = false;
+        if (it->isActive()) {
+            for (auto& enemy : level_enemies) {
+                if (CheckCollisionRecs(it->getBounds(), enemy.bounds)) {
+                    // Fuego daña Agua, Agua daña Fuego
+                    bool isOpposite = (it->getType() == FIRE && enemy.type == WATER) || 
+                                      (it->getType() == WATER && enemy.type == FIRE);
+                                      
+                    if (isOpposite) {
+                        if (!enemy.isInvincible()) {
+                            enemy.updateLifeCount(-1);
+                            enemy.activateInvincibility();
+                        }
+                        hit = true;
+                    } else {
+                        // Mismo elemento: el proyectil se destruye sin daño
+                        hit = true;
+                    }
+                    break; // Un proyectil solo golpea un enemigo
+                }
+            }
+        }
+        
+        if (!it->isActive() || hit) {
+            it = projectiles.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    // Limpiar enemigos muertos
+    level_enemies.erase(std::remove_if(level_enemies.begin(), level_enemies.end(),
+        [](const Enemy& e) { return e.getLifeCount() <= 0; }), level_enemies.end());
 
     // Verificar colisiones con enemigos
     for (auto& enemy : level_enemies) {
@@ -528,6 +587,12 @@ void MainGameState::render()
     for (auto& enemy : level_enemies) {
         enemy.render();
     }
+    
+    // Renderizar proyectiles
+    for (const auto& projectile : projectiles) {
+        projectile.render();
+    }
+
     // Debug: draw outlines and labels for enemies
     for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
         Enemy &en = level_enemies[ei];

@@ -15,10 +15,12 @@ SettingsManager::SettingsManager() {
     fireLeft = KEY_A;
     fireRight = KEY_D;
     fireJump = KEY_W;
+    fireAttack = KEY_S;
     
     waterLeft = KEY_LEFT;
     waterRight = KEY_RIGHT;
     waterJump = KEY_UP;
+    waterAttack = KEY_DOWN;
 }
 
 SettingsManager* SettingsManager::getInstance() {
@@ -76,16 +78,69 @@ void SettingsManager::loadSettings() {
     val = findValue("language");
     if (!val.empty()) language = val;
     
-    val = findValue("left");
-    if (!val.empty()) {
-        size_t pos = content.find("\"firePlayer\"");
-        size_t leftPos = content.find("\"left\"", pos);
-        size_t colonPos = content.find(":", leftPos);
-        size_t commaPos = content.find(",", colonPos);
-        fireLeft = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+    // Cargar teclas de Fire Player
+    size_t firePlayerPos = content.find("\"firePlayer\"");
+    if (firePlayerPos != std::string::npos) {
+        size_t leftPos = content.find("\"left\"", firePlayerPos);
+        if (leftPos != std::string::npos) {
+            size_t colonPos = content.find(":", leftPos);
+            size_t commaPos = content.find(",", colonPos);
+            fireLeft = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t rightPos = content.find("\"right\"", firePlayerPos);
+        if (rightPos != std::string::npos) {
+            size_t colonPos = content.find(":", rightPos);
+            size_t commaPos = content.find(",", colonPos);
+            fireRight = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t jumpPos = content.find("\"jump\"", firePlayerPos);
+        if (jumpPos != std::string::npos) {
+            size_t colonPos = content.find(":", jumpPos);
+            size_t commaPos = content.find_first_of(",\n", colonPos);
+            fireJump = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t attackPos = content.find("\"attack\"", firePlayerPos);
+        if (attackPos != std::string::npos) {
+            size_t colonPos = content.find(":", attackPos);
+            size_t commaPos = content.find_first_of(",\n}", colonPos);
+            fireAttack = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
     }
     
-    // Repetir para las demás teclas...
+    // Cargar teclas de Water Player
+    size_t waterPlayerPos = content.find("\"waterPlayer\"");
+    if (waterPlayerPos != std::string::npos) {
+        size_t leftPos = content.find("\"left\"", waterPlayerPos);
+        if (leftPos != std::string::npos) {
+            size_t colonPos = content.find(":", leftPos);
+            size_t commaPos = content.find(",", colonPos);
+            waterLeft = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t rightPos = content.find("\"right\"", waterPlayerPos);
+        if (rightPos != std::string::npos) {
+            size_t colonPos = content.find(":", rightPos);
+            size_t commaPos = content.find(",", colonPos);
+            waterRight = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t jumpPos = content.find("\"jump\"", waterPlayerPos);
+        if (jumpPos != std::string::npos) {
+            size_t colonPos = content.find(":", jumpPos);
+            size_t commaPos = content.find_first_of(",\n", colonPos);
+            waterJump = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+        
+        size_t attackPos = content.find("\"attack\"", waterPlayerPos);
+        if (attackPos != std::string::npos) {
+            size_t colonPos = content.find(":", attackPos);
+            size_t commaPos = content.find_first_of(",\n}", colonPos);
+            waterAttack = std::stoi(content.substr(colonPos + 1, commaPos - colonPos - 1));
+        }
+    }
     
     TraceLog(LOG_INFO, "Settings loaded successfully");
 }
@@ -104,12 +159,14 @@ void SettingsManager::saveSettings() {
     ss << "        \"firePlayer\": {\n";
     ss << "            \"left\": " << fireLeft << ",\n";
     ss << "            \"right\": " << fireRight << ",\n";
-    ss << "            \"jump\": " << fireJump << "\n";
+    ss << "            \"jump\": " << fireJump << ",\n";
+    ss << "            \"attack\": " << fireAttack << "\n";
     ss << "        },\n";
     ss << "        \"waterPlayer\": {\n";
     ss << "            \"left\": " << waterLeft << ",\n";
     ss << "            \"right\": " << waterRight << ",\n";
-    ss << "            \"jump\": " << waterJump << "\n";
+    ss << "            \"jump\": " << waterJump << ",\n";
+    ss << "            \"attack\": " << waterAttack << "\n";
     ss << "        }\n";
     ss << "    }\n";
     ss << "}\n";
