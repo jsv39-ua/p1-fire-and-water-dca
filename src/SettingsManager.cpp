@@ -1,6 +1,7 @@
 #include "SettingsManager.hpp"
 #include <fstream>
 #include <sstream>
+#include <regex>
 
 SettingsManager* SettingsManager::instance = nullptr;
 
@@ -21,6 +22,8 @@ SettingsManager::SettingsManager() {
     waterRight = KEY_RIGHT;
     waterJump = KEY_UP;
     waterAttack = KEY_DOWN;
+    
+    loadKeyNames();
 }
 
 SettingsManager* SettingsManager::getInstance() {
@@ -173,4 +176,49 @@ void SettingsManager::saveSettings() {
     
     SaveFileText(settingsPath, (char*)ss.str().c_str());
     TraceLog(LOG_INFO, "Settings saved successfully");
+}
+
+void SettingsManager::loadKeyNames() {
+    char* jsonText = LoadFileText(keyNamesPath);
+    if (jsonText == nullptr) {
+        TraceLog(LOG_WARNING, "Key names file not found: %s", keyNamesPath);
+        return;
+    }
+
+    std::string content(jsonText);
+    UnloadFileText(jsonText);
+
+    // Usamos Regex para encontrar patrones "numero": "texto"
+    std::regex pattern("\"([0-9]+)\"\\s*:\\s*\"([^\"]+)\"");
+    
+    auto begin = std::sregex_iterator(content.begin(), content.end(), pattern);
+    auto end = std::sregex_iterator();
+
+    for (std::sregex_iterator i = begin; i != end; ++i) {
+        std::smatch match = *i;
+        try {
+            int key = std::stoi(match[1].str());
+            std::string name = match[2].str();
+            keyNames[key] = name;
+        } catch (...) {
+            continue;
+        }
+    }
+    
+    TraceLog(LOG_INFO, "Loaded %d key names from JSON using Regex", (int)keyNames.size());
+}
+
+std::string SettingsManager::getKeyName(int key) {
+    // Check if key is in the map loaded from JSON
+    auto it = keyNames.find(key);
+    if (it != keyNames.end()) {
+        return it->second;
+    }
+
+    // Fallback for printable characters
+    if (key >= 32 && key <= 126) {
+        return std::string(1, (char)key);
+    }
+    
+    return "KEY " + std::to_string(key);
 }
