@@ -1,0 +1,65 @@
+name: Empaquetar .deb
+
+on:
+  # Se ejecuta automáticamente al crear o publicar una release
+  release:
+    types: [created, published]
+  # Para ejecutar manualmente si hace falta
+  workflow_dispatch:
+
+jobs:
+  build_and_package_deb:
+    name: Compilar y empaquetar (.deb)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias
+        run: |
+          # Requisitos para compilar y para crear .deb
+          sudo apt-get update
+          sudo apt-get install -y build-essential debhelper fakeroot
+
+      - name: Compilacion del proyecto
+        run: make all
+
+     
+      - name: Generar Paquete .deb con Makefile
+        # Makefile crea el paquete a través de la regla 'dist' para crear el .deb
+        run: make dist
+        
+      - name: Encontrar el paquete .deb Generado
+        id: find_deb
+        # Busca el archivo .deb generado en el directorio padre
+        run: echo "DEB_FILE=$(find . -maxdepth 1 -name "*.deb" -print -quit)" >> $GITHUB_OUTPUT
+
+      - name: Subir Paquete .deb como Artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: ${{ steps.find_deb.outputs.DEB_FILE }}
+          retention-days: 7
+          
+  publish_release_asset:
+    name: Publicar Paquete .deb en Release
+    runs-on: ubuntu-latest
+    needs: build_and_package_deb
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Descargar el artefacto (.deb)
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-package
+          path: artifacts
+
+      - name: Publicar Paquete .deb en GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # El paquete se encuentra dentro de la carpeta 'artifacts'
+          files: artifacts/*.deb
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
