@@ -26,7 +26,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
+            debhelper \
+            fakeroot \
+            mesa-common-dev \
             libgl1-mesa-dev \
+            libglu1-mesa-dev \
             libx11-dev \
             libxrandr-dev \
             libxi-dev \
@@ -34,17 +38,23 @@ jobs:
             libxinerama-dev \
             libasound2-dev
 
+      - name: Verificar bibliotecas instaladas
+        run: |
+          echo "Verificando libGL..."
+          ldconfig -p | grep libGL || echo "libGL no encontrada"
+          echo "Verificando libX11..."
+          ldconfig -p | grep libX11 || echo "libX11 no encontrada"
+          echo "Rutas de búsqueda del linker:"
+          gcc -print-search-dirs
+
       - name: Compilacion del proyecto
         run: make all
-
      
       - name: Generar Paquete .deb con Makefile
-        # Makefile crea el paquete a través de la regla 'dist' para crear el .deb
         run: make dist
         
       - name: Encontrar el paquete .deb Generado
         id: find_deb
-        # Busca el archivo .deb generado en el directorio padre
         run: echo "DEB_FILE=$(find . -maxdepth 1 -name "*.deb" -print -quit)" >> $GITHUB_OUTPUT
 
       - name: Subir Paquete .deb como Artefacto
