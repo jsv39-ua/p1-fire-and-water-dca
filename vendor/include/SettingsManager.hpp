@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <map>
 
 extern "C" {
     #include <raylib.h>
@@ -14,7 +15,8 @@ public:
     
     void loadSettings();
     void saveSettings();
-    
+    void loadKeyNames(); // New method to load key names from JSON
+
     // Audio
     float getMasterVolume() const { return masterVolume; }
     float getMusicVolume() const { return musicVolume; }
@@ -54,6 +56,9 @@ public:
         waterAttack = attack;
     }
 
+    // Utility
+    std::string getKeyName(int key);
+
 private:
     SettingsManager();
     ~SettingsManager() = default;
@@ -73,4 +78,7 @@ private:
     int waterLeft, waterRight, waterJump, waterAttack;
     
     const char* settingsPath = "assets/config/settings.json";
+    const char* keyNamesPath = "assets/config/key_names.json";
+    
+    std::map<int, std::string> keyNames;
 };
