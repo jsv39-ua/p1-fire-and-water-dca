@@ -1,5 +1,13 @@
 name: Entregable 3 - CMake, Multiplataforma y CPack
 
+permissions:
+  contents: read
+  packages: write
+  issues: write
+  pull-requests: write
+  # Add this if you are interacting with releases:
+  actions: write
+
 on:
   # Se ejecuta automáticamente al crear o publicar una release
   release:
