@@ -32,22 +32,26 @@ public:
     int getFireLeft() const { return fireLeft; }
     int getFireRight() const { return fireRight; }
     int getFireJump() const { return fireJump; }
+    int getFireAttack() const { return fireAttack; }
     
-    void setFireKeys(int left, int right, int jump) {
+    void setFireKeys(int left, int right, int jump, int attack) {
         fireLeft = left;
         fireRight = right;
         fireJump = jump;
+        fireAttack = attack;
     }
     
     // Controls - Water Player
     int getWaterLeft() const { return waterLeft; }
     int getWaterRight() const { return waterRight; }
     int getWaterJump() const { return waterJump; }
+    int getWaterAttack() const { return waterAttack; }
     
-    void setWaterKeys(int left, int right, int jump) {
+    void setWaterKeys(int left, int right, int jump, int attack) {
         waterLeft = left;
         waterRight = right;
         waterJump = jump;
+        waterAttack = attack;
     }
 
 private:
@@ -65,8 +69,8 @@ private:
     std::string language;
     
     // Controls
-    int fireLeft, fireRight, fireJump;
-    int waterLeft, waterRight, waterJump;
+    int fireLeft, fireRight, fireJump, fireAttack;
+    int waterLeft, waterRight, waterJump, waterAttack;
     
     const char* settingsPath = "assets/config/settings.json";
 };

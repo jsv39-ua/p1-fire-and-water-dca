@@ -15,6 +15,7 @@ Player::Player() : Entity() {
     key_left = 0;
     key_right = 0;
     key_jump = 0;
+    key_attack = 0;
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
     
@@ -22,6 +23,7 @@ Player::Player() : Entity() {
     jumpSound.setVolume(1.0f);
     life_count = 3;
     invincibility_timer = 0.0f;
+    attack_cooldown = 0.0f;
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -30,6 +32,7 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_left = 0;
     key_right = 0;
     key_jump = 0;
+    key_attack = 0;
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
 
@@ -98,12 +101,14 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     }
     life_count = 3;
     invincibility_timer = 0.0f;
+    attack_cooldown = 0.0f;
 }
 
-void Player::setKeys(int left, int right, int jump) {
+void Player::setKeys(int left, int right, int jump, int attack) {
     key_left = left;
     key_right = right;
     key_jump = jump;
+    key_attack = attack;
 }
 
 void Player::update(float deltaTime) {
@@ -112,6 +117,14 @@ void Player::update(float deltaTime) {
         invincibility_timer -= deltaTime;
         if (invincibility_timer < 0.0f) {
             invincibility_timer = 0.0f;
+        }
+    }
+    
+    // Actualizar cooldown de ataque
+    if (attack_cooldown > 0.0f) {
+        attack_cooldown -= deltaTime;
+        if (attack_cooldown < 0.0f) {
+            attack_cooldown = 0.0f;
         }
     }
     
@@ -156,7 +169,13 @@ void Player::walk(int direction) {
 void Player::jump() {
     velocity.y = -JUMP_FORCE;
     jump_hold_timer = 0.0f; // Reiniciar timer al saltar
+}
 
+void Player::attack() {
+    if (canAttack()) {
+        attack_cooldown = ATTACK_COOLDOWN;
+        // El proyectil se creará en MainGameState
+    }
 }
 
 void Player::updateJump(float deltaTime, bool jumpKeyHeld) {
