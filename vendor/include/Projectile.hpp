@@ -27,6 +27,6 @@ private:
     bool active;
     float lifetime;
     
-    static constexpr float MAX_LIFETIME = 2.0f; // 2 segundos antes de desaparecer
+    static constexpr float MAX_LIFETIME = 0.4f; // 0.4 segundos (ataque corto)
     static constexpr float SIZE = 8.0f; // Tamaño del proyectil
 };
