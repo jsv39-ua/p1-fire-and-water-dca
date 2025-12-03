@@ -16,6 +16,10 @@ public:
     Texture2D texture;
     Rectangle sourceRect;
     bool hasTexture;
+    
+    // Sistema de vida e invencibilidad
+    int life_count;
+    float invincibility_timer;
 
     Enemy();
     Enemy(Rectangle bounds, ElementType type, float range = 50.0f, bool vertical = false);
@@ -24,4 +28,15 @@ public:
     
     void update(float deltaTime) override;
     void render() override;
+    
+    // Sistema de vida
+    int getLifeCount() const { return life_count; }
+    void updateLifeCount(int change);
+    bool isInvincible() const { return invincibility_timer > 0.0f; }
+    void activateInvincibility() { invincibility_timer = INVINCIBILITY_DURATION; }
+    bool shouldRenderVisible() const;
+    
+private:
+    static constexpr float INVINCIBILITY_DURATION = 1.0f; // 1 segundo de invencibilidad
+    static constexpr float BLINK_INTERVAL = 0.1f; // Parpadeo cada 0.1 segundos
 };

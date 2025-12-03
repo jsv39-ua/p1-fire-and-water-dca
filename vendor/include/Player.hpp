@@ -21,12 +21,13 @@ public:
     void render() override;
     
     // Configurar teclas
-    void setKeys(int left, int right, int jump);
+    void setKeys(int left, int right, int jump, int attack);
     
     // Getters para las teclas
     int getKeyLeft() const { return key_left; }
     int getKeyRight() const { return key_right; }
     int getKeyJump() const { return key_jump; }
+    int getKeyAttack() const { return key_attack; }
     int getLifeCount() const { return life_count; }
     void setLifeCount(int lives) { life_count = lives; }
     
@@ -38,6 +39,8 @@ public:
     // Métodos de control
     void walk(int direction); // -1 = izquierda, 0 = parar, 1 = derecha
     void jump();
+    void attack(); // Realizar ataque
+    bool canAttack() const { return attack_cooldown <= 0.0f; }
     void updateJump(float deltaTime, bool jumpKeyHeld); // Actualizar salto variable
     void updateLifeCount(int change); // Cambiar vida por 'change' unidades
     int checkPlatformCollision(const Platform & platform) const;
@@ -50,11 +53,13 @@ private:
     static constexpr float MAX_JUMP_HOLD_TIME = 0.25f;
     static constexpr float INVINCIBILITY_DURATION = 1.0f; // 1 segundo de invencibilidad
     static constexpr float BLINK_INTERVAL = 0.1f; // Parpadeo cada 0.1 segundos
+    static constexpr float ATTACK_COOLDOWN = 0.5f; // Medio segundo entre ataques
     
     // Teclas configurables
     int key_left;
     int key_right;
     int key_jump;
+    int key_attack;
     int life_count;
     
     // Timer para salto variable
@@ -62,4 +67,7 @@ private:
     
     // Sistema de invencibilidad
     float invincibility_timer;
+    
+    // Sistema de ataque
+    float attack_cooldown;
 };

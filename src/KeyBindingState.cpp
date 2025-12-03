@@ -52,10 +52,12 @@ void KeyBindingsState::init() {
     tempFireLeft = settings->getFireLeft();
     tempFireRight = settings->getFireRight();
     tempFireJump = settings->getFireJump();
+    tempFireAttack = settings->getFireAttack();
     
     tempWaterLeft = settings->getWaterLeft();
     tempWaterRight = settings->getWaterRight();
     tempWaterJump = settings->getWaterJump();
+    tempWaterAttack = settings->getWaterAttack();
     
     int screenWidth = GetScreenWidth();
     float centerX = screenWidth / 2.0f;
@@ -71,15 +73,17 @@ void KeyBindingsState::init() {
     fireLeftButton = { leftColumnX, startY, buttonWidth, buttonHeight };
     fireRightButton = { leftColumnX, startY + spacing, buttonWidth, buttonHeight };
     fireJumpButton = { leftColumnX, startY + spacing * 2, buttonWidth, buttonHeight };
+    fireAttackButton = { leftColumnX, startY + spacing * 3, buttonWidth, buttonHeight };
     
     // Columna derecha - Jugador Agua
     waterLeftButton = { rightColumnX, startY, buttonWidth, buttonHeight };
     waterRightButton = { rightColumnX, startY + spacing, buttonWidth, buttonHeight };
     waterJumpButton = { rightColumnX, startY + spacing * 2, buttonWidth, buttonHeight };
+    waterAttackButton = { rightColumnX, startY + spacing * 3, buttonWidth, buttonHeight };
     
     // Botones de acción
-    saveButton = { centerX - 210, startY + spacing * 4, 200, 50 };
-    cancelButton = { centerX + 10, startY + spacing * 4, 200, 50 };
+    saveButton = { centerX - 210, startY + spacing * 5, 200, 50 };
+    cancelButton = { centerX + 10, startY + spacing * 5, 200, 50 };
 }
 
 // Función helper para verificar si una tecla ya está en uso
@@ -89,9 +93,11 @@ bool KeyBindingsState::isKeyInUse(int key, EditingKey excludeThis) {
     if (excludeThis != FIRE_LEFT && key == tempFireLeft) return true;
     if (excludeThis != FIRE_RIGHT && key == tempFireRight) return true;
     if (excludeThis != FIRE_JUMP && key == tempFireJump) return true;
+    if (excludeThis != FIRE_ATTACK && key == tempFireAttack) return true;
     if (excludeThis != WATER_LEFT && key == tempWaterLeft) return true;
     if (excludeThis != WATER_RIGHT && key == tempWaterRight) return true;
     if (excludeThis != WATER_JUMP && key == tempWaterJump) return true;
+    if (excludeThis != WATER_ATTACK && key == tempWaterAttack) return true;
     
     return false;
 }
@@ -130,9 +136,11 @@ void KeyBindingsState::handleInput() {
                     case FIRE_LEFT: tempFireLeft = key; break;
                     case FIRE_RIGHT: tempFireRight = key; break;
                     case FIRE_JUMP: tempFireJump = key; break;
+                    case FIRE_ATTACK: tempFireAttack = key; break;
                     case WATER_LEFT: tempWaterLeft = key; break;
                     case WATER_RIGHT: tempWaterRight = key; break;
                     case WATER_JUMP: tempWaterJump = key; break;
+                    case WATER_ATTACK: tempWaterAttack = key; break;
                     default: break;
                 }
             }
@@ -165,6 +173,9 @@ void KeyBindingsState::handleInput() {
         } else if (CheckCollisionPointRec(mouse, fireJumpButton)) {
             AudioManager::getInstance()->playButtonClick();
             currentlyEditing = FIRE_JUMP;
+        } else if (CheckCollisionPointRec(mouse, fireAttackButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            currentlyEditing = FIRE_ATTACK;
         } else if (CheckCollisionPointRec(mouse, waterLeftButton)) {
             AudioManager::getInstance()->playButtonClick();
             currentlyEditing = WATER_LEFT;
@@ -174,6 +185,9 @@ void KeyBindingsState::handleInput() {
         } else if (CheckCollisionPointRec(mouse, waterJumpButton)) {
             AudioManager::getInstance()->playButtonClick();
             currentlyEditing = WATER_JUMP;
+        } else if (CheckCollisionPointRec(mouse, waterAttackButton)) {
+            AudioManager::getInstance()->playButtonClick();
+            currentlyEditing = WATER_ATTACK;
         }
     }
     
@@ -204,9 +218,11 @@ void KeyBindingsState::update(float deltaTime) {
     mouseOverFireLeft = CheckCollisionPointRec(mousePos, fireLeftButton);
     mouseOverFireRight = CheckCollisionPointRec(mousePos, fireRightButton);
     mouseOverFireJump = CheckCollisionPointRec(mousePos, fireJumpButton);
+    mouseOverFireAttack = CheckCollisionPointRec(mousePos, fireAttackButton);
     mouseOverWaterLeft = CheckCollisionPointRec(mousePos, waterLeftButton);
     mouseOverWaterRight = CheckCollisionPointRec(mousePos, waterRightButton);
     mouseOverWaterJump = CheckCollisionPointRec(mousePos, waterJumpButton);
+    mouseOverWaterAttack = CheckCollisionPointRec(mousePos, waterAttackButton);
     
     AudioManager* audioMgr = AudioManager::getInstance();
     
@@ -269,6 +285,20 @@ void KeyBindingsState::update(float deltaTime) {
     } else if (!mouseOverWaterJump) {
         mouseExitedWaterJump = true;
     }
+    
+    if (mouseOverFireAttack && mouseExitedFireAttack) {
+        audioMgr->playButtonHover();
+        mouseExitedFireAttack = false;
+    } else if (!mouseOverFireAttack) {
+        mouseExitedFireAttack = true;
+    }
+    
+    if (mouseOverWaterAttack && mouseExitedWaterAttack) {
+        audioMgr->playButtonHover();
+        mouseExitedWaterAttack = false;
+    } else if (!mouseOverWaterAttack) {
+        mouseExitedWaterAttack = true;
+    }
 }
 
 void KeyBindingsState::render() {
@@ -328,19 +358,23 @@ void KeyBindingsState::render() {
     bool fireLeftDup = isKeyInUse(tempFireLeft, FIRE_LEFT);
     bool fireRightDup = isKeyInUse(tempFireRight, FIRE_RIGHT);
     bool fireJumpDup = isKeyInUse(tempFireJump, FIRE_JUMP);
+    bool fireAttackDup = isKeyInUse(tempFireAttack, FIRE_ATTACK);
     bool waterLeftDup = isKeyInUse(tempWaterLeft, WATER_LEFT);
     bool waterRightDup = isKeyInUse(tempWaterRight, WATER_RIGHT);
     bool waterJumpDup = isKeyInUse(tempWaterJump, WATER_JUMP);
+    bool waterAttackDup = isKeyInUse(tempWaterAttack, WATER_ATTACK);
     
     // Dibujar botones de teclas - Fuego
     drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup, mouseOverFireLeft);
     drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup, mouseOverFireRight);
     drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup, mouseOverFireJump);
+    drawKeyButton(fireAttackButton, "Ataque:", tempFireAttack, currentlyEditing == FIRE_ATTACK, fireAttackDup, mouseOverFireAttack);
     
     // Dibujar botones de teclas - Agua
     drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup, mouseOverWaterLeft);
     drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup, mouseOverWaterRight);
     drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup, mouseOverWaterJump);
+    drawKeyButton(waterAttackButton, "Ataque:", tempWaterAttack, currentlyEditing == WATER_ATTACK, waterAttackDup, mouseOverWaterAttack);
     
     // Botón Guardar
     DrawRectangleRec(saveButton, mouseOverSaveButton ? GRAY : DARKGRAY);
@@ -398,15 +432,17 @@ void KeyBindingsState::resume() {
     tempFireLeft = settings->getFireLeft();
     tempFireRight = settings->getFireRight();
     tempFireJump = settings->getFireJump();
+    tempFireAttack = settings->getFireAttack();
     tempWaterLeft = settings->getWaterLeft();
     tempWaterRight = settings->getWaterRight();
     tempWaterJump = settings->getWaterJump();
+    tempWaterAttack = settings->getWaterAttack();
 }
 
 void KeyBindingsState::saveKeys() {
     SettingsManager* settings = SettingsManager::getInstance();
-    settings->setFireKeys(tempFireLeft, tempFireRight, tempFireJump);
-    settings->setWaterKeys(tempWaterLeft, tempWaterRight, tempWaterJump);
+    settings->setFireKeys(tempFireLeft, tempFireRight, tempFireJump, tempFireAttack);
+    settings->setWaterKeys(tempWaterLeft, tempWaterRight, tempWaterJump, tempWaterAttack);
     settings->saveSettings();
 }
 
