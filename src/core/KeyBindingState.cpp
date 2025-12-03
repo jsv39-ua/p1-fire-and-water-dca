@@ -323,7 +323,7 @@ void KeyBindingsState::render() {
         if (isEditing) {
             bgColor = YELLOW;
         } else if (isDuplicate) {
-            bgColor = (Color){ 255, 100, 100, 255 }; // Rojo claro para indicar duplicado
+            bgColor = Color{ 255, 100, 100, 255 }; // Rojo claro para indicar duplicado
         } else if (isHovered) {
             bgColor = GRAY; // Color de hover
         } else {
@@ -407,11 +407,11 @@ void KeyBindingsState::render() {
     // Mensaje de confirmación al guardar
     if (showSaveConfirmation) {
         // Fondo semi-transparente
-        DrawRectangle(0, 0, screenWidth, GetScreenHeight(), (Color){ 0, 0, 0, 150 });
+        DrawRectangle(0, 0, screenWidth, GetScreenHeight(), Color{ 0, 0, 0, 150 });
         
         // Cuadro de confirmación
         Rectangle confirmBox = { centerX - 200, GetScreenHeight() / 2.0f - 60, 400, 120 };
-        DrawRectangleRec(confirmBox, (Color){ 50, 200, 50, 255 }); // Verde
+        DrawRectangleRec(confirmBox, Color{ 50, 200, 50, 255 }); // Verde
         DrawRectangleLinesEx(confirmBox, 3, BLACK);
         
         const char* confirmText = "¡CONFIGURACION GUARDADA!";

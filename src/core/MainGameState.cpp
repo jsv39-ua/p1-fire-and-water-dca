@@ -657,8 +657,8 @@ void MainGameState::render()
         if (players[i].shouldRenderVisible()) {
             DrawTexturePro(character_textures[i], 
                            sourceRect,  
-                           (Rectangle){renderX, renderY, renderWidth, renderHeight}, 
-                           (Vector2){0, 0}, 
+                           Rectangle{renderX, renderY, renderWidth, renderHeight}, 
+                           Vector2{0, 0}, 
                            0.0f, 
                            WHITE);
         }
