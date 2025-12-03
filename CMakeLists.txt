@@ -123,9 +123,9 @@ target_include_directories(game_core
 target_link_libraries(game_core PUBLIC raylib)
 
 # Enforce modern properties and warnings (good default set)
-target_compile_features(game_core PUBLIC cxx_std_17)
+target_compile_features(game_core PUBLIC cxx_std_20)
 if(MSVC)
-    target_compile_options(game_core PRIVATE /W4 /permissive-)
+    target_compile_options(game_core PRIVATE /W4 /permissive- /wd4576)
 else()
     target_compile_options(game_core PRIVATE -Wall -Wextra -Wpedantic -Wshadow)
 endif()
