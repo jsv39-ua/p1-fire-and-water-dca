@@ -56,6 +56,10 @@ public:
         waterAttack = attack;
     }
 
+    // Best Time
+    float getBestTime() const { return bestTime; }
+    void setBestTime(float time) { bestTime = time; }
+
     // Utility
     std::string getKeyName(int key);
 
@@ -76,6 +80,9 @@ private:
     // Controls
     int fireLeft, fireRight, fireJump, fireAttack;
     int waterLeft, waterRight, waterJump, waterAttack;
+
+    // Best Time
+    float bestTime;
     
     const char* settingsPath = "assets/config/settings.json";
     const char* keyNamesPath = "assets/config/key_names.json";

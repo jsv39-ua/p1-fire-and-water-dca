@@ -38,7 +38,7 @@ std::string formatSignText(const std::string& text) {
 const float DEFAULT_SCREEN_WIDTH = 1280.0f;
 const float DEFAULT_SCREEN_HEIGHT = 720.0f;
 
-MainGameState::MainGameState() : playerDying(false), deathTimer(0.0f)
+MainGameState::MainGameState() : playerDying(false), deathTimer(0.0f), speedrunTimer(0.0f)
 {
 }
 
@@ -184,7 +184,10 @@ void MainGameState::handleInput()
 
 void MainGameState::update(float deltaTime)
 {
-    // Si un jugador está muriendo, contar el timer
+    // Actualizar timer de speedrun
+    speedrunTimer += deltaTime;
+
+    // Si el jugador está muriendo, actualizar timer de muerte
     if (playerDying) {
         deathTimer += deltaTime;
         if (deathTimer >= DEATH_DELAY) {
@@ -309,6 +312,15 @@ void MainGameState::update(float deltaTime)
         // Verificar si ambos están en la puerta
         if (fireOnGoal && waterOnGoal) {
             TraceLog(LOG_INFO, "Ambos jugadores han alcanzado la GOAL: cambiando a SimpleLevelState");
+            
+            // Guardar mejor tiempo si corresponde
+            float currentBest = SettingsManager::getInstance()->getBestTime();
+            if (currentBest == 0.0f || speedrunTimer < currentBest) {
+                SettingsManager::getInstance()->setBestTime(speedrunTimer);
+                SettingsManager::getInstance()->saveSettings();
+                TraceLog(LOG_INFO, "New Best Time: %f", speedrunTimer);
+            }
+            
             this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
             return;
         }
@@ -453,6 +465,15 @@ void MainGameState::handleTransitions() {
         // Check for Game Over / Win condition
         if (active_transition->targetMap == "GOAL" || active_transition->targetMap == "WIN") {
              TraceLog(LOG_INFO, "Transition is GOAL: changing to SimpleLevelState");
+             
+             // Guardar mejor tiempo si corresponde
+             float currentBest = SettingsManager::getInstance()->getBestTime();
+             if (currentBest == 0.0f || speedrunTimer < currentBest) {
+                 SettingsManager::getInstance()->setBestTime(speedrunTimer);
+                 SettingsManager::getInstance()->saveSettings();
+                 TraceLog(LOG_INFO, "New Best Time: %f", speedrunTimer);
+             }
+             
              this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
              return;
         }
@@ -751,6 +772,37 @@ void MainGameState::render()
         Color color = (i < waterLives) ? BLUE : GRAY;
         DrawRectangle(x, y, heartSize, heartSize, color);
         DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
+    }
+
+    // --- TIMER SPEEDRUN ---
+    int minutes = (int)speedrunTimer / 60;
+    int seconds = (int)speedrunTimer % 60;
+    int milliseconds = (int)((speedrunTimer - (int)speedrunTimer) * 100);
+    
+    const char* timerText = TextFormat("%02d:%02d.%02d", minutes, seconds, milliseconds);
+    int timerFontSize = 30;
+    int timerWidth = MeasureText(timerText, timerFontSize);
+    int timerX = (screenWidth / 2) - (timerWidth / 2);
+    int timerY = topMargin;
+    
+    DrawText(timerText, timerX + 2, timerY + 2, timerFontSize, BLACK); // Sombra
+    DrawText(timerText, timerX, timerY, timerFontSize, WHITE);
+    
+    // --- BEST TIME ---
+    float bestTime = SettingsManager::getInstance()->getBestTime();
+    if (bestTime > 0.0f) {
+        int bMinutes = (int)bestTime / 60;
+        int bSeconds = (int)bestTime % 60;
+        int bMilliseconds = (int)((bestTime - (int)bestTime) * 100);
+        
+        const char* bestText = TextFormat("Best: %02d:%02d.%02d", bMinutes, bSeconds, bMilliseconds);
+        int bestFontSize = 20;
+        int bestWidth = MeasureText(bestText, bestFontSize);
+        int bestX = (screenWidth / 2) - (bestWidth / 2);
+        int bestY = timerY + timerFontSize + 2;
+        
+        DrawText(bestText, bestX + 1, bestY + 1, bestFontSize, BLACK);
+        DrawText(bestText, bestX, bestY, bestFontSize, GOLD);
     }
     
     // --- UI FINAL (DIBUJADO FUERA DE LOS BUCLES) ---

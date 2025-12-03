@@ -23,6 +23,8 @@ SettingsManager::SettingsManager() {
     waterJump = KEY_UP;
     waterAttack = KEY_DOWN;
     
+    bestTime = 0.0f;
+    
     loadKeyNames();
 }
 
@@ -80,6 +82,9 @@ void SettingsManager::loadSettings() {
     
     val = findValue("language");
     if (!val.empty()) language = val;
+    
+    val = findValue("bestTime");
+    if (!val.empty()) bestTime = std::stof(val);
     
     // Cargar teclas de Fire Player
     size_t firePlayerPos = content.find("\"firePlayer\"");
@@ -158,6 +163,7 @@ void SettingsManager::saveSettings() {
     ss << "        \"sfxVolume\": " << sfxVolume << "\n";
     ss << "    },\n";
     ss << "    \"language\": \"" << language << "\",\n";
+    ss << "    \"bestTime\": " << bestTime << ",\n";
     ss << "    \"controls\": {\n";
     ss << "        \"firePlayer\": {\n";
     ss << "            \"left\": " << fireLeft << ",\n";

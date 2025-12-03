@@ -66,6 +66,9 @@ private:
     // Timer para muerte del jugador
     bool playerDying = false;
     float deathTimer = 0.0f;
+
+    // Timer para speedrun
+    float speedrunTimer = 0.0f;
     
     // Texto del cartel activo
     std::string activeSignText = "";

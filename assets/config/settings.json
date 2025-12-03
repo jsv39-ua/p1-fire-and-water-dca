@@ -5,18 +5,19 @@
         "sfxVolume": 0.7
     },
     "language": "spanish",
+    "bestTime": 18.9948,
     "controls": {
         "firePlayer": {
             "left": 65,
-            "right": 292,
-            "jump": 294,
-            "attack": 295
+            "right": 68,
+            "jump": 87,
+            "attack": 83
         },
         "waterPlayer": {
-            "left": 84,
-            "right": 82,
-            "jump": 70,
-            "attack": 87
+            "left": 263,
+            "right": 262,
+            "jump": 265,
+            "attack": 264
         }
     }
 }
