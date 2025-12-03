@@ -5,5 +5,6 @@ enum ElementType {
     WATER,
     NONE,
     GOAL,
-    BUTTON
+    BUTTON,
+    SIGN
 };
