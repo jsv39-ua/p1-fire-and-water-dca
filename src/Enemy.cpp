@@ -18,7 +18,7 @@ Enemy::Enemy(Rectangle b, ElementType t, float range, bool vertical)
 
 Enemy::Enemy(Rectangle b, ElementType t, float range, Texture2D tex, Rectangle src, bool vertical)
         : Entity({b.x, b.y}, {vertical ? 0.0f : 30.0f, vertical ? 30.0f : 0.0f}, b.width, b.height, t),
-            patrolRange(range), originalX(b.x), movingRight(true), verticalMovement(vertical), originalY(b.y), movingDown(true), hasTexture(true), texture(tex), sourceRect(src) {
+            patrolRange(range), originalX(b.x), movingRight(true), verticalMovement(vertical), originalY(b.y), movingDown(true), texture(tex), sourceRect(src), hasTexture(true) {
     life_count = 3;
     invincibility_timer = 0.0f;
 }
