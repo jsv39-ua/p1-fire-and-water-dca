@@ -14,7 +14,7 @@ project(p1-fire-and-water-dca
     LANGUAGES CXX C)
 
 # Enforce C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
