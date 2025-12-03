@@ -275,6 +275,7 @@ bool Player::resolvePlatformCollision(const Platform & platform) {
      - 3: Colisión con plataforma meta
      - 4: No hay colisión
      - 5: Colisión con botón
+     - 6: Colisión con cartel
      - -1: Error
 */
 int Player::checkPlatformCollision(const Platform & platform) const {
@@ -296,6 +297,8 @@ int Player::checkPlatformCollision(const Platform & platform) const {
                 return (this->type == WATER) ? 2 : 1;
             case BUTTON:
                 return 5;
+            case SIGN:
+                return 6;
             default:
                 return -1; // Será una plataforma con tipo inválido
         }

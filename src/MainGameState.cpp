@@ -198,6 +198,9 @@ void MainGameState::update(float deltaTime)
     // Verificar colisiones con plataformas
     // bool bothOnGoal = true;
     
+    // Reset active sign text
+    activeSignText = "";
+    
     // Optimization: Merged reset logic into the main collision loop to avoid double iteration
     for (auto& platform : level_platforms) {
         if (!platform.active) continue;
@@ -207,6 +210,13 @@ void MainGameState::update(float deltaTime)
         bool touchedByAny = false;
         
         for (int i = 0; i < 2; i++) {
+            // Lógica de Carteles (SIGN) - Solicitada por usuario
+            if (platform.type == SIGN) {
+                if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
+                    activeSignText = platform.text;
+                }
+            }
+
             int collision = players[i].checkPlatformCollision(platform);
 
             // Check if button is being touched (collision 5 is BUTTON)
@@ -695,6 +705,42 @@ void MainGameState::render()
         DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
     }
     
+    // --- UI FINAL (DIBUJADO FUERA DE LOS BUCLES) ---
+    if (!activeSignText.empty()) {
+        // 1. Configuración de estilo
+        int fontSize = 20;
+        int padding = 20;        // Espacio entre el texto y el borde de la caja
+        Color boxColor = { 0, 0, 0, 200 }; // Negro semitransparente
+        Color borderColor = RAYWHITE;
+        
+        // 2. Medir cuánto ocupa el texto en píxeles
+        const char* texto = activeSignText.c_str();
+        int textWidth = MeasureText(texto, fontSize);
+        int textHeight = fontSize; // Aproximación simple de altura
+
+        // 3. Calcular dimensiones de la caja
+        int boxWidth = textWidth + (padding * 2);
+        int boxHeight = textHeight + (padding * 2);
+
+        // 4. Calcular posición para centrarlo arriba en la pantalla
+        int screenWidth = GetScreenWidth();
+        int boxX = (screenWidth / 2) - (boxWidth / 2); // Centro horizontal
+        int boxY = 50; // A 50 píxeles del techo
+
+        // 5. DIBUJAR
+        // A) Sombra pequeña para darle profundidad (opcional)
+        DrawRectangle(boxX + 4, boxY + 4, boxWidth, boxHeight, Fade(BLACK, 0.5f));
+
+        // B) La caja de fondo
+        DrawRectangle(boxX, boxY, boxWidth, boxHeight, boxColor);
+
+        // C) El borde blanco
+        DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, borderColor);
+
+        // D) El texto (ajustado con el padding)
+        DrawText(texto, boxX + padding, boxY + padding, fontSize, WHITE);
+    }
+
     renderGlobalUI();
     
     EndDrawing();

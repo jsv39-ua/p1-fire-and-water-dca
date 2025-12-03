@@ -286,8 +286,9 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                 // Check type/class
                 bool isButton = (obj->typeString && strcmp(obj->typeString, "button") == 0);
                 bool isPlatform = (obj->typeString && strcmp(obj->typeString, "platform") == 0);
+                bool isSign = (obj->typeString && strcmp(obj->typeString, "sign") == 0);
                 
-                if (isButton || isPlatform) {
+                if (isButton || isPlatform || isSign) {
                     Rectangle bounds = {
                         (float)obj->x,
                         (float)obj->y,
@@ -295,7 +296,7 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                         (float)obj->height
                     };
                     
-                    Platform p(bounds, isButton ? BUTTON : NONE);
+                    Platform p(bounds, isButton ? BUTTON : (isSign ? SIGN : NONE));
                     p.id = obj->id;
                     p.isButton = isButton;
                     
@@ -320,6 +321,13 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                                 if (strcmp(prop->stringValue, "water") == 0) p.type = WATER;
                                 else if (strcmp(prop->stringValue, "fire") == 0) p.type = FIRE;
                             }
+                            // Modificación aquí: Buscamos "texto" (como lo pusiste en Tiled) O "text"
+                            if ((strcmp(prop->name, "text") == 0) 
+                                && prop->type == PROPERTY_TYPE_STRING) {
+                                
+                                p.text = prop->stringValue;
+                                TraceLog(LOG_INFO, "Texto cargado para cartel ID %d: %s", p.id, p.text.c_str());
+                            }
                         }
                     }
 
@@ -336,7 +344,7 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                     }
                     
                     platforms.push_back(p);
-                    TraceLog(LOG_INFO, "Added interactive object: ID=%d, Type=%s, Active=%d", p.id, isButton ? "BUTTON" : "PLATFORM", p.active);
+                    TraceLog(LOG_INFO, "Added interactive object: ID=%d, Type=%s, Active=%d", p.id, isButton ? "BUTTON" : (isSign ? "SIGN" : "PLATFORM"), p.active);
                 }
             }
         }
