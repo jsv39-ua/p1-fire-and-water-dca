@@ -67,7 +67,11 @@ $(TARGET): $(OBJ)
 # --- REGLA DE COMPILACIÓN (MAGIA MULTIDIRECTORIO) ---
 $(OBJ_DIR)/%.o: src/%.cpp
 	@echo "Compilando $<..."
-	@$(MKDIR) "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
+ifeq ($(DETECTED_OS),Windows)
+	@if not exist "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
+else
+	@$(MKDIR) $(dir $@)
+endif
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Incluir dependencias generadas (.d)
