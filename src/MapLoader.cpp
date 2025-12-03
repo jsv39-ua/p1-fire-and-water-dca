@@ -4,6 +4,7 @@
 #include <ResourceManager.hpp>
 
 #include <unordered_set>
+#include <unordered_map>
 
 
 MapLoader::MapLoader(const char* filePath)
@@ -342,23 +343,26 @@ std::vector<Platform> MapLoader::extractPlatforms() {
     }
     
     // Post-processing: Link buttons to their pressed state visuals
+    // Optimization: Use a map for O(1) lookup instead of nested loops O(N^2)
+    std::unordered_map<int, Platform*> idToPlatformMap;
+    for (auto& p : platforms) {
+        idToPlatformMap[p.id] = &p;
+    }
+
     for (auto& p : platforms) {
         if (p.isButton && p.targetId != -1) {
-            // Find the target platform
-            for (const auto& target : platforms) {
-                if (target.id == p.targetId) {
-                    // If target has visuals, copy them to pressed state
-                    if (target.hasVisuals) {
-                        p.hasPressedVisuals = true;
-                        p.pressedTexture = target.texture;
-                        p.pressedSourceRect = target.sourceRect;
-                        TraceLog(LOG_INFO, "Linked button %d to pressed visual from %d", p.id, target.id);
-                        
-                        // Clear targetId so we don't try to activate it as a logic platform
-                        // (Assuming targetId was ONLY for visuals in this case)
-                        p.targetId = -1; 
-                    }
-                    break;
+            auto it = idToPlatformMap.find(p.targetId);
+            if (it != idToPlatformMap.end()) {
+                Platform* target = it->second;
+                // If target has visuals, copy them to pressed state
+                if (target->hasVisuals) {
+                    p.hasPressedVisuals = true;
+                    p.pressedTexture = target->texture;
+                    p.pressedSourceRect = target->sourceRect;
+                    TraceLog(LOG_INFO, "Linked button %d to pressed visual from %d", p.id, target->id);
+                    
+                    // Clear targetId so we don't try to activate it as a logic platform
+                    p.targetId = -1; 
                 }
             }
         }

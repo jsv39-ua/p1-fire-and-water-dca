@@ -177,31 +177,21 @@ void MainGameState::update(float deltaTime)
     // Verificar colisiones con plataformas
     // bool bothOnGoal = true;
     
-    // Reset button pressed state if no one is touching it
-    for (auto& platform : level_platforms) {
-        if (platform.isButton && platform.isPressed) {
-            bool stillPressed = false;
-            for (int i = 0; i < 2; i++) {
-                // Check simple collision without resolution logic
-                if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
-                    stillPressed = true;
-                    break;
-                }
-            }
-            if (!stillPressed) {
-                platform.isPressed = false;
-            }
-        }
-    }
-
+    // Optimization: Merged reset logic into the main collision loop to avoid double iteration
     for (auto& platform : level_platforms) {
         if (!platform.active) continue;
 
         bool fireOnGoal = false;
         bool waterOnGoal = false;
+        bool touchedByAny = false;
         
         for (int i = 0; i < 2; i++) {
             int collision = players[i].checkPlatformCollision(platform);
+
+            // Check if button is being touched (collision 5 is BUTTON)
+            if (platform.isButton && collision == 5) {
+                touchedByAny = true;
+            }
 
             switch (collision) {
                 case 0:
@@ -248,6 +238,11 @@ void MainGameState::update(float deltaTime)
             }
         }
         
+        // Reset button state if it was pressed but no one is touching it anymore
+        if (platform.isButton && platform.isPressed && !touchedByAny) {
+            platform.isPressed = false;
+        }
+
         // Verificar si ambos están en la puerta
         if (fireOnGoal && waterOnGoal) {
             TraceLog(LOG_INFO, "Ambos jugadores han alcanzado la GOAL: cambiando a SimpleLevelState");
