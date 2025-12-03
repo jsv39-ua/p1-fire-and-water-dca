@@ -8,7 +8,8 @@ ifeq ($(OS),Windows_NT)
     RM = del /Q
     
     # Comandos específicos de Windows para crear carpetas
-    MKDIR = mkdir
+    # Usamos if not exist para evitar errores si ya existe
+    MKDIR = if not exist
     
     # BUSQUEDA RECURSIVA (WINDOWS):
     # Busca en: src/ (root), src/carpeta/ y src/carpeta/subcarpeta/
@@ -66,7 +67,7 @@ $(TARGET): $(OBJ)
 # --- REGLA DE COMPILACIÓN (MAGIA MULTIDIRECTORIO) ---
 $(OBJ_DIR)/%.o: src/%.cpp
 	@echo "Compilando $<..."
-	@$(MKDIR) $(dir $@)
+	@$(MKDIR) "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Incluir dependencias generadas (.d)
