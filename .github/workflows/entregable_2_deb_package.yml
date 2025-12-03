@@ -25,7 +25,12 @@ jobs:
         run: |
           sudo apt-get update
           # Se añaden las librerías gráficas (GL, X11, Audio, etc.) necesarias para Raylib
-          sudo apt-get install -y build-essential debhelper fakeroot \
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            fakeroot \
+            cmake \
+            pkg-config \
             libgl1-mesa-dev \
             libglu1-mesa-dev \
             libx11-dev \
@@ -35,7 +40,9 @@ jobs:
             libxinerama-dev \
             libxxf86vm-dev \
             libasound2-dev \
-            mesa-common-dev
+            mesa-common-dev \
+            libglfw3-dev \
+            xorg-dev
 
       - name: Compilacion del proyecto
         run: make all
