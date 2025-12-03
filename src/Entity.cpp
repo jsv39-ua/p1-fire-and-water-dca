@@ -8,6 +8,6 @@ Entity::Entity() : width(30.0f), height(30.0f), facingRight(true) {
 }
 
 Entity::Entity(Vector2 pos, Vector2 vel, float w, float h, ElementType t) 
-    : position(pos), velocity(vel), width(w), height(h), type(t), facingRight(true) {
+    : position(pos), velocity(vel), type(t), width(w), height(h), facingRight(true) {
     bounds = {position.x, position.y, width, height};
 }
