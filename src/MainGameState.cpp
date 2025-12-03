@@ -336,6 +336,21 @@ void MainGameState::update(float deltaTime)
         }
     }
     
+    // Check for dead enemies and trigger events (e.g. deactivate platforms)
+    for (const auto& enemy : level_enemies) {
+        if (enemy.getLifeCount() <= 0) {
+            if (!enemy.targetTag.empty()) {
+                // Deactivate platforms with this tag
+                for (auto& platform : level_platforms) {
+                    if (!platform.tag.empty() && platform.tag == enemy.targetTag) {
+                        platform.active = false;
+                        TraceLog(LOG_INFO, "Enemy death deactivated platform with tag: %s", platform.tag.c_str());
+                    }
+                }
+            }
+        }
+    }
+
     // Limpiar enemigos muertos
     level_enemies.erase(std::remove_if(level_enemies.begin(), level_enemies.end(),
         [](const Enemy& e) { return e.getLifeCount() <= 0; }), level_enemies.end());
@@ -401,6 +416,13 @@ void MainGameState::handleTransitions() {
     if (active_transition) {
         TraceLog(LOG_INFO, "Transition triggered to %s", active_transition->targetMap.c_str());
         
+        // Check for Game Over / Win condition
+        if (active_transition->targetMap == "GOAL" || active_transition->targetMap == "WIN") {
+             TraceLog(LOG_INFO, "Transition is GOAL: changing to SimpleLevelState");
+             this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
+             return;
+        }
+
         // Store velocities to preserve momentum
         Vector2 fire_vel = players[0].velocity;
         Vector2 water_vel = players[1].velocity;

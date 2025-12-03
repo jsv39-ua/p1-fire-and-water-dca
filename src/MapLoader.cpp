@@ -404,6 +404,7 @@ std::vector<Enemy> MapLoader::extractEnemies() {
                 float range = getPropertyFloatFromLayer(layer, "patrolRange", 50.0f);
                 const char* movementStr = getPropertyStringFromLayer(layer, "movement", "horizontal");
                 bool vertical = (movementStr != NULL && strcmp(movementStr, "vertical") == 0);
+                const char* targetTagStr = getPropertyStringFromLayer(layer, "targetTag", "");
                 
                 ElementType eType = FIRE;
                 if (strcmp(typeStr, "WATER") == 0) eType = WATER;
@@ -427,16 +428,24 @@ std::vector<Enemy> MapLoader::extractEnemies() {
                             // --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE ---
                             // Delegamos la lógica fea a la función auxiliar
                             TileData tData = GetTileDataFromGID(gid);
-
+                            
+                            Enemy en;
                             if (tData.valid) {
-                                // Constructor con textura (asegúrate de tenerlo en Enemy.hpp)
-                                enemies.push_back(Enemy(bounds, eType, range, tData.texture, tData.source, vertical));
-                                TraceLog(LOG_INFO, "Enemy spawned at x=%f y=%f type=%d vertical=%d", bounds.x, bounds.y, eType, vertical);
+                                // Constructor con textura
+                                en = Enemy(bounds, eType, range, tData.texture, tData.source, vertical);
                             } else {
                                 // Constructor sin textura (fallback)
-                                enemies.push_back(Enemy(bounds, eType, range, vertical));
-                                TraceLog(LOG_INFO, "Enemy spawned at x=%f y=%f type=%d vertical=%d", bounds.x, bounds.y, eType, vertical);
+                                en = Enemy(bounds, eType, range, vertical);
                             }
+                            
+                            // Asignar tag si existe
+                            if (targetTagStr && strlen(targetTagStr) > 0) {
+                                en.targetTag = std::string(targetTagStr);
+                            }
+                            
+                            enemies.push_back(en);
+                            TraceLog(LOG_INFO, "Enemy spawned at x=%f y=%f type=%d vertical=%d tag=%s", 
+                                     bounds.x, bounds.y, eType, vertical, en.targetTag.c_str());
                         }
                     }
                 }
