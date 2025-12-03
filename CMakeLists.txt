@@ -133,6 +133,7 @@ endif()
 # Executable target
 # Executable target
 add_executable(game ${MAIN_SOURCE})
+set_target_properties(game PROPERTIES OUTPUT_NAME "game.bin")
 
 if(UNIX AND NOT APPLE)
     # TRUCO DE FUERZA BRUTA PARA LINUX:
@@ -174,8 +175,35 @@ target_include_directories(game PRIVATE $<TARGET_PROPERTY:raylib,INTERFACE_INCLU
 # ----------------------------------------------------------------------------
 # Installation rules (used by CPack)
 # ----------------------------------------------------------------------------
+# Install the actual game binary with a different name
 install(TARGETS game
   RUNTIME DESTINATION bin
+)
+
+# Create a wrapper script that runs the game from the correct directory
+# We generate it at configure time so we can install it as a regular file
+set(WRAPPER_CONTENT "#!/bin/bash
+# Get script directory
+DIR=\$( cd \"\$( dirname \"\${BASH_SOURCE[0]}\" )\" && pwd )
+
+# Try standard install path
+if [ -d \"\$DIR/../share/${PROJECT_NAME}/assets\" ]; then
+    cd \"\$DIR/../share/${PROJECT_NAME}\"
+# Try local path
+elif [ -d \"\$DIR/assets\" ]; then
+    cd \"\$DIR\"
+fi
+
+# Run game
+exec \"\$DIR/game.bin\" \"\$@\"
+")
+
+file(WRITE "${CMAKE_BINARY_DIR}/game_wrapper" "${WRAPPER_CONTENT}")
+
+# Install the wrapper script
+install(PROGRAMS "${CMAKE_BINARY_DIR}/game_wrapper"
+    DESTINATION bin
+    RENAME game
 )
 
 # Install assets and map files (so packaged app contains resources)

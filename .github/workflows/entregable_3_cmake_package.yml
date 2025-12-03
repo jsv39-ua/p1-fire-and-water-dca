@@ -1,0 +1,88 @@
+name: Entregable 3 - CMake, Multiplataforma y CPack
+
+on:
+  # Se ejecuta automáticamente al crear o publicar una release
+  release:
+    types: [created, published]
+  # Permite ejecutarlo manualmente para pruebas
+  workflow_dispatch:
+
+jobs:
+  build_linux:
+    name: Linux Build and Package (.tar.gz)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configurar CMake
+        run: cmake -B build-linux -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compilar
+        # Compilación en paralelo, esencialmente 'make -j'
+        run: cmake --build build-linux --config Release --parallel
+
+      - name: Generar Paquete de Distribución con CPack (tar.gz)
+        # CPack genera el paquete usando la configuración de CMake
+        run: cmake --build build-linux --target package
+
+      - name: Subir Artefacto de Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-package
+          # CPack nombra el archivo según la configuración
+          path: build-linux/*.tar.gz
+
+  build_windows:
+    name: Windows Build and Package (.zip)
+    # Ejecuta el build en un entorno Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configurar CMake
+        # Generador por defecto (Visual Studio o similar)
+        run: cmake -B build-windows -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compilar
+        # Compilación en paralelo, esencialmente 'make -j'
+        run: cmake --build build-windows --config Release --parallel
+
+      - name: Generar Paquete de Distribución con CPack (.zip)
+        # CPack genera el paquete usando la configuración de CMake
+        run: cmake --build build-windows --target package
+        
+      - name: Subir Artefacto de Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          # CPack nombra el archivo según la configuración
+          path: build-windows/*.zip # O *.exe si se configura un instalador
+
+  publish_release_assets:
+    name: Publicar Paquetes en Release
+    runs-on: ubuntu-latest
+    needs: [build_linux, build_windows]
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Descargar Artefactos (Linux y Windows)
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publicar Paquetes en GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/linux-package/*
+            artifacts/windows-package/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

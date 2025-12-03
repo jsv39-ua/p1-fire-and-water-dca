@@ -1,7 +1,7 @@
 #include <AudioManager.hpp>
 #include <ResourceManager.hpp>
 #include <iostream>
-#include "../include/raylib_compat.h"
+#include <raylib_compat.h>
 
 // De esta clase se crea una instancia para poder cargar los sonidos
 
