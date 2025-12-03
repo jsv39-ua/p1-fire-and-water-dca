@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_linux:
-    name: Linux Build and Package (.tar.gz)
+    name: Linux Build and Package (.tar.gz + .deb)
     runs-on: ubuntu-latest
 
     steps:
@@ -18,27 +18,40 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Instalar Dependencias de Compilación
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libgl1-mesa-dev \
+            libx11-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libasound2-dev
+
       - name: Configurar CMake
         run: cmake -B build-linux -S . -DCMAKE_BUILD_TYPE=Release
 
       - name: Compilar
-        # Compilación en paralelo, esencialmente 'make -j'
         run: cmake --build build-linux --config Release --parallel
 
-      - name: Generar Paquete de Distribución con CPack (tar.gz)
-        # CPack genera el paquete usando la configuración de CMake
-        run: cmake --build build-linux --target package
+      - name: Generar Paquetes con CPack (.tar.gz y .deb)
+        working-directory: build-linux
+        run: cpack -G "DEB;TGZ"
 
-      - name: Subir Artefacto de Linux
+      - name: Subir Artefactos de Linux
         uses: actions/upload-artifact@v4
         with:
           name: linux-package
-          # CPack nombra el archivo según la configuración
-          path: build-linux/*.tar.gz
+          path: |
+            build-linux/*.tar.gz
+            build-linux/*.deb
 
   build_windows:
     name: Windows Build and Package (.zip)
-    # Ejecuta el build en un entorno Windows
     runs-on: windows-latest
 
     steps:
@@ -48,23 +61,20 @@ jobs:
           submodules: recursive
 
       - name: Configurar CMake
-        # Generador por defecto (Visual Studio o similar)
         run: cmake -B build-windows -S . -DCMAKE_BUILD_TYPE=Release
 
       - name: Compilar
-        # Compilación en paralelo, esencialmente 'make -j'
         run: cmake --build build-windows --config Release --parallel
 
-      - name: Generar Paquete de Distribución con CPack (.zip)
-        # CPack genera el paquete usando la configuración de CMake
-        run: cmake --build build-windows --target package
+      - name: Generar Paquete con CPack (.zip)
+        working-directory: build-windows
+        run: cpack -G "ZIP" -C Release
         
       - name: Subir Artefacto de Windows
         uses: actions/upload-artifact@v4
         with:
           name: windows-package
-          # CPack nombra el archivo según la configuración
-          path: build-windows/*.zip # O *.exe si se configura un instalador
+          path: build-windows/*.zip
 
   publish_release_assets:
     name: Publicar Paquetes en Release
