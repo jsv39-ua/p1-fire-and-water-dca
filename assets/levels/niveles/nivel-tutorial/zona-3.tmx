@@ -16,7 +16,7 @@
     <property name="direction" value="left"/>
     <property name="targetMap" value="zona-4.tmx"/>
     <property name="targetSpawnX" type="float" value="0"/>
-    <property name="targetSpawnY" type="float" value="285"/>
+    <property name="targetSpawnY" type="float" value="225"/>
     <property name="transitionType" value="instant"/>
    </properties>
   </object>
