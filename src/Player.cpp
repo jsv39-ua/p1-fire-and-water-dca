@@ -255,6 +255,7 @@ bool Player::resolvePlatformCollision(const Platform & platform) {
      - 2: Colisión con plataforma amiga
      - 3: Colsión con plataforma meta
      - 4: No hay colisión
+     - 5: Colisión con botón
      - -1: Error
 */
 int Player::checkPlatformCollision(const Platform & platform) const {
