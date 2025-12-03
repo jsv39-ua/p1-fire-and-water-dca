@@ -306,7 +306,6 @@ void MainGameState::update(float deltaTime)
                     if (isOpposite) {
                         if (!enemy.isInvincible()) {
                             enemy.updateLifeCount(-1);
-                            enemy.activateInvincibility();
                         }
                         hit = true;
                     } else {
