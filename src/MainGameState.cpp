@@ -340,12 +340,16 @@ void MainGameState::update(float deltaTime)
     for (const auto& enemy : level_enemies) {
         if (enemy.getLifeCount() <= 0) {
             if (!enemy.targetTag.empty()) {
+                int count = 0;
                 // Deactivate platforms with this tag
                 for (auto& platform : level_platforms) {
-                    if (!platform.tag.empty() && platform.tag == enemy.targetTag) {
+                    if (platform.active && !platform.tag.empty() && platform.tag == enemy.targetTag) {
                         platform.active = false;
-                        TraceLog(LOG_INFO, "Enemy death deactivated platform with tag: %s", platform.tag.c_str());
+                        count++;
                     }
+                }
+                if (count > 0) {
+                    TraceLog(LOG_INFO, "Enemy death deactivated %d platforms with tag: %s", count, enemy.targetTag.c_str());
                 }
             }
         }
@@ -630,9 +634,9 @@ void MainGameState::render()
         }
     }
 
-    // Debug: bounds de jugadores
-    DrawRectangleLinesEx(players[0].bounds, 2, GREEN);
-    DrawRectangleLinesEx(players[1].bounds, 2, BLUE);
+    // Debug: bounds de jugadores (ELIMINADO)
+    // DrawRectangleLinesEx(players[0].bounds, 2, GREEN);
+    // DrawRectangleLinesEx(players[1].bounds, 2, BLUE);
 
     
 
@@ -673,7 +677,8 @@ void MainGameState::render()
         projectile.render();
     }
 
-    // Debug: draw outlines and labels for enemies
+    // Debug: draw outlines and labels for enemies (ELIMINADO)
+    /*
     for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
         Enemy &en = level_enemies[ei];
         DrawRectangleLinesEx(en.bounds, 2, YELLOW);
@@ -682,6 +687,7 @@ void MainGameState::render()
         int tw = MeasureText(lab.c_str(), 12);
         DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
     }
+    */
     EndMode2D();
     
     // Dibujar vidas de los jugadores (UI fija en pantalla)
