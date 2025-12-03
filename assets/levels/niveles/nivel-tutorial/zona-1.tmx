@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="49" height="23" tilewidth="18" tileheight="18" infinite="0" nextlayerid="9" nextobjectid="10">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="49" height="23" tilewidth="18" tileheight="18" infinite="0" nextlayerid="10" nextobjectid="11">
  <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
  <objectgroup id="5" name="Transitions">
   <object id="6" x="881.667" y="153.5" width="60.6667" height="242.333">
@@ -34,7 +34,15 @@
  <objectgroup id="8" name="Interactables">
   <object id="9" type="sign" gid="87" x="306" y="324" width="18" height="18">
    <properties>
-    <property name="text" value="Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!"/>
+    <property name="text">Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete! 
+
+Controles:
+
+	Jugador Agua: Movimiento básico: LEFT, UP, RIGHT
+		Ataque: DOWN
+
+	Jugador Fuego: Movimiento básico: A, W, D
+		Ataque: S</property>
    </properties>
   </object>
  </objectgroup>
@@ -53,8 +61,8 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,10,0,0,0,29,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,9,11,12,0,32,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
