@@ -1,0 +1,78 @@
+Se han hecho las pruebas en el sistema operativo Debian 13
+
+17:27 ~ $ cd Desktop/Cuarto/DCA/p1-fire-and-water-dca/
+17:27 p1-fire-and-water-dca (main) $ rm -rf build/
+
+17:27 p1-fire-and-water-dca (main) $ cmake -S . -B build -DCPACK_GENERATOR="DEB" -DCMAKE_BUILD_TYPE=Release
+-- The CXX compiler identification is GNU 14.2.0
+-- The C compiler identification is GNU 14.2.0
+-- Detecting CXX compiler ABI info - done
+-- Raylib tag configured: 'master' (override with -DRAYLIB_TAG=...))
+-- Found Threads: TRUE
+-- Including X11 support
+-- Found X11: /usr/include
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated build type: Release
+-- Project: p1-fire-and-water-dca v0.1.0
+-- Configuring done (41.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/saulet/Desktop/Cuarto/DCA/p1-fire-and-water-dca/build
+
+17:29 p1-fire-and-water-dca (main) $ cd build
+
+17:29 build (main) $ make all
+[  1%] Building C object _deps/raylib-build/raylib/external/glfw/src/CMakeFiles/glfw.dir/context.c.o
+...
+[ 58%] Built target raylib
+[ 60%] Building CXX object CMakeFiles/game_core.dir/src/Animation.cpp.o
+...
+[ 96%] Built target game_core
+[ 98%] Building CXX object CMakeFiles/game.dir/src/main.cpp.o
+[100%] Linking CXX executable game
+[100%] Built target game
+
+17:31 build (main) $ make clean
+
+17:31 build (main) $ ls
+CMakeCache.txt  cmake_install.cmake  _CPack_Packages  _deps
+CMakeFiles      CPackConfig.cmake    CPackSourceConfig.cmake  Makefile
+
+17:31 build (main) $ sudo make install
+[sudo] contraseña para saulet: 
+[  1%] Building C object ...
+...
+[100%] Built target game
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /usr/local/lib/libraylib.a
+-- Installing: /usr/local/include/raylib.h
+...
+-- Installing: /usr/local/bin/game
+-- Installing: /usr/local/share/p1-fire-and-water-dca/assets
+-- Installing: /usr/local/share/p1-fire-and-water-dca/assets/music/backgroundMusic.mp3
+...
+-- Installing: /usr/local/share/p1-fire-and-water-dca/assets/config/settings.json
+-- Installing: /usr/local/share/p1-fire-and-water-dca/assets/levels/level_prueba/nivel1-prueba.tmx
+...
+-- Installing: /usr/local/share/p1-fire-and-water-dca/doc/Memoria del Proyecto (Hito 1  Alpha).md
+
+17:33 build (main) $ sudo cpack
+CPack: Create package using DEB
+CPack: Install projects
+CPack: - Run preinstall target for: p1-fire-and-water-dca
+CPack: - Install project: p1-fire-and-water-dca []
+CPack: Create package
+CPackDeb: - Generating dependency list
+CPack: - package: /home/saulet/Desktop/Cuarto/DCA/p1-fire-and-water-dca/build/p1-fire-and-water-dca-0.1.0-Linux.deb generated.
+CPack: Create package using ZIP
+CPack: Install projects
+...
+CPack: - package: /home/saulet/Desktop/Cuarto/DCA/p1-fire-and-water-dca/build/p1-fire-and-water-dca-0.1.0-Linux.zip generated.
+
+17:34 build (main) $ sudo dpkg -i p1-fire-and-water-dca-0.1.0-Linux.deb
+Seleccionando el paquete p1-fire-and-water-dca previamente no seleccionado.
+(Leyendo la base de datos ... 481159 ficheros o directorios instalados actualmente.)
+Preparando para desempaquetar p1-fire-and-water-dca-0.1.0-Linux.deb ...
+Desempaquetando p1-fire-and-water-dca (0.1.0) ...
+Configurando p1-fire-and-water-dca (0.1.0) ...
