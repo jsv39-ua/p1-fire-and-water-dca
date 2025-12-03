@@ -737,14 +737,35 @@ void MainGameState::render()
     if (!activeSignText.empty()) {
         // 1. Configuración de estilo
         int fontSize = 20;
-        int padding = 20;        // Espacio entre el texto y el borde de la caja
-        Color boxColor = { 0, 0, 0, 200 }; // Negro semitransparente
+        int padding = 30;        // Más padding para que se vea más grande
+        Color boxColor = { 0, 0, 0, 220 }; 
         Color borderColor = RAYWHITE;
         
-        // 2. Medir cuánto ocupa el texto en píxeles
-        const char* texto = activeSignText.c_str();
-        int textWidth = MeasureText(texto, fontSize);
-        int textHeight = fontSize; // Aproximación simple de altura
+        // 2. Medir dimensiones del texto multilínea manualmente
+        int maxLineWidth = 0;
+        int lineCount = 0;
+        
+        const char* textPtr = activeSignText.c_str();
+        const char* lineStart = textPtr;
+        
+        // Recorrer el texto para contar líneas y medir la más ancha
+        for (int i = 0; textPtr[i] != '\0'; i++) {
+            if (textPtr[i] == '\n') {
+                std::string line(lineStart, textPtr + i - lineStart);
+                int w = MeasureText(line.c_str(), fontSize);
+                if (w > maxLineWidth) maxLineWidth = w;
+                
+                lineCount++;
+                lineStart = textPtr + i + 1;
+            }
+        }
+        // Medir última línea
+        int w = MeasureText(lineStart, fontSize);
+        if (w > maxLineWidth) maxLineWidth = w;
+        lineCount++; 
+
+        int textWidth = maxLineWidth;
+        int textHeight = lineCount * fontSize + (lineCount * 2); // Altura basada en líneas
 
         // 3. Calcular dimensiones de la caja
         int boxWidth = textWidth + (padding * 2);
@@ -752,21 +773,14 @@ void MainGameState::render()
 
         // 4. Calcular posición para centrarlo arriba en la pantalla
         int screenWidth = GetScreenWidth();
-        int boxX = (screenWidth / 2) - (boxWidth / 2); // Centro horizontal
-        int boxY = 50; // A 50 píxeles del techo
+        int boxX = (screenWidth / 2) - (boxWidth / 2); 
+        int boxY = 50; 
 
         // 5. DIBUJAR
-        // A) Sombra pequeña para darle profundidad (opcional)
         DrawRectangle(boxX + 4, boxY + 4, boxWidth, boxHeight, Fade(BLACK, 0.5f));
-
-        // B) La caja de fondo
         DrawRectangle(boxX, boxY, boxWidth, boxHeight, boxColor);
-
-        // C) El borde blanco
         DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, borderColor);
-
-        // D) El texto (ajustado con el padding)
-        DrawText(texto, boxX + padding, boxY + padding, fontSize, WHITE);
+        DrawText(activeSignText.c_str(), boxX + padding, boxY + padding, fontSize, WHITE);
     }
 
     renderGlobalUI();
