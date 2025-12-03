@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Entity.hpp>
+#include <string>
 
 class Enemy : public Entity {
 public:
@@ -35,6 +36,9 @@ public:
     bool isInvincible() const { return invincibility_timer > 0.0f; }
     void activateInvincibility() { invincibility_timer = INVINCIBILITY_DURATION; }
     bool shouldRenderVisible() const;
+
+    // Trigger system
+    std::string targetTag;
     
 private:
     static constexpr float INVINCIBILITY_DURATION = 1.0f; // 1 segundo de invencibilidad
