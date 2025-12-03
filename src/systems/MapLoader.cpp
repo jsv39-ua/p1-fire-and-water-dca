@@ -73,7 +73,7 @@ void MapLoader::drawTileLayer(TmxLayer* layer, TmxTileLayer* tileLayer) {
                 DrawTexturePro(tData.texture, 
                               tData.source, 
                               dest, 
-                              (Vector2){0, 0}, 
+                              Vector2{0, 0}, 
                               0.0f, 
                               WHITE);
             }
@@ -109,7 +109,7 @@ void MapLoader::draw(const Camera2D& camera) {
                 
                 // Dibujar la imagen de fondo con el offset de parallax
                 DrawTextureEx(imgLayer->image.texture, 
-                             (Vector2){offsetX, offsetY}, 
+                             Vector2{offsetX, offsetY}, 
                              0.0f, 
                              1.0f, 
                              WHITE);
@@ -151,7 +151,7 @@ void MapLoader::drawParallaxLayers(const Camera2D& camera) {
                 float scale = camera.zoom;
                 
                 DrawTextureEx(imgLayer->image.texture, 
-                             (Vector2){drawX, drawY}, 
+                             Vector2{drawX, drawY}, 
                              0.0f, 
                              scale, 
                              WHITE);
