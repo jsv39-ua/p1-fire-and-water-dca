@@ -15,6 +15,26 @@ extern "C" {
     #include <raylib.h>
 }
 
+// Helper function to format sign text with current controls
+std::string formatSignText(const std::string& text) {
+    // Check if this is the tutorial sign
+    if (text.find("Hola, bienvenido a Elements") != std::string::npos) {
+        SettingsManager* sm = SettingsManager::getInstance();
+        
+        std::string newText = "Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!\n\n";
+        newText += "Controles:\n\n";
+        
+        newText += "Jugador Agua: Movimiento básico: " + sm->getKeyName(sm->getWaterLeft()) + ", " + sm->getKeyName(sm->getWaterJump()) + ", " + sm->getKeyName(sm->getWaterRight()) + "\n";
+        newText += "Ataque: " + sm->getKeyName(sm->getWaterAttack()) + "\n\n";
+        
+        newText += "Jugador Fuego: Movimiento básico: " + sm->getKeyName(sm->getFireLeft()) + ", " + sm->getKeyName(sm->getFireJump()) + ", " + sm->getKeyName(sm->getFireRight()) + "\n";
+        newText += "Ataque: " + sm->getKeyName(sm->getFireAttack());
+        
+        return newText;
+    }
+    return text;
+}
+
 const float DEFAULT_SCREEN_WIDTH = 1280.0f;
 const float DEFAULT_SCREEN_HEIGHT = 720.0f;
 
@@ -213,7 +233,7 @@ void MainGameState::update(float deltaTime)
             // Lógica de Carteles (SIGN) - Solicitada por usuario
             if (platform.type == SIGN) {
                 if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
-                    activeSignText = platform.text;
+                    activeSignText = formatSignText(platform.text);
                 }
             }
 
