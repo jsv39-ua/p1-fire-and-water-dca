@@ -6,6 +6,7 @@ on:
     types: [created, published]
   # Para ejecutar manualmente si hace falta
   workflow_dispatch:
+    []
 
 jobs:
   build_and_package_deb:
