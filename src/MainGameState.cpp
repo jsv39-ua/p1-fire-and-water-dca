@@ -216,10 +216,12 @@ void MainGameState::update(float deltaTime)
 
             switch (collision) {
                 case 0:
-                case 2:
                     if (players[i].resolvePlatformCollision(platform)) {
                         on_ground[i] = true;
                     }
+                    break;
+                case 2:
+                    // Friendly liquid: do nothing (pass through)
                     break;
                 case 3:  // GOAL
                     if (players[i].resolvePlatformCollision(platform)) {
@@ -228,12 +230,22 @@ void MainGameState::update(float deltaTime)
                     if (i == 0) fireOnGoal = true;
                     else waterOnGoal = true;
                     break;
-                case 1:  // Muerte
-                    // Activar timer de muerte en vez de cambiar inmediatamente
-                    playerDying = true;
-                    deathTimer = 0.0f;
-                    TraceLog(LOG_INFO, "[MainGameState] Player hit deadly platform, starting death timer");
-                    return;
+                case 1:  // Daño por superficie letal
+                    if (!players[i].isInvincible()) {
+                        // TODO: poner mas daño si queremos que se muera directo
+                        players[i].updateLifeCount(-3);
+                        
+                        if (players[i].getLifeCount() > 0) {
+                            players[i].damageSound.play();
+                        } else {
+                            playerDying = true;
+                            deathTimer = 0.0f;
+                            players[i].deathSound.play();
+                            TraceLog(LOG_INFO, "[MainGameState] Player %d died from deadly platform", i);
+                            return;
+                        }
+                    }
+                    break;
                 case 5: // BUTTON
                     if (platform.isButton) {
                         // Logic for One-Shot Trigger
@@ -613,7 +625,7 @@ void MainGameState::render()
              DrawTexturePro(platform.texture, platform.sourceRect, platform.bounds, {0,0}, 0.0f, WHITE);
         }
 
-        if(platform.type == GOAL){
+        else if(platform.type == GOAL){
             // Dibujamos la puerta como rectángulo negro relleno, borde y etiqueta para depuración
             DrawRectangleRec(platform.bounds, BLACK);
             DrawRectangleLinesEx(platform.bounds, 3, MAGENTA);
@@ -621,12 +633,7 @@ void MainGameState::render()
             int textW = MeasureText(label.c_str(), 10);
             DrawText(label.c_str(), platform.bounds.x + (platform.bounds.width - textW) / 2, platform.bounds.y - 12, 10, MAGENTA);
         }
-        else if(platform.type == FIRE){
-            DrawRectangleRec(platform.bounds, MAROON);
-        }
-        else if(platform.type == WATER){
-            DrawRectangleRec(platform.bounds, DARKBLUE);
-        }
+        // FIRE and WATER are invisible (visuals are in the map tiles)
         else if(platform.type == BUTTON){
             if (!platform.hasVisuals) {
                 DrawRectangleRec(platform.bounds, ORANGE);
