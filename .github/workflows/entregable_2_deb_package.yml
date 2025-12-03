@@ -28,6 +28,7 @@ jobs:
             build-essential \
             debhelper \
             fakeroot \
+            cmake \
             mesa-common-dev \
             libgl1-mesa-dev \
             libglu1-mesa-dev \
@@ -38,19 +39,7 @@ jobs:
             libxinerama-dev \
             libasound2-dev
 
-      - name: Verificar bibliotecas instaladas
-        run: |
-          echo "Verificando libGL..."
-          ldconfig -p | grep libGL || echo "libGL no encontrada"
-          echo "Verificando libX11..."
-          ldconfig -p | grep libX11 || echo "libX11 no encontrada"
-          echo "Rutas de búsqueda del linker:"
-          gcc -print-search-dirs
-
-      - name: Compilacion del proyecto
-        run: make all
-     
-      - name: Generar Paquete .deb con Makefile
+      - name: Generar Paquete .deb con Makefile (usa CMake internamente)
         run: make dist
         
       - name: Encontrar el paquete .deb Generado
