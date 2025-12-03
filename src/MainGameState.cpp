@@ -346,6 +346,25 @@ void MainGameState::update(float deltaTime)
         }
     }
     
+    // Check for dead enemies and trigger events (e.g. deactivate platforms)
+    for (const auto& enemy : level_enemies) {
+        if (enemy.getLifeCount() <= 0) {
+            if (!enemy.targetTag.empty()) {
+                int count = 0;
+                // Deactivate platforms with this tag
+                for (auto& platform : level_platforms) {
+                    if (platform.active && !platform.tag.empty() && platform.tag == enemy.targetTag) {
+                        platform.active = false;
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    TraceLog(LOG_INFO, "Enemy death deactivated %d platforms with tag: %s", count, enemy.targetTag.c_str());
+                }
+            }
+        }
+    }
+
     // Limpiar enemigos muertos
     level_enemies.erase(std::remove_if(level_enemies.begin(), level_enemies.end(),
         [](const Enemy& e) { return e.getLifeCount() <= 0; }), level_enemies.end());
@@ -411,6 +430,13 @@ void MainGameState::handleTransitions() {
     if (active_transition) {
         TraceLog(LOG_INFO, "Transition triggered to %s", active_transition->targetMap.c_str());
         
+        // Check for Game Over / Win condition
+        if (active_transition->targetMap == "GOAL" || active_transition->targetMap == "WIN") {
+             TraceLog(LOG_INFO, "Transition is GOAL: changing to SimpleLevelState");
+             this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
+             return;
+        }
+
         // Store velocities to preserve momentum
         Vector2 fire_vel = players[0].velocity;
         Vector2 water_vel = players[1].velocity;
@@ -618,9 +644,9 @@ void MainGameState::render()
         }
     }
 
-    // Debug: bounds de jugadores
-    DrawRectangleLinesEx(players[0].bounds, 2, GREEN);
-    DrawRectangleLinesEx(players[1].bounds, 2, BLUE);
+    // Debug: bounds de jugadores (ELIMINADO)
+    // DrawRectangleLinesEx(players[0].bounds, 2, GREEN);
+    // DrawRectangleLinesEx(players[1].bounds, 2, BLUE);
 
     
 
@@ -661,7 +687,8 @@ void MainGameState::render()
         projectile.render();
     }
 
-    // Debug: draw outlines and labels for enemies
+    // Debug: draw outlines and labels for enemies (ELIMINADO)
+    /*
     for (size_t ei = 0; ei < level_enemies.size(); ++ei) {
         Enemy &en = level_enemies[ei];
         DrawRectangleLinesEx(en.bounds, 2, YELLOW);
@@ -670,6 +697,7 @@ void MainGameState::render()
         int tw = MeasureText(lab.c_str(), 12);
         DrawText(lab.c_str(), en.bounds.x + (en.bounds.width - tw)/2, en.bounds.y - 14, 12, BLACK);
     }
+    */
     EndMode2D();
     
     // Dibujar vidas de los jugadores (UI fija en pantalla)

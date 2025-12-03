@@ -1,0 +1,76 @@
+name: Empaquetar .deb
+
+on:
+  # Se ejecuta automáticamente al crear o publicar una release
+  release:
+    types: [created, published]
+  # Para ejecutar manualmente si hace falta
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Etiqueta de version (e.g., v1.0.0)'
+        required: false
+        default: 'dev-build'
+
+jobs:
+  build_and_package_deb:
+    name: Compilar y empaquetar (.deb)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Dependencias de Compilación y Empaquetado
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            fakeroot \
+            cmake \
+            mesa-common-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libx11-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libasound2-dev
+
+      - name: Generar Paquete .deb con Makefile (usa CMake internamente)
+        run: make dist
+        
+      - name: Encontrar el paquete .deb Generado
+        id: find_deb
+        run: echo "DEB_FILE=$(find . -maxdepth 1 -name "*.deb" -print -quit)" >> $GITHUB_OUTPUT
+
+      - name: Subir Paquete .deb como Artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: ${{ steps.find_deb.outputs.DEB_FILE }}
+          retention-days: 7
+          
+  publish_release_asset:
+    name: Publicar Paquete .deb en Release
+    runs-on: ubuntu-latest
+    needs: build_and_package_deb
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Descargar el artefacto (.deb)
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-package
+          path: artifacts
+
+      - name: Publicar Paquete .deb en GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # El paquete se encuentra dentro de la carpeta 'artifacts'
+          files: artifacts/*.deb
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
