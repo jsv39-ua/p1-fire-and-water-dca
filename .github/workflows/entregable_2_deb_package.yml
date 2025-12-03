@@ -6,7 +6,11 @@ on:
     types: [created, published]
   # Para ejecutar manualmente si hace falta
   workflow_dispatch:
-    []
+    inputs:
+      version:
+        description: 'Etiqueta de version (e.g., v1.0.0)'
+        required: false
+        default: 'dev-build'
 
 jobs:
   build_and_package_deb:
