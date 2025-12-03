@@ -28,19 +28,23 @@ private:
         FIRE_LEFT,
         FIRE_RIGHT,
         FIRE_JUMP,
+        FIRE_ATTACK,
         WATER_LEFT,
         WATER_RIGHT,
-        WATER_JUMP
+        WATER_JUMP,
+        WATER_ATTACK
     };
     
     // Botones para cada tecla
     Rectangle fireLeftButton;
     Rectangle fireRightButton;
     Rectangle fireJumpButton;
+    Rectangle fireAttackButton;
     
     Rectangle waterLeftButton;
     Rectangle waterRightButton;
     Rectangle waterJumpButton;
+    Rectangle waterAttackButton;
     
     // Botones de acción
     Rectangle saveButton;
@@ -49,8 +53,8 @@ private:
     EditingKey currentlyEditing;
     
     // Teclas temporales (se guardan al presionar "Guardar")
-    int tempFireLeft, tempFireRight, tempFireJump;
-    int tempWaterLeft, tempWaterRight, tempWaterJump;
+    int tempFireLeft, tempFireRight, tempFireJump, tempFireAttack;
+    int tempWaterLeft, tempWaterRight, tempWaterJump, tempWaterAttack;
     
     // Mouse hover states
     bool mouseOverSaveButton = false;
@@ -62,16 +66,20 @@ private:
     bool mouseOverFireLeft = false;
     bool mouseOverFireRight = false;
     bool mouseOverFireJump = false;
+    bool mouseOverFireAttack = false;
     bool mouseOverWaterLeft = false;
     bool mouseOverWaterRight = false;
     bool mouseOverWaterJump = false;
+    bool mouseOverWaterAttack = false;
     
     bool mouseExitedFireLeft = true;
     bool mouseExitedFireRight = true;
     bool mouseExitedFireJump = true;
+    bool mouseExitedFireAttack = true;
     bool mouseExitedWaterLeft = true;
     bool mouseExitedWaterRight = true;
     bool mouseExitedWaterJump = true;
+    bool mouseExitedWaterAttack = true;
     
     // Estado de mensaje de confirmación
     bool showSaveConfirmation = false;

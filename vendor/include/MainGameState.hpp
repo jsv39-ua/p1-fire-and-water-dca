@@ -7,6 +7,7 @@
 #include <Platform.hpp>
 #include <Animation.hpp>
 #include <Camera.hpp>
+#include <Projectile.hpp>
 #include <vector>
 #include <string>
 #include <MapLoader.hpp>
@@ -41,6 +42,7 @@ private:
     bool on_ground[2] = {false, false}; // [0] = fire, [1] = water
     
     std::vector<Enemy> level_enemies;
+    std::vector<Projectile> projectiles;
     std::vector<MapTransition> level_transitions;
 
     void loadLevel(const std::string& mapPath);
