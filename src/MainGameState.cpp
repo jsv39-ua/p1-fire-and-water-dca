@@ -176,7 +176,27 @@ void MainGameState::update(float deltaTime)
 
     // Verificar colisiones con plataformas
     // bool bothOnGoal = true;
-    for (const auto& platform : level_platforms) {
+    
+    // Reset button pressed state if no one is touching it
+    for (auto& platform : level_platforms) {
+        if (platform.isButton && platform.isPressed) {
+            bool stillPressed = false;
+            for (int i = 0; i < 2; i++) {
+                // Check simple collision without resolution logic
+                if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
+                    stillPressed = true;
+                    break;
+                }
+            }
+            if (!stillPressed) {
+                platform.isPressed = false;
+            }
+        }
+    }
+
+    for (auto& platform : level_platforms) {
+        if (!platform.active) continue;
+
         bool fireOnGoal = false;
         bool waterOnGoal = false;
         
@@ -203,6 +223,28 @@ void MainGameState::update(float deltaTime)
                     deathTimer = 0.0f;
                     TraceLog(LOG_INFO, "[MainGameState] Player hit deadly platform, starting death timer");
                     return;
+                case 5: // BUTTON
+                    if (platform.isButton) {
+                        // Logic for One-Shot Trigger
+                        if (!platform.isPressed) {
+                            platform.isPressed = true;
+                            
+                            // Activate targets
+                            for (auto& target : level_platforms) {
+                                // Check ID match
+                                if (platform.targetId != -1 && target.id == platform.targetId) {
+                                    target.active = true;
+                                    TraceLog(LOG_INFO, "Button %d activated platform %d by ID", platform.id, target.id);
+                                }
+                                // Check Tag match
+                                if (!platform.targetTag.empty() && !target.tag.empty() && target.tag == platform.targetTag) {
+                                    target.active = true;
+                                    TraceLog(LOG_INFO, "Button %d activated platform %d by TAG", platform.id, target.id);
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
         }
         
@@ -509,6 +551,15 @@ void MainGameState::render()
 
     // Dibujar las plataformas del nivel
     for (const auto& platform : level_platforms) {
+        if (!platform.active) continue;
+
+        if (platform.isButton && platform.isPressed && platform.hasPressedVisuals) {
+             DrawTexturePro(platform.pressedTexture, platform.pressedSourceRect, platform.bounds, {0,0}, 0.0f, WHITE);
+        }
+        else if (platform.hasVisuals) {
+             DrawTexturePro(platform.texture, platform.sourceRect, platform.bounds, {0,0}, 0.0f, WHITE);
+        }
+
         if(platform.type == GOAL){
             // Dibujamos la puerta como rectángulo negro relleno, borde y etiqueta para depuración
             DrawRectangleRec(platform.bounds, BLACK);
@@ -522,6 +573,12 @@ void MainGameState::render()
         }
         else if(platform.type == WATER){
             DrawRectangleRec(platform.bounds, DARKBLUE);
+        }
+        else if(platform.type == BUTTON){
+            if (!platform.hasVisuals) {
+                DrawRectangleRec(platform.bounds, ORANGE);
+                DrawRectangleLinesEx(platform.bounds, 2, BLACK);
+            }
         }
     }
     

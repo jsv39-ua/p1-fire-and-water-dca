@@ -4,5 +4,6 @@ enum ElementType {
     FIRE,
     WATER,
     NONE,
-    GOAL
+    GOAL,
+    BUTTON
 };
