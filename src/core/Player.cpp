@@ -24,6 +24,7 @@ Player::Player() : Entity() {
     life_count = 3;
     invincibility_timer = 0.0f;
     attack_cooldown = 0.0f;
+    log_timer = 0.0f;
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -35,6 +36,7 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     key_attack = 0;
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
+    log_timer = 0.0f;
 
     // Función helper para cargar todos los archivos de una carpeta
     auto loadSoundsFromDirectory = [](const std::string& path, std::vector<std::string>& soundList) {
@@ -112,6 +114,18 @@ void Player::setKeys(int left, int right, int jump, int attack) {
 }
 
 void Player::update(float deltaTime) {
+    // Logging periódico
+    log_timer += deltaTime;
+    if (log_timer >= LOG_INTERVAL) {
+        log_timer = 0.0f;
+        TraceLog(LOG_INFO, "[Player %s] Pos: (%.2f, %.2f), Vel: (%.2f, %.2f), Lives: %d, Invincible: %s", 
+            (type == FIRE ? "FIRE" : (type == WATER ? "WATER" : "NONE")),
+            position.x, position.y,
+            velocity.x, velocity.y,
+            life_count,
+            (isInvincible() ? "YES" : "NO"));
+    }
+
     // Actualizar timer de invencibilidad
     if (invincibility_timer > 0.0f) {
         invincibility_timer -= deltaTime;

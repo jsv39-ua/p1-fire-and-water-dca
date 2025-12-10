@@ -461,6 +461,9 @@ void MainGameState::handleTransitions() {
         Vector2 fire_vel = players[0].velocity;
         Vector2 water_vel = players[1].velocity;
         
+        // Store target spawn BEFORE loading level (which clears transitions vector)
+        Vector2 targetSpawn = active_transition->targetSpawn;
+
         // Load new level
         std::string fullPath = active_transition->targetMap;
         if (fullPath.find("assets/") == std::string::npos) {
@@ -469,8 +472,8 @@ void MainGameState::handleTransitions() {
         loadLevel(fullPath);
         
         // Set positions
-        players[0].position = active_transition->targetSpawn;
-        players[1].position = { active_transition->targetSpawn.x + PLAYER_SPAWN_OFFSET, active_transition->targetSpawn.y }; 
+        players[0].position = targetSpawn;
+        players[1].position = { targetSpawn.x + PLAYER_SPAWN_OFFSET, targetSpawn.y }; 
 
         // Restore velocity
         players[0].velocity = fire_vel;

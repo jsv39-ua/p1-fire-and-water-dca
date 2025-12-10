@@ -70,4 +70,8 @@ private:
     
     // Sistema de ataque
     float attack_cooldown;
+
+    // Esto es si queremos que el jugador emita logs periódicos (para debug)
+    float log_timer;
+    static constexpr float LOG_INTERVAL = 1.0f;
 };
