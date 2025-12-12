@@ -69,7 +69,8 @@ La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qu�
 * **Test 9 - AssetsTest.BackgroundMusicExists:** Comprueba que los recursos multimedia (música de fondo) se han copiado correctamente a la carpeta de compilación.
 * **Test 10 - RaylibMath.VectorAddition:** Test de integración ("Smoke Test") que realiza una operación matemática usando Raylib. Sirve para confirmar que la librería gráfica externa está correctamente enlazada y operativa.
 
-### 🔹 Gameplay y Físicas (Tests Avanzados)
+## Tests Avanzados
+### 🔹 Gameplay y Físicas 
 * **Test 11 - PlayerLogic.LifeSystem:** Comprueba que el jugador pierde y gana vida correctamente, respetando los límites.
 * **Test 12 - PlayerLogic.MovementPhysics (aceleración y frenado):** Verfica la velocidad La velocidad cambia correctamente.
 * **Test 13 - PlayerLogic.JumpPhysics:** Verifica que la acción de saltar aplica una velocidad vertical negativa (hacia arriba).
@@ -77,7 +78,7 @@ La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qu�
 * **Test 15 - PhysicsTest.CollisionLogic:** Verifica la lógica de colisiones AABB (Caja contra Caja) usando las funciones nativas del motor.
 * **Test 16 - PlayerLogic.MovementPhysics (Orientación):** Verifica que al andar, la variable facingRight se actualiza según la dirección de movimiento (Izquierda/Derecha).
 
-### 🔹 Grupo 5: Elementos y Combate (Tests 17-20)
+### 🔹 Grupo 5: Elementos y Combate
 Pruebas específicas de la lógica "Fire & Water".
 
 * **Test 17 - GameplayLogic.ElementalInteraction:** Verifica la lógica de elementos:
@@ -88,10 +89,19 @@ Pruebas específicas de la lógica "Fire & Water".
 * **Test 20 - EnemyLogic.DamageSystem:** Verifica que los enemigos tienen vida, la pierden al recibir daño y entran en estado de invencibilidad.
 
 
-### 🔹 Grupo 6: Sistemas Auxiliares (Tests 21-25)
+### 🔹 Grupo 6: Sistemas Auxiliares
 Pruebas de sistemas de soporte del motor.
 * **Test 21 - AnimationSystem.AnimationLoop:** Verifica que el sistema de animación avanza frames correctamente y hace bucle al final.
 * **Test 22 - SettingsSystem.KeyRebinding:** Comprueba que el gestor de configuración permite cambiar las teclas de control en tiempo de ejecución.
 * **Test 23 - CameraSystem.ZoomLimits:** Verifica que la cámara respeta los límites de zoom mínimo y máximo configurados, ignorando valores fuera de rango.
 * **Test 24 - AudioSystem.MultiSoundInit:** Comprueba que el reproductor de sonido avanzado acepta listas de archivos para sonidos con variaciones aleatorias.
 * **Test 25 - ResourceSystem.SafeUnload:** Verifica la robustez del gestor de recursos, asegurando que intentar liberar recursos no existentes no provoca cierres inesperados.
+
+
+### 🔹 Grupo 7: Mecánicas Finas
+Pruebas de detalle y "game feel".
+* **Test 26 - AnimationSystem.ResetLogic:** Verifica que las animaciones pueden reiniciarse forzosamente al primer frame (útil al cambiar de estado idle/walk).
+* **Test 27 - CameraSystem.ZoomAdjustment:** Comprueba la lógica de zoom incremental (acercar/alejar) de la cámara.
+* **Test 28 - PlayerLogic.AttackCooldown:** Verifica el sistema de ritmo de combate. El jugador no debe poder atacar spammeando el botón; debe respetar el tiempo de enfriamiento (`ATTACK_COOLDOWN`).
+* **Test 29 - SettingsSystem.KeyNameParsing:** Verifica que el gestor de configuración traduce correctamente los códigos de tecla internos a texto legible para la UI ("A", "Z", etc.).
+* **Test 30 - PlayerLogic.VariableJumpHeight:** Verifica la mecánica de "salto variable" (estilo Mario Bros). Si el jugador mantiene pulsado el botón de salto mientras sube, recibe un impulso extra vertical.
