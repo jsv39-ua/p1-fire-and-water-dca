@@ -10,6 +10,7 @@
 #include <Player.hpp>
 #include <ResourceManager.hpp>
 #include <SettingsManager.hpp>
+#include <LocalizationManager.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -17,21 +18,31 @@ extern "C" {
 
 // Helper function to format sign text with current controls
 std::string formatSignText(const std::string& text) {
+    TraceLog(LOG_INFO, "DEBUG TRADUCCION: Texto recibido del mapa: '%s'", text.c_str());
     // Check if this is the tutorial sign
     if (text.find("Hola, bienvenido a Elements") != std::string::npos) {
+        TraceLog(LOG_INFO, "DEBUG TRADUCCION: ¡ENTRÓ EN EL IF! Intentando traducir...");
         SettingsManager* sm = SettingsManager::getInstance();
         
-        std::string newText = "Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!\n\n";
-        newText += "Controles:\n\n";
+        // AQUI ESTÁ EL CAMBIO: Usamos _("Texto")
+        std::string newText = _("Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!\n\n");
+        newText += _("Controles:\n\n");
         
-        newText += "Jugador Agua: Movimiento básico: " + sm->getKeyName(sm->getWaterLeft()) + ", " + sm->getKeyName(sm->getWaterJump()) + ", " + sm->getKeyName(sm->getWaterRight()) + "\n";
-        newText += "Ataque: " + sm->getKeyName(sm->getWaterAttack()) + "\n\n";
+        // OJO: Los nombres de las teclas (sm->getKeyName) no se traducen aquí, 
+        // eso se hace dentro de getKeyName si quisieras.
         
-        newText += "Jugador Fuego: Movimiento básico: " + sm->getKeyName(sm->getFireLeft()) + ", " + sm->getKeyName(sm->getFireJump()) + ", " + sm->getKeyName(sm->getFireRight()) + "\n";
-        newText += "Ataque: " + sm->getKeyName(sm->getFireAttack());
+        newText += _("Jugador Agua: Movimiento básico: ") + sm->getKeyName(sm->getWaterLeft()) + ", " + sm->getKeyName(sm->getWaterJump()) + ", " + sm->getKeyName(sm->getWaterRight()) + "\n";
+        newText += _("Ataque: ") + sm->getKeyName(sm->getWaterAttack()) + "\n\n";
+        
+        newText += _("Jugador Fuego: Movimiento básico: ") + sm->getKeyName(sm->getFireLeft()) + ", " + sm->getKeyName(sm->getFireJump()) + ", " + sm->getKeyName(sm->getFireRight()) + "\n";
+        newText += _("Ataque: ") + sm->getKeyName(sm->getFireAttack());
         
         return newText;
     }
+    else {
+        TraceLog(LOG_WARNING, "DEBUG TRADUCCION: NO entró en el IF. La búsqueda falló.");
+    }
+
     return text;
 }
 
