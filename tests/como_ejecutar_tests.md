@@ -68,3 +68,11 @@ La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qu�
 * **Test 8 - ConfigTest.SettingsFileExists:** Verifica que el archivo de configuración (`assets/config/settings.json`) existe y es accesible desde el ejecutable. Si falla, suele indicar problemas en la copia de assets.
 * **Test 9 - AssetsTest.BackgroundMusicExists:** Comprueba que los recursos multimedia (música de fondo) se han copiado correctamente a la carpeta de compilación.
 * **Test 10 - RaylibMath.VectorAddition:** Test de integración ("Smoke Test") que realiza una operación matemática usando Raylib. Sirve para confirmar que la librería gráfica externa está correctamente enlazada y operativa.
+
+### 🔹 Gameplay y Físicas (Tests Avanzados)
+* **Test 11 - PlayerLogic.LifeSystem:** Comprueba que el jugador pierde y gana vida correctamente, respetando los límites.
+* **Test 12 - PlayerLogic.MovementPhysics (aceleración y frenado):** Verfica la velocidad La velocidad cambia correctamente.
+* **Test 13 - PlayerLogic.JumpPhysics:** Verifica que la acción de saltar aplica una velocidad vertical negativa (hacia arriba).
+* **Test 14 - PlayerLogic.InvincibilityState:** Comprueba que el sistema de invencibilidad temporal y parpadeo (shouldRenderVisible) se activa tras recibir daño.
+* **Test 15 - PhysicsTest.CollisionLogic:** Verifica la lógica de colisiones AABB (Caja contra Caja) usando las funciones nativas del motor.
+* **Test 16 - PlayerLogic.MovementPhysics (Orientación):** Verifica que al andar, la variable facingRight se actualiza según la dirección de movimiento (Izquierda/Derecha).
