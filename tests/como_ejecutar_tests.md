@@ -76,3 +76,22 @@ La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qu�
 * **Test 14 - PlayerLogic.InvincibilityState:** Comprueba que el sistema de invencibilidad temporal y parpadeo (shouldRenderVisible) se activa tras recibir daño.
 * **Test 15 - PhysicsTest.CollisionLogic:** Verifica la lógica de colisiones AABB (Caja contra Caja) usando las funciones nativas del motor.
 * **Test 16 - PlayerLogic.MovementPhysics (Orientación):** Verifica que al andar, la variable facingRight se actualiza según la dirección de movimiento (Izquierda/Derecha).
+
+### 🔹 Grupo 5: Elementos y Combate (Tests 17-20)
+Pruebas específicas de la lógica "Fire & Water".
+
+* **Test 17 - GameplayLogic.ElementalInteraction:** Verifica la lógica de elementos:
+    * Fuego vs Agua = Daño (Retorno 1).
+    * Fuego vs Fuego = Seguro (Retorno 2).
+* **Test 18 - EnemyLogic.PatrolMovement:** Verifica la IA de los enemigos. Confirma que cambian de dirección (`movingRight` cambia a `false`) cuando superan su rango de patrulla.
+* **Test 19 - CombatLogic.ProjectileLifecycle:** Comprueba que los proyectiles se inicializan activos, tienen el tipo correcto (Fuego/Agua) y pueden desactivarse.
+* **Test 20 - EnemyLogic.DamageSystem:** Verifica que los enemigos tienen vida, la pierden al recibir daño y entran en estado de invencibilidad.
+
+
+### 🔹 Grupo 6: Sistemas Auxiliares (Tests 21-25)
+Pruebas de sistemas de soporte del motor.
+* **Test 21 - AnimationSystem.AnimationLoop:** Verifica que el sistema de animación avanza frames correctamente y hace bucle al final.
+* **Test 22 - SettingsSystem.KeyRebinding:** Comprueba que el gestor de configuración permite cambiar las teclas de control en tiempo de ejecución.
+* **Test 23 - CameraSystem.ZoomLimits:** Verifica que la cámara respeta los límites de zoom mínimo y máximo configurados, ignorando valores fuera de rango.
+* **Test 24 - AudioSystem.MultiSoundInit:** Comprueba que el reproductor de sonido avanzado acepta listas de archivos para sonidos con variaciones aleatorias.
+* **Test 25 - ResourceSystem.SafeUnload:** Verifica la robustez del gestor de recursos, asegurando que intentar liberar recursos no existentes no provoca cierres inesperados.
