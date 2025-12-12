@@ -240,3 +240,29 @@ message(STATUS "Raylib target available: ${raylib_SOURCE_DIR}")
 # - To locally run the app:
 #   cmake --build build --target run
 # ----------------------------------------------------------------------------
+# Juanky --> si no activais los test compulará igual.
+
+# ----------------------------------------------------------------------------
+# Testing Unitario (Añadido para el Hito Final)
+# ----------------------------------------------------------------------------
+# CAMBIO AQUÍ: Usamos BUILD_GAME_TESTS en lugar de BUILD_TESTS
+if(BUILD_GAME_TESTS) 
+    message(STATUS "Building Tests... (Activado)")
+    enable_testing()
+
+    # Aseguramos que FetchContent esté disponible
+    include(FetchContent) 
+
+    # Descargar GoogleTest
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/refs/heads/main.zip
+    )
+    # Evitar conflictos en Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    
+    FetchContent_MakeAvailable(googletest)
+
+    # Añadir la carpeta de tests
+    add_subdirectory(tests)
+endif()
