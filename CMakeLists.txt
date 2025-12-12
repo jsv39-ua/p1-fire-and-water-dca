@@ -59,6 +59,11 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 # Make raylib available
 FetchContent_MakeAvailable(raylib)
 
+# ----------------------------------------------------------------------------
+# Localización (GNU gettext) - juanky
+# ----------------------------------------------------------------------------
+find_package(Intl REQUIRED)
+
 # Sanity: check if the fetched raylib matches the bundled vendor header
 if(EXISTS "${CMAKE_SOURCE_DIR}/vendor/include/raylib.h" AND EXISTS "${raylib_SOURCE_DIR}/src/raylib.h")
     # Read vendor header and extract RAYLIB_VERSION line, then extract version
@@ -120,7 +125,7 @@ target_include_directories(game_core
 )
 # Enlazamos raylib con game_core y lo hacemos PUBLIC
 # Esto significa: "Quien use game_core, también recibe raylib automáticamente"
-target_link_libraries(game_core PUBLIC raylib)
+target_link_libraries(game_core PUBLIC raylib Intl::Intl)
 
 # Enforce modern properties and warnings (good default set)
 target_compile_features(game_core PUBLIC cxx_std_20)
@@ -212,6 +217,48 @@ install(DIRECTORY doc/ DESTINATION share/${PROJECT_NAME}/doc)
 
 # Optional: install global headers if you want to publish the library
 #install(DIRECTORY include/ DESTINATION include)
+
+
+# ----------------------------------------------------------------------------
+# Tareas de Traducción (Automatización)
+# ----------------------------------------------------------------------------
+
+# 1. Tarea para actualizar la plantilla de textos (.pot)
+# Ejecutar manualmente: cmake --build build --target update_pot
+add_custom_target(update_pot
+    COMMAND xgettext --keyword=_ -d fire_water_game -o ${CMAKE_SOURCE_DIR}/assets/locales/template.pot 
+            --from-code=UTF-8 --c++ ${CMAKE_SOURCE_DIR}/src/main.cpp ${CMAKE_SOURCE_DIR}/src/core/*.cpp ${CMAKE_SOURCE_DIR}/src/systems/*.cpp
+    COMMENT "Extrayendo textos del código fuente a template.pot..."
+)
+
+# 2. Tarea automática para compilar .po a .mo al construir el juego
+add_custom_command(TARGET game PRE_BUILD
+    # Compilar Español
+    COMMAND msgfmt ${CMAKE_SOURCE_DIR}/assets/locales/es/LC_MESSAGES/fire_water_game.po 
+            -o ${CMAKE_SOURCE_DIR}/assets/locales/es/LC_MESSAGES/fire_water_game.mo
+    # Compilar Inglés
+    COMMAND msgfmt ${CMAKE_SOURCE_DIR}/assets/locales/en/LC_MESSAGES/fire_water_game.po 
+            -o ${CMAKE_SOURCE_DIR}/assets/locales/en/LC_MESSAGES/fire_water_game.mo
+    COMMENT "Compilando archivos de traducción (.mo)..."
+)
+
+
+add_custom_command(TARGET game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}/assets
+    COMMENT "Copiando assets y traducciones al directorio de ejecución..."
+)
+
+# ----------------------------------------------------------------------------
+# Copia automática de Assets (NUEVO)
+# ----------------------------------------------------------------------------
+add_custom_command(TARGET game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}/assets
+    COMMENT "Copiando carpeta assets completa al directorio de ejecución..."
+)
 
 # ----------------------------------------------------------------------------
 # Packaging - CPack configuration is kept in a separate module (for SRP)
