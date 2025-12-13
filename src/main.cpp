@@ -18,7 +18,7 @@ int main()
     const int screenHeight = 720;  // Más grande (era 450)
 
     LocalizationManager::getInstance()->init();
-    LocalizationManager::getInstance()->setLanguage("en");
+    //LocalizationManager::getInstance()->setLanguage("en"); #obligar a inglés para pruebas
     
     InitWindow(screenWidth, screenHeight, "Fuego y Agua");
     SetExitKey(KEY_NULL); // Deshabilitar que Escape cierre la ventana

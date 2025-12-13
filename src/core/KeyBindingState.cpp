@@ -4,6 +4,7 @@
 #include <cctype>
 #include <string>
 #include <raylib_compat.h>
+#include "LocalizationManager.hpp"
 
 extern "C" {
     #include <raylib.h>
@@ -309,13 +310,13 @@ void KeyBindingsState::render() {
     float centerX = screenWidth / 2.0f;
     
     // Título
-    const char* title = "CONFIGURACION DE TECLAS";
+    const char* title = _("CONFIGURACION DE TECLAS");
     int titleWidth = MeasureText(title, 40);
     DrawText(title, centerX - titleWidth / 2, 50, 40, BLACK);
     
     // Headers de columnas
-    DrawText("JUGADOR FUEGO", fireLeftButton.x, 120, 20, RED);
-    DrawText("JUGADOR AGUA", waterLeftButton.x, 120, 20, BLUE);
+    DrawText(_("JUGADOR FUEGO"), fireLeftButton.x, 120, 20, RED);
+    DrawText(_("JUGADOR AGUA"), waterLeftButton.x, 120, 20, BLUE);
     
     // Función helper para dibujar botón de tecla
     auto drawKeyButton = [&](Rectangle button, const char* label, int key, bool isEditing, bool isDuplicate, bool isHovered) {
@@ -365,41 +366,41 @@ void KeyBindingsState::render() {
     bool waterAttackDup = isKeyInUse(tempWaterAttack, WATER_ATTACK);
     
     // Dibujar botones de teclas - Fuego
-    drawKeyButton(fireLeftButton, "Izquierda:", tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup, mouseOverFireLeft);
-    drawKeyButton(fireRightButton, "Derecha:", tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup, mouseOverFireRight);
-    drawKeyButton(fireJumpButton, "Saltar:", tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup, mouseOverFireJump);
-    drawKeyButton(fireAttackButton, "Ataque:", tempFireAttack, currentlyEditing == FIRE_ATTACK, fireAttackDup, mouseOverFireAttack);
+    drawKeyButton(fireLeftButton, _("Izquierda:"), tempFireLeft, currentlyEditing == FIRE_LEFT, fireLeftDup, mouseOverFireLeft);
+    drawKeyButton(fireRightButton, _("Derecha:"), tempFireRight, currentlyEditing == FIRE_RIGHT, fireRightDup, mouseOverFireRight);
+    drawKeyButton(fireJumpButton, _("Saltar:"), tempFireJump, currentlyEditing == FIRE_JUMP, fireJumpDup, mouseOverFireJump);
+    drawKeyButton(fireAttackButton, _("Ataque:"), tempFireAttack, currentlyEditing == FIRE_ATTACK, fireAttackDup, mouseOverFireAttack);
     
     // Dibujar botones de teclas - Agua
-    drawKeyButton(waterLeftButton, "Izquierda:", tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup, mouseOverWaterLeft);
-    drawKeyButton(waterRightButton, "Derecha:", tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup, mouseOverWaterRight);
-    drawKeyButton(waterJumpButton, "Saltar:", tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup, mouseOverWaterJump);
-    drawKeyButton(waterAttackButton, "Ataque:", tempWaterAttack, currentlyEditing == WATER_ATTACK, waterAttackDup, mouseOverWaterAttack);
+    drawKeyButton(waterLeftButton, _("Izquierda:"), tempWaterLeft, currentlyEditing == WATER_LEFT, waterLeftDup, mouseOverWaterLeft);
+    drawKeyButton(waterRightButton, _("Derecha:"), tempWaterRight, currentlyEditing == WATER_RIGHT, waterRightDup, mouseOverWaterRight);
+    drawKeyButton(waterJumpButton, _("Saltar:"), tempWaterJump, currentlyEditing == WATER_JUMP, waterJumpDup, mouseOverWaterJump);
+    drawKeyButton(waterAttackButton, _("Ataque:"), tempWaterAttack, currentlyEditing == WATER_ATTACK, waterAttackDup, mouseOverWaterAttack);
     
     // Botón Guardar
     DrawRectangleRec(saveButton, mouseOverSaveButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(saveButton, 2, BLACK);
-    const char* saveText = "GUARDAR";
+    const char* saveText = _("GUARDAR");
     int saveWidth = MeasureText(saveText, 20);
     DrawText(saveText, saveButton.x + (saveButton.width - saveWidth) / 2, saveButton.y + 15, 20, BLACK);
     
     // Botón Cancelar
     DrawRectangleRec(cancelButton, mouseOverCancelButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(cancelButton, 2, BLACK);
-    const char* cancelText = "CANCELAR";
+    const char* cancelText = _("CANCELAR");
     int cancelWidth = MeasureText(cancelText, 20);
     DrawText(cancelText, cancelButton.x + (cancelButton.width - cancelWidth) / 2, cancelButton.y + 15, 20, BLACK);
     
     // Ayuda
     const char* help = currentlyEditing != NONE ? 
-        "Presiona una tecla..." : 
-        "Click en una tecla para cambiarla | ESC: Cancelar";
+        _("Presiona una tecla...") : 
+        _("Click en una tecla para cambiarla | ESC: Cancelar");
     int helpWidth = MeasureText(help, 16);
     DrawText(help, centerX - helpWidth / 2, GetScreenHeight() - 40, 16, BLACK);
     
     // Advertencia si hay duplicados
     if (fireLeftDup || fireRightDup || fireJumpDup || waterLeftDup || waterRightDup || waterJumpDup) {
-        const char* warning = "¡Advertencia: Tecla duplicada!";
+        const char* warning = _("¡Advertencia: Tecla duplicada!");
         int warningWidth = MeasureText(warning, 20);
         DrawText(warning, centerX - warningWidth / 2, GetScreenHeight() - 80, 20, RED);
     }
@@ -414,11 +415,11 @@ void KeyBindingsState::render() {
         DrawRectangleRec(confirmBox, Color{ 50, 200, 50, 255 }); // Verde
         DrawRectangleLinesEx(confirmBox, 3, BLACK);
         
-        const char* confirmText = "¡CONFIGURACION GUARDADA!";
+        const char* confirmText = _("¡CONFIGURACION GUARDADA!");
         int confirmWidth = MeasureText(confirmText, 25);
         DrawText(confirmText, centerX - confirmWidth / 2, confirmBox.y + 35, 25, WHITE);
         
-        const char* subText = "Volviendo...";
+        const char* subText = _("Volviendo...");
         int subWidth = MeasureText(subText, 18);
         DrawText(subText, centerX - subWidth / 2, confirmBox.y + 75, 18, WHITE);
     }

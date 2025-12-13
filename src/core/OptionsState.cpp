@@ -3,6 +3,7 @@
 #include "KeyBindingsState.hpp"
 #include <AudioManager.hpp>
 #include <iostream>
+#include "LocalizationManager.hpp"
 
 extern "C" {
     #include <raylib.h>
@@ -23,9 +24,9 @@ OptionsState::OptionsState() :
 
 const char* getLanguageName(OptionsState::Language lang) {
     switch(lang) {
-        case OptionsState::SPANISH: return "ESPAÑOL";
-        case OptionsState::ENGLISH: return "ENGLISH (WIP)";
-        default: return "ESPAÑOL";
+        case OptionsState::SPANISH: return _("ESPAÑOL");
+        case OptionsState::ENGLISH: return _("ENGLISH (WIP)");
+        default: return _("ESPAÑOL");
     }
 }
 
@@ -87,7 +88,16 @@ void OptionsState::handleInput()
 
         if (CheckCollisionPointRec(mouse, languageButton)) {
             AudioManager::getInstance()->playButtonClick();
+            
+            // 1. Cambiar el estado visual del botón (tu código actual)
             currentLanguage = (Language)((currentLanguage + 1) % 2);
+            
+            // 2. AVISAR AL GESTOR DE IDIOMAS (¡Nuevo!)
+            if (currentLanguage == OptionsState::ENGLISH) {
+                LocalizationManager::getInstance()->setLanguage("en");
+            } else {
+                LocalizationManager::getInstance()->setLanguage("es");
+            }
         }
 
         if (CheckCollisionPointRec(mouse, keyBindingsButton)) {
@@ -218,7 +228,7 @@ void OptionsState::render()
     ClearBackground(SKYBLUE);
     
     // Título (centrado)
-    const char* title = "OPCIONES";
+    const char* title = _("OPCIONES");
     int titleWidth = MeasureText(title, 40);
     DrawText(title, centerX - titleWidth / 2, 50, 40, BLACK);
     
@@ -234,13 +244,12 @@ void OptionsState::render()
     // Botón asignar teclas
     DrawRectangleRec(keyBindingsButton, mouseOverKeyBindingsButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(keyBindingsButton, 2, BLACK);
-    const char* keyBindText = "ASIGNAR TECLAS";
+    const char* keyBindText = _("ASIGNAR TECLAS");
     int keyBindWidth = MeasureText(keyBindText, 20);
     DrawText(keyBindText, keyBindingsButton.x + (keyBindingsButton.width - keyBindWidth) / 2, keyBindingsButton.y + 15, 20, BLACK);
     
     // slider volumen general
-    DrawText("VOLUMEN GENERAL", masterVolumeSlider.x, masterVolumeSlider.y - 30, 20, BLACK);
-    
+    DrawText(_("VOLUMEN GENERAL"), masterVolumeSlider.x, masterVolumeSlider.y - 30, 20, BLACK);    
     // Barra del slider
     DrawRectangleRec(masterVolumeSlider, LIGHTGRAY);
     DrawRectangleLinesEx(masterVolumeSlider, 2, BLACK);
@@ -259,7 +268,7 @@ void OptionsState::render()
     DrawText(master_vol_text, masterVolumeSlider.x + masterVolumeSlider.width + 20, masterVolumeSlider.y + 5, 20, DARKGRAY);
 
     // slider volumen musica
-    DrawText("VOLUMEN MUSICA", musicVolumeSlider.x, musicVolumeSlider.y - 30, 20, BLACK);        
+    DrawText(_("VOLUMEN MUSICA"), musicVolumeSlider.x, musicVolumeSlider.y - 30, 20, BLACK);
    
     DrawRectangleRec(musicVolumeSlider, LIGHTGRAY);
     DrawRectangleLinesEx(musicVolumeSlider, 2, BLACK);
@@ -275,7 +284,7 @@ void OptionsState::render()
     DrawText(music_vol_text, musicVolumeSlider.x + musicVolumeSlider.width + 20, musicVolumeSlider.y + 5, 20, DARKGRAY);
 
     // slider volumen efectos
-    DrawText("VOLUMEN EFECTOS", sfxVolumeSlider.x, sfxVolumeSlider.y - 30, 20, BLACK);
+    DrawText(_("VOLUMEN EFECTOS"), sfxVolumeSlider.x, sfxVolumeSlider.y - 30, 20, BLACK);
     
     DrawRectangleRec(sfxVolumeSlider, LIGHTGRAY);
     DrawRectangleLinesEx(sfxVolumeSlider, 2, BLACK);
@@ -293,12 +302,12 @@ void OptionsState::render()
     // Botón volver
     DrawRectangleRec(backButton, mouseOverBackButton ? GRAY : DARKGRAY);
     DrawRectangleLinesEx(backButton, 2, BLACK);
-    const char* backText = "VOLVER";
+    const char* backText = _("VOLVER");
     int backWidth = MeasureText(backText, 20);
     DrawText(backText, backButton.x + (backButton.width - backWidth) / 2, backButton.y + 15, 20, BLACK);
     
     // Ayuda (centrada en la parte inferior)
-    const char* help = "ESC: Volver";
+    const char* help = _("ESC: Volver");
     int helpWidth = MeasureText(help, 16);
     DrawText(help, centerX - helpWidth / 2, screenHeight - 60, 16, BLACK);
     

@@ -2,6 +2,7 @@
 #include <AudioManager.hpp>
 #include <ResourceManager.hpp>
 #include "OptionsState.hpp"
+#include "LocalizationManager.hpp"
 
 
 
@@ -113,13 +114,13 @@ void MainMenuState::render(){
     }
 
     DrawRectangleRec(playButton, mouseOverPlayButton ? GRAY : DARKGRAY);
-    DrawText("JUGAR", playButton.x + 45, playButton.y + 15, 20, BLACK);
+    DrawText(_("JUGAR"), playButton.x + 45, playButton.y + 15, 20, BLACK);
 
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText("OPCIONES", optionsButton.x + 25, optionsButton.y + 15, 20, BLACK);
+    DrawText(_("OPCIONES"), optionsButton.x + 25, optionsButton.y + 15, 20, BLACK);
 
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText("SALIR", exitButton.x + 50, exitButton.y + 15, 20, BLACK);
+    DrawText(_("SALIR"), exitButton.x + 50, exitButton.y + 15, 20, BLACK);
 
     renderGlobalUI();
     
