@@ -47,3 +47,90 @@ msgstr "Attack: "
 #: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:35
 msgid "Jugador Fuego: Movimiento básico: "
 msgstr "Fire Player: Basic movement: "
+
+msgid "OPCIONES"
+msgstr "OPTIONS"
+
+msgid "ASIGNAR TECLAS"
+msgstr "KEY BINDINGS"
+
+msgid "VOLUMEN GENERAL"
+msgstr "MASTER VOLUME"
+
+msgid "VOLUMEN MUSICA"
+msgstr "MUSIC VOLUME"
+
+msgid "VOLUMEN EFECTOS"
+msgstr "SFX VOLUME"
+
+msgid "VOLVER"
+msgstr "BACK"
+
+msgid "ESC: Volver"
+msgstr "ESC: Back"
+
+msgid "ESPAÑOL"
+msgstr "SPANISH"
+
+msgid "ENGLISH (WIP)"
+msgstr "ENGLISH"
+
+msgid "CONFIGURACION DE TECLAS"
+msgstr "KEY BINDINGS"
+
+msgid "JUGADOR FUEGO"
+msgstr "FIRE PLAYER"
+
+msgid "JUGADOR AGUA"
+msgstr "WATER PLAYER"
+
+msgid "Izquierda:"
+msgstr "Left:"
+
+msgid "Derecha:"
+msgstr "Right:"
+
+msgid "Saltar:"
+msgstr "Jump:"
+
+msgid "Ataque:"
+msgstr "Attack:"
+
+msgid "GUARDAR"
+msgstr "SAVE"
+
+msgid "CANCELAR"
+msgstr "CANCEL"
+
+msgid "Presiona una tecla..."
+msgstr "Press any key..."
+
+msgid "Click en una tecla para cambiarla | ESC: Cancelar"
+msgstr "Click a key to change it | ESC: Cancel"
+
+msgid "¡Advertencia: Tecla duplicada!"
+msgstr "Warning: Duplicate key!"
+
+msgid "¡CONFIGURACION GUARDADA!"
+msgstr "CONFIGURATION SAVED!"
+
+msgid "Volviendo..."
+msgstr "Returning..."
+
+msgid "JUGAR"
+msgstr "PLAY"
+
+msgid "SALIR"
+msgstr "EXIT"
+
+msgid "Game Over"
+msgstr "Game Over"
+
+msgid "¡Nivel Completado!"
+msgstr "Level Completed!"
+
+msgid "Pulsa ESPACIO para reiniciar"
+msgstr "Press SPACE to restart"
+
+msgid "MENU PRINCIPAL"
+msgstr "MAIN MENU"

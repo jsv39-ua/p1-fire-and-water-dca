@@ -3,6 +3,7 @@
 #include <StateMachine.hpp>
 #include <AudioManager.hpp>
 #include <memory>
+#include "LocalizationManager.hpp"
 
 extern "C" {
     #include <raylib.h>
@@ -59,12 +60,12 @@ void GameOverState::render() {
     BeginDrawing();
     ClearBackground(SKYBLUE);
 
-    const char* message = isVictory ? "¡Nivel Completado!" : "Game Over";
+    const char* message = isVictory ? _("¡Nivel Completado!") : _("Game Over");;
     int textWidth = MeasureText(message, 30);
     int x = (GetScreenWidth() - textWidth) / 2;
     int y = (GetScreenHeight() / 2) - 100;
 
-    const char* message2 = "Pulsa ESPACIO para reiniciar";
+    const char* message2 = _("Pulsa ESPACIO para reiniciar");
     int textWidth2 = MeasureText(message2, 20);
     int x2 = (GetScreenWidth() - textWidth2) / 2;
     int y2 = (GetScreenHeight() / 2) - 50;
@@ -73,7 +74,7 @@ void GameOverState::render() {
 
 
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText("MENU PRINCIPAL", exitButton.x + 10, exitButton.y + 12, 20, BLACK);
+    DrawText(_("MENU PRINCIPAL"), exitButton.x + 10, exitButton.y + 12, 20, BLACK);
 
     renderGlobalUI();
     

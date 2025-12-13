@@ -18,10 +18,10 @@ extern "C" {
 
 // Helper function to format sign text with current controls
 std::string formatSignText(const std::string& text) {
-    TraceLog(LOG_INFO, "DEBUG TRADUCCION: Texto recibido del mapa: '%s'", text.c_str());
+    //TraceLog(LOG_INFO, "DEBUG TRADUCCION: Texto recibido del mapa: '%s'", text.c_str());
     // Check if this is the tutorial sign
     if (text.find("Hola, bienvenido a Elements") != std::string::npos) {
-        TraceLog(LOG_INFO, "DEBUG TRADUCCION: ¡ENTRÓ EN EL IF! Intentando traducir...");
+        //TraceLog(LOG_INFO, "DEBUG TRADUCCION: ¡ENTRÓ EN EL IF! Intentando traducir...");
         SettingsManager* sm = SettingsManager::getInstance();
         
         // AQUI ESTÁ EL CAMBIO: Usamos _("Texto")
@@ -40,7 +40,7 @@ std::string formatSignText(const std::string& text) {
         return newText;
     }
     else {
-        TraceLog(LOG_WARNING, "DEBUG TRADUCCION: NO entró en el IF. La búsqueda falló.");
+        //TraceLog(LOG_WARNING, "DEBUG TRADUCCION: NO entró en el IF. La búsqueda falló.");
     }
 
     return text;
