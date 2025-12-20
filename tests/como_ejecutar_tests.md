@@ -4,7 +4,7 @@ Este proyecto utiliza **GoogleTest** como framework de pruebas y **CTest** como 
 
 Los tests están **desactivados por defecto** para no ralentizar el desarrollo normal del juego. Para ejecutarlos, debes seguir estas instrucciones.
 
-## 🚀 Guía Rápida
+## Guía Rápida
 
 Para habilitar y ejecutar los tests, debes configurar CMake con la opción personalizada `BUILD_GAME_TESTS=ON`.
 
@@ -38,7 +38,7 @@ cd build
 ctest --output-on-failure
 ```
 
-### 🛠️ Solución de Problemas Comunes
+### Solución de Problemas Comunes
 ##### Error: "No tests were found!!!"
 **Causa**: CTest no encuentra pruebas registradas. Solución: Probablemente configuraste el proyecto sin el flag -DBUILD_GAME_TESTS=ON. Borra la carpeta build y repite el Paso 1.
 
@@ -49,7 +49,7 @@ ctest --output-on-failure
 **Causa**: Si estás usando WSL (Linux en Windows), esto ocurre por la sincronización de archivos entre sistemas. Solución: Puedes ignorarlo completamente si el mensaje final dice [100%] Built target....
 
 ## EXPLICACIÓN DE QUE HACE CADA TEST:
-## 🧪 Explicación de los Tests
+## Explicación de los Tests
 
 La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qué verifica cada uno:
 
