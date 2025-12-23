@@ -2,8 +2,18 @@
 
 #include <string>
 #include <vector>
-#include <libintl.h>
 #include <locale.h>
+
+// Gettext (libintl) es opcional en Windows.
+// Si no está disponible, usamos stubs: gettext(msgid) devuelve msgid.
+#if defined(HAVE_GETTEXT) && (HAVE_GETTEXT == 1)
+    #include <libintl.h>
+#else
+    static inline const char* gettext(const char* msgid) { return msgid; }
+    static inline const char* textdomain(const char*) { return ""; }
+    static inline const char* bindtextdomain(const char*, const char*) { return ""; }
+    static inline const char* bind_textdomain_codeset(const char*, const char*) { return ""; }
+#endif
 
 // MACRO DE TRADUCCIÓN
 // Tus compañeros usarán esto: DrawText(_("GAME OVER"), ...)

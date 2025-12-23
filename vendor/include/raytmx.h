@@ -45,6 +45,16 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #  endif
 #endif
 
+#ifndef RAYTMX_RECT
+#  ifdef __cplusplus
+#    define RAYTMX_RECT(x, y, w, h) Rectangle{ (x), (y), (w), (h) }
+#    define RAYTMX_RECT0() Rectangle{ 0.0f }
+#  else
+#    define RAYTMX_RECT(x, y, w, h) (Rectangle){ (x), (y), (w), (h) }
+#    define RAYTMX_RECT0() (Rectangle){ 0.0f }
+#  endif
+#endif
+
 #include <ctype.h> /* isspace() */
 #include <math.h> /* floor(), INFINITY */
 #include <stddef.h> /* NULL */
@@ -1336,7 +1346,7 @@ RAYTMX_DEC bool CheckCollisionTMXLayersPoly(const TmxMap* map, const TmxLayer* l
 
     /* Check the polygon against objects associated with tiles in the layers for collisions */
     return CheckCollisionTMXTileLayerObject(map, layers, layersLength,
-        CreatePolygonTMXObject(points, pointCount, (Rectangle){0.0f}), outputObject);
+        CreatePolygonTMXObject(points, pointCount, RAYTMX_RECT0()), outputObject);
 }
 
 RAYTMX_DEC bool CheckCollisionTMXLayersPolyEx(const TmxMap* map, const TmxLayer* layers, uint32_t layersLength,
@@ -1380,7 +1390,7 @@ RAYTMX_DEC bool CheckCollisionTMXObjectGroupPoly(TmxObjectGroup group, Vector2* 
         return false; /* Early-out opportunity. These cases would always return false. */
 
     /* Check the polygon TMX object against other TMX objects in the group for collisions */
-    return CheckCollisionTMXObjectGroupObject(group, CreatePolygonTMXObject(points, pointCount, (Rectangle){0.0f}),
+    return CheckCollisionTMXObjectGroupObject(group, CreatePolygonTMXObject(points, pointCount, RAYTMX_RECT0()),
         outputObject);
 }
 
@@ -3371,12 +3381,12 @@ bool IterateTileLayer(const TmxMap* map, const TmxTileLayer* layer, Rectangle sc
     }
     if (tileRect != NULL) {
         /* Calculate the tile's destination rectangle, in pixels */
-        *tileRect = (Rectangle) {
-            .x = (float)((uint32_t)currentX * map->tileWidth),
-            .y = (float)((uint32_t)currentY * map->tileHeight),
-            .width = (float)map->tileWidth,
-            .height = (float)map->tileHeight
-        };
+        *tileRect = RAYTMX_RECT(
+            (float)((uint32_t)currentX * map->tileWidth),
+            (float)((uint32_t)currentY * map->tileHeight),
+            (float)map->tileWidth,
+            (float)map->tileHeight
+        );
     }
 
     return true;
