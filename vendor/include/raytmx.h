@@ -30,6 +30,31 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef RAYTMX_H
     #define RAYTMX_H
 
+// NOTE (C/C++ compatibility):
+// This header is written in C and uses C99 compound literals like (Vector2){...}.
+// That syntax is not valid in MSVC C++ and will fail to compile on Windows.
+// We provide a small helper macro that expands to a valid constructor in both C and C++.
+//
+// If you include raylib.h before this header, Vector2 is already defined.
+// Otherwise, make sure Vector2 is visible to this header.
+#ifndef RAYTMX_VEC2
+#  ifdef __cplusplus
+#    define RAYTMX_VEC2(x, y) Vector2{ (x), (y) }
+#  else
+#    define RAYTMX_VEC2(x, y) (Vector2){ (x), (y) }
+#  endif
+#endif
+
+#ifndef RAYTMX_RECT
+#  ifdef __cplusplus
+#    define RAYTMX_RECT(x, y, w, h) Rectangle{ (x), (y), (w), (h) }
+#    define RAYTMX_RECT0() Rectangle{ 0.0f }
+#  else
+#    define RAYTMX_RECT(x, y, w, h) (Rectangle){ (x), (y), (w), (h) }
+#    define RAYTMX_RECT0() (Rectangle){ 0.0f }
+#  endif
+#endif
+
 #include <ctype.h> /* isspace() */
 #include <math.h> /* floor(), INFINITY */
 #include <stddef.h> /* NULL */
@@ -1321,7 +1346,7 @@ RAYTMX_DEC bool CheckCollisionTMXLayersPoly(const TmxMap* map, const TmxLayer* l
 
     /* Check the polygon against objects associated with tiles in the layers for collisions */
     return CheckCollisionTMXTileLayerObject(map, layers, layersLength,
-        CreatePolygonTMXObject(points, pointCount, (Rectangle){0.0f}), outputObject);
+        CreatePolygonTMXObject(points, pointCount, RAYTMX_RECT0()), outputObject);
 }
 
 RAYTMX_DEC bool CheckCollisionTMXLayersPolyEx(const TmxMap* map, const TmxLayer* layers, uint32_t layersLength,
@@ -1365,7 +1390,7 @@ RAYTMX_DEC bool CheckCollisionTMXObjectGroupPoly(TmxObjectGroup group, Vector2* 
         return false; /* Early-out opportunity. These cases would always return false. */
 
     /* Check the polygon TMX object against other TMX objects in the group for collisions */
-    return CheckCollisionTMXObjectGroupObject(group, CreatePolygonTMXObject(points, pointCount, (Rectangle){0.0f}),
+    return CheckCollisionTMXObjectGroupObject(group, CreatePolygonTMXObject(points, pointCount, RAYTMX_RECT0()),
         outputObject);
 }
 
@@ -3356,12 +3381,12 @@ bool IterateTileLayer(const TmxMap* map, const TmxTileLayer* layer, Rectangle sc
     }
     if (tileRect != NULL) {
         /* Calculate the tile's destination rectangle, in pixels */
-        *tileRect = (Rectangle) {
-            .x = (float)((uint32_t)currentX * map->tileWidth),
-            .y = (float)((uint32_t)currentY * map->tileHeight),
-            .width = (float)map->tileWidth,
-            .height = (float)map->tileHeight
-        };
+        *tileRect = RAYTMX_RECT(
+            (float)((uint32_t)currentX * map->tileWidth),
+            (float)((uint32_t)currentY * map->tileHeight),
+            (float)map->tileWidth,
+            (float)map->tileHeight
+        );
     }
 
     return true;
@@ -3827,7 +3852,7 @@ RAYTMX_DEC bool CheckCollisionTMXObjects(TmxObject object1, TmxObject object2) {
             return true;
 
         case OBJECT_TYPE_POINT: /* Object 2's type */
-            return CheckCollisionPointRec(/* point: */ (Vector2){(float)object2.x, (float)object2.y},
+            return CheckCollisionPointRec(/* point: */ RAYTMX_VEC2((float)object2.x, (float)object2.y),
                 /* rec: */ object1.aabb);
 
         case OBJECT_TYPE_POLYGON: /* Object 2's type */
@@ -3836,13 +3861,13 @@ RAYTMX_DEC bool CheckCollisionTMXObjects(TmxObject object1, TmxObject object2) {
             /* A rectangle is a polygon. Create an array of points to treat it as a polygon keeping in mind polygon */
             /* vertices are relative so the top-left corner is always (0, 0). */
             Vector2 points[4];
-            points[0] = (Vector2){0.0f, 0.0f};
-            points[1] = (Vector2){(float)object1.width, 0.0f};
-            points[2] = (Vector2){(float)object1.width, (float)object1.height};
-            points[3] = (Vector2){0.0f, (float)object1.height};
-            return CheckCollisionPolyPoly(/* polyPos1: */ (Vector2){(float)object1.x, (float)object1.y},
+            points[0] = RAYTMX_VEC2(0.0f, 0.0f);
+            points[1] = RAYTMX_VEC2((float)object1.width, 0.0f);
+            points[2] = RAYTMX_VEC2((float)object1.width, (float)object1.height);
+            points[3] = RAYTMX_VEC2(0.0f, (float)object1.height);
+            return CheckCollisionPolyPoly(/* polyPos1: */ RAYTMX_VEC2((float)object1.x, (float)object1.y),
                 /* points1: */ points, /* pointCount: */ 4,
-                /* polyPos2: */ (Vector2){(float)object2.x, (float)object2.y}, /* points2: */ object2.points,
+                /* polyPos2: */ RAYTMX_VEC2((float)object2.x, (float)object2.y), /* points2: */ object2.points,
                 /* pointCount2: */ object2.pointsLength);
         }
         }
@@ -3854,7 +3879,7 @@ RAYTMX_DEC bool CheckCollisionTMXObjects(TmxObject object1, TmxObject object2) {
         case OBJECT_TYPE_ELLIPSE: /* Object 2's type (treated as a rectangle due to difficulty) */
         case OBJECT_TYPE_TEXT: /* Object 2's type */
         case OBJECT_TYPE_TILE: /* Object 2's type */
-            return CheckCollisionPointRec(/* point: */ (Vector2){(float)object1.x, (float)object2.y},
+            return CheckCollisionPointRec(/* point: */ RAYTMX_VEC2((float)object1.x, (float)object2.y),
                 /* rec: */ object2.aabb);
 
         case OBJECT_TYPE_POINT: /* Object 2's type */
@@ -3862,7 +3887,7 @@ RAYTMX_DEC bool CheckCollisionTMXObjects(TmxObject object1, TmxObject object2) {
 
         case OBJECT_TYPE_POLYGON: /* Object 2's type */
         case OBJECT_TYPE_POLYLINE: /* Object 2's type */
-            return CheckCollisionPointPoly((Vector2){(float)object1.x, (float)object1.y}, object2.points,
+            return CheckCollisionPointPoly(RAYTMX_VEC2((float)object1.x, (float)object1.y), object2.points,
                 object2.pointsLength);
         }
     break;
@@ -3878,25 +3903,25 @@ RAYTMX_DEC bool CheckCollisionTMXObjects(TmxObject object1, TmxObject object2) {
             /* A rectangle is a polygon. Create an array of points to treat it as a polygon keeping in mind polygon */
             /* vertices are relative so the top-left corner is always (0, 0). */
             Vector2 points[4];
-            points[0] = (Vector2){0.0f, 0.0f};
-            points[1] = (Vector2){(float)object2.width, 0.0f};
-            points[2] = (Vector2){(float)object2.width, (float)object2.height};
-            points[3] = (Vector2){0.0f, (float)object2.height};
-            return CheckCollisionPolyPoly(/* polyPos1: */ (Vector2){(float)object1.x, (float)object1.y},
+            points[0] = RAYTMX_VEC2(0.0f, 0.0f);
+            points[1] = RAYTMX_VEC2((float)object2.width, 0.0f);
+            points[2] = RAYTMX_VEC2((float)object2.width, (float)object2.height);
+            points[3] = RAYTMX_VEC2(0.0f, (float)object2.height);
+            return CheckCollisionPolyPoly(/* polyPos1: */ RAYTMX_VEC2((float)object1.x, (float)object1.y),
                 /* points1: */ object1.points, /* pointCount1: */ object1.pointsLength,
-                /* polyPos2: */ (Vector2){(float)object2.x, (float)object2.y}, /* points2: */ points,
+                /* polyPos2: */ RAYTMX_VEC2((float)object2.x, (float)object2.y), /* points2: */ points,
                 /* pointCount2: */ 4);
         }
 
         case OBJECT_TYPE_POINT: /* Object 2's type */
-            return CheckCollisionPointPoly(/* point: */ (Vector2){(float)object2.x, (float)object2.y},
+            return CheckCollisionPointPoly(/* point: */ RAYTMX_VEC2((float)object2.x, (float)object2.y),
                 /* points: */ object1.points, /* pointCount: */ object1.pointsLength);
 
         case OBJECT_TYPE_POLYGON: /* Object 2's type */
         case OBJECT_TYPE_POLYLINE: /* Object 2's type */
-            return CheckCollisionPolyPoly(/* polyPos1: */ (Vector2){(float)object1.x, (float)object1.y},
+            return CheckCollisionPolyPoly(/* polyPos1: */ RAYTMX_VEC2((float)object1.x, (float)object1.y),
                 /* points1: */ object1.points, /* pointCount1: */ object1.pointsLength,
-                /* polyPos2: */ (Vector2){(float)object2.x, (float)object2.y}, /* points2: */ object2.points,
+                /* polyPos2: */ RAYTMX_VEC2((float)object2.x, (float)object2.y), /* points2: */ object2.points,
                 /* pointCount2: */ object2.pointsLength);
         }
     break;

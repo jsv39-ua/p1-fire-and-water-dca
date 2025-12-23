@@ -48,3 +48,31 @@ apunte.txt
 
 game
 build/
+
+# CMake build directories/files
+build_cmake/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+.cmake/
+
+# CTest/CPack
+Testing/
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+_CPack_Packages/
+
+# Make build artifacts
+obj/
+*.a
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
