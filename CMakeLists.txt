@@ -11,7 +11,24 @@ include(GNUInstallDirs)
 include(FetchContent)
 
 # Localización (GNU gettext)
-find_package(Intl REQUIRED)
+# En Windows no suele venir libintl por defecto. Para no bloquear la build,
+# hacemos Intl opcional y activable explícitamente.
+option(USE_GETTEXT "Enable gettext/libintl based localization" ON)
+
+set(HAVE_GETTEXT OFF)
+if(USE_GETTEXT)
+  if(WIN32)
+    find_package(Intl QUIET)
+  else()
+    find_package(Intl REQUIRED)
+  endif()
+
+  if(Intl_FOUND)
+    set(HAVE_GETTEXT ON)
+  endif()
+endif()
+
+message(STATUS "Gettext/Intl enabled: ${USE_GETTEXT} (found: ${HAVE_GETTEXT})")
 
 
 # Nota: el código usa APIs relativamente recientes (p.ej. IsSoundValid/IsMusicValid/GetKeyName).

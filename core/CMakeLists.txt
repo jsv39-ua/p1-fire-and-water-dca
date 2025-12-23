@@ -33,9 +33,18 @@ target_include_directories(game_core
     ${CMAKE_SOURCE_DIR}/vendor/include
 )
 
-# Enlazamos Raylib e Intl al núcleo del juego
+# Enlazamos Raylib al núcleo del juego
 target_link_libraries(game_core
   PUBLIC
     raylib
-    Intl::Intl
 )
+
+# Gettext/Intl: solo si está disponible (o si el usuario lo fuerza y existe)
+if(DEFINED HAVE_GETTEXT AND HAVE_GETTEXT)
+  target_compile_definitions(game_core PUBLIC HAVE_GETTEXT=1)
+  if(TARGET Intl::Intl)
+    target_link_libraries(game_core PUBLIC Intl::Intl)
+  endif()
+else()
+  target_compile_definitions(game_core PUBLIC HAVE_GETTEXT=0)
+endif()
