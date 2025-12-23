@@ -11,9 +11,11 @@ ifeq ($(OS),Windows_NT)
     # Usamos if not exist para evitar errores si ya existe
     MKDIR = if not exist
     
-    # BUSQUEDA RECURSIVA (WINDOWS):
-    # Busca en: src/ (root), src/carpeta/ y src/carpeta/subcarpeta/
-    SRC := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*/*/*.cpp)
+	# BUSQUEDA RECURSIVA (WINDOWS):
+	# Busca en core/src y app/src
+	SRC := $(filter-out core/src/main.cpp, \
+	       $(wildcard core/src/*.cpp) $(wildcard core/src/*/*.cpp) $(wildcard core/src/*/*/*.cpp) \
+	       $(wildcard app/src/*.cpp)  $(wildcard app/src/*/*.cpp)  $(wildcard app/src/*/*/*.cpp))
     
     INSTALL_DIR = "C:/Program Files/TuJuego" 
 else
@@ -24,9 +26,10 @@ else
     RM = rm -rf
     MKDIR = mkdir -p
     
-    # BUSQUEDA RECURSIVA (LINUX):
-    # 'find' busca en todas las subcarpetas automáticamente
-    SRC := $(shell find src -name '*.cpp')
+	# BUSQUEDA RECURSIVA (LINUX):
+	# 'find' busca en todas las subcarpetas automáticamente
+	# Excluimos core/src/main.cpp: el main vive en app/src/main.cpp
+	SRC := $(shell find core/src app/src -name '*.cpp' ! -path 'core/src/main.cpp')
     
     INSTALL_DIR = /usr/local/bin
 endif
@@ -35,13 +38,14 @@ endif
 CXX = g++
 # -I vendor/include/ es CRUCIAL porque ahí tienes tus headers (.hpp)
 # Agregamos -I include/ para headers propios del proyecto
-CXXFLAGS = -I vendor/include/ -I include/ -Wall -MMD -MP
+CXXFLAGS = -I vendor/include/ -I include/ -I core/include/ -Wall -MMD -MP
 LDFLAGS = -L $(LIB_DIR)
 
 # --- ARCHIVOS OBJETO ---
 OBJ_DIR = obj
-# Esto convierte ej: "src/systems/MapLoader.cpp" -> "obj/systems/MapLoader.o"
-OBJ := $(SRC:src/%.cpp=$(OBJ_DIR)/%.o)
+# Esto convierte ej: "core/src/systems/MapLoader.cpp" -> "obj/systems/MapLoader.o"
+OBJ := $(SRC:core/src/%.cpp=$(OBJ_DIR)/%.o)
+OBJ := $(OBJ:app/src/%.cpp=$(OBJ_DIR)/app/%.o)
 DEPS := $(OBJ:.o=.d)
 
 TARGET = game$(EXT)
@@ -65,7 +69,16 @@ $(TARGET): $(OBJ)
 	@echo "--> EXITO: Ejecutable $(TARGET) creado."
 
 # --- REGLA DE COMPILACIÓN (MAGIA MULTIDIRECTORIO) ---
-$(OBJ_DIR)/%.o: src/%.cpp
+$(OBJ_DIR)/%.o: core/src/%.cpp
+	@echo "Compilando $<..."
+ifeq ($(DETECTED_OS),Windows)
+	@if not exist "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
+else
+	@$(MKDIR) $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+endif
+
+$(OBJ_DIR)/app/%.o: app/src/%.cpp
 	@echo "Compilando $<..."
 ifeq ($(DETECTED_OS),Windows)
 	@if not exist "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
