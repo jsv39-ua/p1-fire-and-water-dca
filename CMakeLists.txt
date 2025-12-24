@@ -49,6 +49,7 @@ FetchContent_MakeAvailable(raylib)
 
 add_subdirectory(core)
 add_subdirectory(app)
+add_subdirectory(assets/locales)
 
 if(BUILD_TESTS)
   enable_testing()
