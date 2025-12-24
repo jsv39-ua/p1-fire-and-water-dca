@@ -2,7 +2,6 @@
 #include <entities/Platform.hpp>
 #include <components/ElementType.hpp>
 #include <systems/ResourceManager.hpp>
-#include <systems/SignDictionary.hpp>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -325,11 +324,8 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                             if ((strcmp(prop->name, "text") == 0) 
                                 && prop->type == PROPERTY_TYPE_STRING) {
                                 
-                                std::string textId = prop->stringValue;
-                                // Usamos el diccionario para obtener el texto
-                                p.text = SignDictionary::getText(textId);
-                                
-                                TraceLog(LOG_INFO, "Texto cargado para cartel ID %d. Clave: %s", p.id, textId.c_str());
+                                p.text = prop->stringValue;
+                                TraceLog(LOG_INFO, "Clave de texto cargada para cartel ID %d: %s", p.id, p.text.c_str());
                             }
                         }
                     }

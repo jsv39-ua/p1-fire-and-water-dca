@@ -11,6 +11,7 @@
 #include <systems/ResourceManager.hpp>
 #include <systems/SettingsManager.hpp>
 #include <systems/LocalizationManager.hpp>
+#include <systems/SignDictionary.hpp>
 extern "C" {
     #include <raylib.h>
 }
@@ -206,10 +207,10 @@ void MainGameState::update(float deltaTime)
         bool touchedByAny = false;
         
         for (int i = 0; i < 2; i++) {
-            // Lógica de Carteles
+                        // Lógica de Carteles
             if (platform.type == SIGN) {
                 if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
-                    activeSignText = platform.text;
+                    activeSignText = SignDictionary::getText(platform.text);
                 }
             }
 
