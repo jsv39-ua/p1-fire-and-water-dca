@@ -3,6 +3,7 @@
 #include <states/MainMenuState.hpp>
 #include <states/OptionsState.hpp>
 #include <systems/AudioManager.hpp>
+#include <systems/LocalizationManager.hpp>
 PauseMenuState::PauseMenuState(){};
 
 void PauseMenuState::init(){
@@ -98,27 +99,24 @@ void PauseMenuState::render(){
     // Fondo igual que el menú principal
     ClearBackground(SKYBLUE);
     
-    // Título centrado
-    const char* title = "PAUSA";
+    const char* title = _("PAUSA");
     int titleWidth = MeasureText(title, 25);
     DrawText(title, GetScreenWidth()/2 - titleWidth/2, 30, 25, YELLOW);
 
     // Botón de reanudar
     DrawRectangleRec(resumeButton, mouseOverResumeButton ? GRAY : DARKGRAY);
-    DrawText("REANUDAR", resumeButton.x + 45, resumeButton.y + 12, 20, BLACK);
+    DrawText(_("REANUDAR"), resumeButton.x + 45, resumeButton.y + 12, 20, BLACK);
 
     // Botón de reiniciar
     DrawRectangleRec(restartButton, mouseOverRestartButton ? GRAY : DARKGRAY);
-    DrawText("REINICIAR", restartButton.x + 45, restartButton.y + 12, 20, BLACK);
-
+    DrawText(_("REINICIAR"), restartButton.x + 45, restartButton.y + 12, 20, BLACK);
     // Botón de opciones
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText("OPCIONES", optionsButton.x + 45, optionsButton.y + 12, 20, BLACK);
+    DrawText(_("OPCIONES"), optionsButton.x + 45, optionsButton.y + 12, 20, BLACK);
 
     // Botón de salir
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText("MENU PRINCIPAL", exitButton.x + 15, exitButton.y + 12, 20, BLACK);
-
+    DrawText(_("MENU PRINCIPAL"), exitButton.x + 15, exitButton.y + 12, 20, BLACK);
     renderGlobalUI();
     
     EndDrawing();

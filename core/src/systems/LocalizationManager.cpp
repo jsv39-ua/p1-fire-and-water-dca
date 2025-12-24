@@ -1,7 +1,7 @@
 #include "systems/LocalizationManager.hpp"
 #include <cstdlib>
 #include <iostream>
-#include <filesystem> // <--- IMPORTANTE: Necesario para el chivato
+#include <filesystem>
 
 // Compatibilidad con Windows para variables de entorno
 #if defined(_WIN32)
@@ -24,7 +24,6 @@ void LocalizationManager::init() {
     // Inicializar locale del sistema
     setlocale(LC_ALL, ""); 
 
-    // --- CÓDIGO DE DEPURACIÓN (EL CHIVATO) ---
     std::filesystem::path cwd = std::filesystem::current_path();
     std::filesystem::path localePath = cwd / "assets" / "locales";
     
@@ -39,34 +38,29 @@ void LocalizationManager::init() {
         std::cerr << "[LOCALIZATION ERROR] Solución: Copia la carpeta 'assets' junto al ejecutable." << std::endl;
     }
     std::cout << "[LOCALIZATION DEBUG] ----------------------------------------\n" << std::endl;
-    // -----------------------------------------
 
     // Configurar la ruta de las traducciones
-    // IMPORTANTE: Ajustar ruta relativa a donde esté el ejecutable
-    // "assets/locales" funcionará si la carpeta assets está junto al .exe
     bindtextdomain("fire_water_game", "assets/locales");
     bind_textdomain_codeset("fire_water_game", "UTF-8");
     textdomain("fire_water_game");
     
-    // Idioma por defecto (puedes cambiarlo aquí o en el main)
+    // Idioma por defecto
     setLanguage("es"); 
 }
 
 void LocalizationManager::setLanguage(const std::string& langCode) {
     currentLang = langCode;
     
-    // 1. Decidir el locale exacto del sistema (Linux es quisquilloso con esto)
+    // determinar locale objetivo
     std::string targetLocale;
     if (langCode == "en") {
         targetLocale = "en_US.UTF-8";
     } else if (langCode == "es") {
         targetLocale = "es_ES.UTF-8";
     } else {
-        targetLocale = langCode; // Fallback
+        targetLocale = langCode;
     }
 
-    // 2. Forzar la variable LANGUAGE (Prioridad para gettext)
-    // Nota: En Linux usamos setenv, en Windows _putenv_s
     #if defined(_WIN32)
         std::string envVar = "LANGUAGE=" + langCode;
         _putenv_s("LANGUAGE", langCode.c_str());
@@ -75,20 +69,16 @@ void LocalizationManager::setLanguage(const std::string& langCode) {
         setenv("LC_ALL", targetLocale.c_str(), 1); // Forzar también LC_ALL en entorno
     #endif
     
-    // 3. Intentar aplicar el locale en C++
     char* result = setlocale(LC_ALL, targetLocale.c_str());
     
-    // Chivato de Locale
     if (result == nullptr) {
         std::cerr << "[LOCALIZATION ERROR] Falló setlocale a '" << targetLocale << "'. Probando fallback..." << std::endl;
-        // Intento desesperado: probar variantes comunes si falla
         if (langCode == "en") setlocale(LC_ALL, "en_US.utf8");
         if (langCode == "es") setlocale(LC_ALL, "es_ES.utf8");
     } else {
         std::cout << "[LOCALIZATION DEBUG] setlocale ÉXITO. Locale activo: " << result << std::endl;
     }
     
-    // 4. Refrescar el dominio de texto (¡CRÍTICO!)
     textdomain("fire_water_game");
     
     std::cout << "[Localization] Idioma solicitado: " << langCode << " -> Locale aplicado: " << targetLocale << std::endl;
