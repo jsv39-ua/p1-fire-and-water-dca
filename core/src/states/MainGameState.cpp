@@ -15,20 +15,13 @@ extern "C" {
     #include <raylib.h>
 }
 
-// Helper function to format sign text with current controls
+// Funcion para el cartel de las teclas
 std::string formatSignText(const std::string& text) {
-    //TraceLog(LOG_INFO, "DEBUG TRADUCCION: Texto recibido del mapa: '%s'", text.c_str());
-    // Check if this is the tutorial sign
     if (text.find("Hola, bienvenido a Elements") != std::string::npos) {
-        //TraceLog(LOG_INFO, "DEBUG TRADUCCION: ¡ENTRÓ EN EL IF! Intentando traducir...");
         SettingsManager* sm = SettingsManager::getInstance();
         
-        // AQUI ESTÁ EL CAMBIO: Usamos _("Texto")
         std::string newText = _("Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!\n\n");
         newText += _("Controles:\n\n");
-        
-        // OJO: Los nombres de las teclas (sm->getKeyName) no se traducen aquí, 
-        // eso se hace dentro de getKeyName si quisieras.
         
         newText += _("Jugador Agua: Movimiento básico: ") + sm->getKeyName(sm->getWaterLeft()) + ", " + sm->getKeyName(sm->getWaterJump()) + ", " + sm->getKeyName(sm->getWaterRight()) + "\n";
         newText += _("Ataque: ") + sm->getKeyName(sm->getWaterAttack()) + "\n\n";
@@ -37,9 +30,6 @@ std::string formatSignText(const std::string& text) {
         newText += _("Ataque: ") + sm->getKeyName(sm->getFireAttack());
         
         return newText;
-    }
-    else {
-        //TraceLog(LOG_WARNING, "DEBUG TRADUCCION: NO entró en el IF. La búsqueda falló.");
     }
 
     return text;
@@ -72,7 +62,7 @@ void MainGameState::init()
     players[0] = Player(100.0f, 275.0f, hitboxWidth, hitboxHeight, FIRE);
     players[1] = Player(150.0f, 275.0f, hitboxWidth, hitboxHeight, WATER);
     
-    // Cargar teclas desde SettingsManager (Updated)
+    // Cargar teclas desde SettingsManager
     players[0].setKeys(
         SettingsManager::getInstance()->getFireLeft(),
         SettingsManager::getInstance()->getFireRight(),
@@ -87,7 +77,7 @@ void MainGameState::init()
         SettingsManager::getInstance()->getWaterAttack()
     );
 
-    // Inicialización de la cámara (se configurará después de cargar el mapa)
+    // Inicialización de la cámara
 
     // Inicialización del MapLoader
     loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
@@ -104,8 +94,7 @@ void MainGameState::init()
     float minZoomX = screenWidth / mapBounds.width;
     float minZoomY = screenHeight / mapBounds.height;
     
-    // El zoom mínimo debe ser suficiente para cubrir la pantalla (evitar bordes negros)
-    // Y también respetamos un mínimo de 1.0f para no alejar demasiado la cámara en mapas grandes
+    // zoom mínimo
     float minZoom = fmaxf(1.0f, fmaxf(minZoomX, minZoomY));
 
     camera.setZoomLimits(minZoom, 3.0f);
@@ -126,7 +115,7 @@ void MainGameState::handleInput()
         return;
     }
 
-    // TECLA DE PRUEBA: pulsar '1' fuerza Game Over (útil para testing)
+    // TECLA DE PRUEBA: pulsar '1' fuerza Game Over
     if (IsKeyPressed(KEY_ONE)) {
         this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         return;
@@ -174,19 +163,17 @@ void MainGameState::handleInput()
         }
     }
 
-    // Debug: Spawn enemies during gameplay
+    // Debug: Spawnear enemigos con e y con r
     if (IsKeyPressed(KEY_E)) {
-        // Spawn a FIRE enemy (affects Water player) near the Fire player, vertical movement
         Rectangle b = { players[0].position.x + 100, players[0].position.y - 32, 32, 32 };
-        Enemy en(b, FIRE, 90.0f, /*vertical=*/true);
+        Enemy en(b, FIRE, 90.0f, true);
         level_enemies.push_back(en);
         TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
     }
 
     if (IsKeyPressed(KEY_R)) {
-        // Spawn a WATER enemy (affects Fire player) near the Water player, horizontal movement
         Rectangle b = { players[1].position.x + 100, players[1].position.y - 32, 32, 32 };
-        Enemy en2(b, WATER, 150.0f, /*vertical=*/false);
+        Enemy en2(b, WATER, 150.0f, false);
         level_enemies.push_back(en2);
         TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
     }
@@ -231,7 +218,6 @@ void MainGameState::update(float deltaTime)
     // Reset active sign text
     activeSignText = "";
     
-    // Optimization: Merged reset logic into the main collision loop to avoid double iteration
     for (auto& platform : level_platforms) {
         if (!platform.active) continue;
 
@@ -240,7 +226,7 @@ void MainGameState::update(float deltaTime)
         bool touchedByAny = false;
         
         for (int i = 0; i < 2; i++) {
-            // Lógica de Carteles (SIGN) - Solicitada por usuario
+            // Lógica de Carteles
             if (platform.type == SIGN) {
                 if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
                     activeSignText = formatSignText(platform.text);
@@ -249,7 +235,7 @@ void MainGameState::update(float deltaTime)
 
             int collision = players[i].checkPlatformCollision(platform);
 
-            // Check if button is being touched (collision 5 is BUTTON)
+            // compruebo si el boton se está tocando por algun jugador
             if (platform.isButton && collision == 5) {
                 touchedByAny = true;
             }
@@ -261,7 +247,7 @@ void MainGameState::update(float deltaTime)
                     }
                     break;
                 case 2:
-                    // Friendly liquid: do nothing (pass through)
+                    // liquido que no te hace daño
                     break;
                 case 3:  // GOAL
                     if (players[i].resolvePlatformCollision(platform)) {
@@ -288,18 +274,16 @@ void MainGameState::update(float deltaTime)
                     break;
                 case 5: // BUTTON
                     if (platform.isButton) {
-                        // Logic for One-Shot Trigger
                         if (!platform.isPressed) {
                             platform.isPressed = true;
                             
-                            // Activate targets
                             for (auto& target : level_platforms) {
-                                // Check ID match
+                                // compruebo si el id coincide
                                 if (platform.targetId != -1 && target.id == platform.targetId && target.id != platform.id) {
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by ID", platform.id, target.id);
                                 }
-                                // Check Tag match
+                                // compruebo si la tag coincide
                                 if (!platform.targetTag.empty() && !target.tag.empty() && target.tag == platform.targetTag && target.id != platform.id) {
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by TAG", platform.id, target.id);
@@ -311,7 +295,7 @@ void MainGameState::update(float deltaTime)
             }
         }
         
-        // Reset button state if it was pressed but no one is touching it anymore
+        // Resetear el estado del botón si estaba presionado pero nadie lo está tocando
         if (platform.isButton && platform.isPressed && !touchedByAny) {
             platform.isPressed = false;
         }
@@ -376,12 +360,12 @@ void MainGameState::update(float deltaTime)
         }
     }
     
-    // Check for dead enemies and trigger events (e.g. deactivate platforms)
+    // Comprobar enemigos muertos y activar eventos
     for (const auto& enemy : level_enemies) {
         if (enemy.getLifeCount() <= 0) {
             if (!enemy.targetTag.empty()) {
                 int count = 0;
-                // Deactivate platforms with this tag
+                // Desactivar plataformas con esta etiqueta
                 for (auto& platform : level_platforms) {
                     if (platform.active && !platform.tag.empty() && platform.tag == enemy.targetTag) {
                         platform.active = false;
@@ -451,7 +435,7 @@ void MainGameState::handleTransitions() {
             active_transition = &transition;
             break;
         } else {
-            // Reset if not both in the same transition
+            // resetear si no están ambos
             fire_in_transition = false;
             water_in_transition = false;
         }
@@ -460,33 +444,33 @@ void MainGameState::handleTransitions() {
     if (active_transition) {
         TraceLog(LOG_INFO, "Transition triggered to %s", active_transition->targetMap.c_str());
         
-        // Check for Game Over / Win condition
+        // Comprobar si es GOAL o WIN
         if (active_transition->targetMap == "GOAL" || active_transition->targetMap == "WIN") {
              TraceLog(LOG_INFO, "Transition is GOAL: changing to SimpleLevelState");
              this->state_machine->add_state(std::make_unique<SimpleLevelState>(), true);
              return;
         }
 
-        // Store velocities to preserve momentum
+        // guardo las velocidades para mantenerlas tras cargar el nivel
         Vector2 fire_vel = players[0].velocity;
         Vector2 water_vel = players[1].velocity;
         
-        // Load new level
+        // cargar nuevo nivel
         std::string fullPath = active_transition->targetMap;
         if (fullPath.find("assets/") == std::string::npos) {
             fullPath = LEVEL_BASE_PATH + fullPath;
         }
         loadLevel(fullPath);
         
-        // Set positions
+        // Reposicionar jugadores en spawn del nuevo nivel
         players[0].position = active_transition->targetSpawn;
         players[1].position = { active_transition->targetSpawn.x + PLAYER_SPAWN_OFFSET, active_transition->targetSpawn.y }; 
 
-        // Restore velocity
+        // Restaurar velocidades
         players[0].velocity = fire_vel;
         players[1].velocity = water_vel;
         
-        // Update bounds immediately
+        // Actualizar bounds tras modificar posición
         players[0].update(0); 
         players[1].update(0);
     }
@@ -515,7 +499,7 @@ void MainGameState::handleMapBoundaries() {
                 if (players[i].velocity.y > 0) players[i].velocity.y = 0;
             }
 
-            // Límite Izquierdo (si la transición está a la izquierda)
+            // Límite Izquierdo
             if (tBounds.x < mapBounds.x) {
                 if (players[i].position.x < tBounds.x) {
                     players[i].position.x = tBounds.x;
@@ -523,7 +507,7 @@ void MainGameState::handleMapBoundaries() {
                 }
             }
             
-            // Límite Derecho (si la transición está a la derecha)
+            // Límite Derecho
             if (tBounds.x + tBounds.width > mapBounds.x + mapBounds.width) {
                 if (players[i].position.x + players[i].width > tBounds.x + tBounds.width) {
                     players[i].position.x = tBounds.x + tBounds.width - players[i].width;
@@ -531,7 +515,7 @@ void MainGameState::handleMapBoundaries() {
                 }
             }
 
-            // Límite Superior (si la transición está arriba)
+            // Límite Superior
             if (tBounds.y < mapBounds.y) {
                 if (players[i].position.y < tBounds.y) {
                     players[i].position.y = tBounds.y;
@@ -539,7 +523,7 @@ void MainGameState::handleMapBoundaries() {
                 }
             }
 
-            // Límite Inferior (si la transición está abajo)
+            // Límite Inferior
             if (tBounds.y + tBounds.height > mapBounds.y + mapBounds.height) {
                 // Permitir caer hasta el fondo de la transición
                 if (players[i].position.y > tBounds.y + tBounds.height - players[i].height) {
@@ -730,7 +714,7 @@ void MainGameState::render()
     */
     EndMode2D();
     
-    // Dibujar vidas de los jugadores (UI fija en pantalla)
+    // Dibujar vidas de los jugadores
     int maxLives = 3;
     int heartSize = 30;
     int heartSpacing = 5;
@@ -763,15 +747,15 @@ void MainGameState::render()
         DrawRectangleLinesEx({(float)x, (float)y, (float)heartSize, (float)heartSize}, 2, DARKGRAY);
     }
     
-    // --- UI FINAL (DIBUJADO FUERA DE LOS BUCLES) ---
+    // Dibujar texto del cartel activo
     if (!activeSignText.empty()) {
-        // 1. Configuración de estilo
+        // Configuración de estilo
         int fontSize = 20;
-        int padding = 30;        // Más padding para que se vea más grande
+        int padding = 30;
         Color boxColor = { 0, 0, 0, 220 }; 
         Color borderColor = RAYWHITE;
         
-        // 2. Medir dimensiones del texto multilínea manualmente
+        // Medir dimensiones del texto multilínea manualmente
         int maxLineWidth = 0;
         int lineCount = 0;
         
@@ -797,16 +781,16 @@ void MainGameState::render()
         int textWidth = maxLineWidth;
         int textHeight = lineCount * fontSize + (lineCount * 2); // Altura basada en líneas
 
-        // 3. Calcular dimensiones de la caja
+        // Calcular dimensiones de la caja
         int boxWidth = textWidth + (padding * 2);
         int boxHeight = textHeight + (padding * 2);
 
-        // 4. Calcular posición para centrarlo arriba en la pantalla
+        // Calcular posición para centrarlo arriba en la pantalla
         int screenWidth = GetScreenWidth();
         int boxX = (screenWidth / 2) - (boxWidth / 2); 
         int boxY = 50; 
 
-        // 5. DIBUJAR
+        // Dibujar
         DrawRectangle(boxX + 4, boxY + 4, boxWidth, boxHeight, Fade(BLACK, 0.5f));
         DrawRectangle(boxX, boxY, boxWidth, boxHeight, boxColor);
         DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, borderColor);
