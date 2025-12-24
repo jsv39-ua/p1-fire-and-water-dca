@@ -15,26 +15,6 @@ extern "C" {
     #include <raylib.h>
 }
 
-// Funcion para el cartel de las teclas
-std::string formatSignText(const std::string& text) {
-    if (text.find("Hola, bienvenido a Elements") != std::string::npos) {
-        SettingsManager* sm = SettingsManager::getInstance();
-        
-        std::string newText = _("Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete!\n\n");
-        newText += _("Controles:\n\n");
-        
-        newText += _("Jugador Agua: Movimiento básico: ") + sm->getKeyName(sm->getWaterLeft()) + ", " + sm->getKeyName(sm->getWaterJump()) + ", " + sm->getKeyName(sm->getWaterRight()) + "\n";
-        newText += _("Ataque: ") + sm->getKeyName(sm->getWaterAttack()) + "\n\n";
-        
-        newText += _("Jugador Fuego: Movimiento básico: ") + sm->getKeyName(sm->getFireLeft()) + ", " + sm->getKeyName(sm->getFireJump()) + ", " + sm->getKeyName(sm->getFireRight()) + "\n";
-        newText += _("Ataque: ") + sm->getKeyName(sm->getFireAttack());
-        
-        return newText;
-    }
-
-    return text;
-}
-
 const float DEFAULT_SCREEN_WIDTH = 1280.0f;
 const float DEFAULT_SCREEN_HEIGHT = 720.0f;
 
@@ -229,7 +209,7 @@ void MainGameState::update(float deltaTime)
             // Lógica de Carteles
             if (platform.type == SIGN) {
                 if (CheckCollisionRecs(players[i].bounds, platform.bounds)) {
-                    activeSignText = formatSignText(platform.text);
+                    activeSignText = platform.text;
                 }
             }
 

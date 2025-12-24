@@ -1,4 +1,4 @@
-xgettext --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot $(find core/src app/src core/include -name "*.cpp" -o -name "*.hpp")xgettext --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot $(find core/src app/src core/include -name "*.cpp" -o -name "*.hpp")
+xgettext --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot $(find core/src app/src core/include -name "*.cpp" -o -name "*.hpp")
 
 msgmerge --update --no-fuzzy-matching --backup=off assets/locales/es/LC_MESSAGES/fire_water_game.po assets/locales/template.pot
 
