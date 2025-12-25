@@ -74,7 +74,9 @@ void GameOverState::render() {
 
 
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText(_("MENU PRINCIPAL"), exitButton.x + 10, exitButton.y + 12, 20, BLACK);
+    const char* exitText = _("MENU PRINCIPAL");
+    int exitTextWidth = MeasureText(exitText, 20);
+    DrawText(exitText, exitButton.x + (exitButton.width - exitTextWidth) / 2, exitButton.y + (exitButton.height - 20) / 2, 20, BLACK);
 
     renderGlobalUI();
     

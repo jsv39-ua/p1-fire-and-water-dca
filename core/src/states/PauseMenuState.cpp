@@ -105,18 +105,27 @@ void PauseMenuState::render(){
 
     // Botón de reanudar
     DrawRectangleRec(resumeButton, mouseOverResumeButton ? GRAY : DARKGRAY);
-    DrawText(_("REANUDAR"), resumeButton.x + 45, resumeButton.y + 12, 20, BLACK);
+    const char* resumeText = _("REANUDAR");
+    int resumeTextWidth = MeasureText(resumeText, 20);
+    DrawText(resumeText, resumeButton.x + (resumeButton.width - resumeTextWidth) / 2, resumeButton.y + (resumeButton.height - 20) / 2, 20, BLACK);
 
     // Botón de reiniciar
     DrawRectangleRec(restartButton, mouseOverRestartButton ? GRAY : DARKGRAY);
-    DrawText(_("REINICIAR"), restartButton.x + 45, restartButton.y + 12, 20, BLACK);
+    const char* restartText = _("REINICIAR");
+    int restartTextWidth = MeasureText(restartText, 20);
+    DrawText(restartText, restartButton.x + (restartButton.width - restartTextWidth) / 2, restartButton.y + (restartButton.height - 20) / 2, 20, BLACK);
+
     // Botón de opciones
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText(_("OPCIONES"), optionsButton.x + 45, optionsButton.y + 12, 20, BLACK);
+    const char* optionsText = _("OPCIONES");
+    int optionsTextWidth = MeasureText(optionsText, 20);
+    DrawText(optionsText, optionsButton.x + (optionsButton.width - optionsTextWidth) / 2, optionsButton.y + (optionsButton.height - 20) / 2, 20, BLACK);
 
     // Botón de salir
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText(_("MENU PRINCIPAL"), exitButton.x + 15, exitButton.y + 12, 20, BLACK);
+    const char* exitText = _("MENU PRINCIPAL");
+    int exitTextWidth = MeasureText(exitText, 20);
+    DrawText(exitText, exitButton.x + (exitButton.width - exitTextWidth) / 2, exitButton.y + (exitButton.height - 20) / 2, 20, BLACK);
     renderGlobalUI();
     
     EndDrawing();
