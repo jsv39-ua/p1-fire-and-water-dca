@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <filesystem>
+#include <clocale>
 
 // Compatibilidad con Windows para variables de entorno
 #if defined(_WIN32)
@@ -42,11 +43,20 @@ void LocalizationManager::setLanguage(const std::string& langCode) {
     #endif
     
     // Intentar aplicar locale, con fallback a .utf8 si falla
-    if (!setlocale(LC_ALL, targetLocale.c_str())) {
+    const char* primaryLocaleResult = setlocale(LC_ALL, targetLocale.c_str());
+    if (!primaryLocaleResult) {
         std::string fallback = targetLocale;
-        if (fallback.find(".UTF-8") != std::string::npos) {
-             fallback.replace(fallback.find(".UTF-8"), 6, ".utf8");
-             setlocale(LC_ALL, fallback.c_str());
+        std::size_t pos = fallback.find(".UTF-8");
+        if (pos != std::string::npos) {
+            fallback.replace(pos, 6, ".utf8");
+            const char* fallbackLocaleResult = setlocale(LC_ALL, fallback.c_str());
+            if (!fallbackLocaleResult) {
+                std::cerr << "Warning: Failed to set locale to '" << targetLocale
+                          << "' and fallback locale '" << fallback << "'." << std::endl;
+            }
+        } else {
+            std::cerr << "Warning: Failed to set locale to '" << targetLocale
+                      << "'. No suitable fallback locale was applied." << std::endl;
         }
     }
     
