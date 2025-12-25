@@ -33,16 +33,20 @@ find_program(XGETTEXT_EXECUTABLE xgettext)
 find_program(MSGMERGE_EXECUTABLE msgmerge)
 
 if(XGETTEXT_EXECUTABLE AND MSGMERGE_EXECUTABLE)
+    # Buscar archivos fuente para traducción
+    file(GLOB_RECURSE TRANSLATION_SOURCES 
+        "${CMAKE_SOURCE_DIR}/core/src/*.cpp"
+        "${CMAKE_SOURCE_DIR}/app/src/*.cpp"
+        "${CMAKE_SOURCE_DIR}/core/include/*.hpp"
+    )
+
     add_custom_target(update_translations
         # Generar template.pot buscando en src e include
-        COMMAND sh -c "${XGETTEXT_EXECUTABLE} --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot $(find core/src app/src core/include -name '*.cpp' -o -name '*.hpp')"
-        
+        COMMAND ${XGETTEXT_EXECUTABLE} --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot ${TRANSLATION_SOURCES}
         # Actualizar PO Español
         COMMAND ${MSGMERGE_EXECUTABLE} --update --no-fuzzy-matching --backup=off assets/locales/es/LC_MESSAGES/fire_water_game.po assets/locales/template.pot
-        
         # Actualizar PO Inglés
         COMMAND ${MSGMERGE_EXECUTABLE} --update --no-fuzzy-matching --backup=off assets/locales/en/LC_MESSAGES/fire_water_game.po assets/locales/template.pot
-        
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Actualizando template.pot y fusionando cambios en archivos .po"
         VERBATIM
