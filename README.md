@@ -69,3 +69,7 @@ g++ -o game src/*.cpp -I vendor/include/ -L vendor/lib/linux -lraylib -lGL -lm -
 Para Windows:
 
 g++ -o game.exe src/*.cpp -I vendor/include/ -L vendor/lib/windows -lraylib -lopengl32 -lgdi32 -lwinmm
+
+### Si se añaden nuevos textos al juego hay que recompilar el .pot y los .po con:
+
+cmake --build build --target update_translations
