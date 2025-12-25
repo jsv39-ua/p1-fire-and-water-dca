@@ -113,13 +113,19 @@ void MainMenuState::render(){
     }
 
     DrawRectangleRec(playButton, mouseOverPlayButton ? GRAY : DARKGRAY);
-    DrawText(_("JUGAR"), playButton.x + 45, playButton.y + 15, 20, BLACK);
+    const char* playText = _("JUGAR");
+    int playTextWidth = MeasureText(playText, 20);
+    DrawText(playText, playButton.x + (playButton.width - playTextWidth) / 2, playButton.y + (playButton.height - 20) / 2, 20, BLACK);
 
     DrawRectangleRec(optionsButton, mouseOverOptionsButton ? GRAY : DARKGRAY);
-    DrawText(_("OPCIONES"), optionsButton.x + 25, optionsButton.y + 15, 20, BLACK);
+    const char* optionsText = _("OPCIONES");
+    int optionsTextWidth = MeasureText(optionsText, 20);
+    DrawText(optionsText, optionsButton.x + (optionsButton.width - optionsTextWidth) / 2, optionsButton.y + (optionsButton.height - 20) / 2, 20, BLACK);
 
     DrawRectangleRec(exitButton, mouseOverExitButton ? GRAY : DARKGRAY);
-    DrawText(_("SALIR"), exitButton.x + 50, exitButton.y + 15, 20, BLACK);
+    const char* exitText = _("SALIR");
+    int exitTextWidth = MeasureText(exitText, 20);
+    DrawText(exitText, exitButton.x + (exitButton.width - exitTextWidth) / 2, exitButton.y + (exitButton.height - 20) / 2, 20, BLACK);
 
     renderGlobalUI();
     

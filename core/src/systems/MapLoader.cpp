@@ -320,12 +320,12 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                                 if (strcmp(prop->stringValue, "water") == 0) p.type = WATER;
                                 else if (strcmp(prop->stringValue, "fire") == 0) p.type = FIRE;
                             }
-                            // Modificación aquí: Buscamos "texto" (como lo pusiste en Tiled) O "text"
+                            // Aqui busco text para encontrar los textos de las señales en el tiled
                             if ((strcmp(prop->name, "text") == 0) 
                                 && prop->type == PROPERTY_TYPE_STRING) {
                                 
                                 p.text = prop->stringValue;
-                                TraceLog(LOG_INFO, "Texto cargado para cartel ID %d: %s", p.id, p.text.c_str());
+                                TraceLog(LOG_INFO, "Clave de texto cargada para cartel ID %d: %s", p.id, p.text.c_str());
                             }
                         }
                     }

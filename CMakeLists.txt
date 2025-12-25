@@ -31,8 +31,7 @@ endif()
 message(STATUS "Gettext/Intl enabled: ${USE_GETTEXT} (found: ${HAVE_GETTEXT})")
 
 
-# Nota: el código usa APIs relativamente recientes (p.ej. IsSoundValid/IsMusicValid/GetKeyName).
-# Por defecto apuntamos a master; puedes fijarlo a un tag/commit concreto con -DRAYLIB_TAG=...
+# Por defecto apuntamos a master; se puede fijar a un tag/commit concreto con -DRAYLIB_TAG=
 set(RAYLIB_TAG "master" CACHE STRING "Raylib Git tag/branch")
 
 message(STATUS "Raylib tag configured: '${RAYLIB_TAG}' (override with -DRAYLIB_TAG=...)")
@@ -49,6 +48,7 @@ FetchContent_MakeAvailable(raylib)
 
 add_subdirectory(core)
 add_subdirectory(app)
+add_subdirectory(assets/locales)
 
 if(BUILD_TESTS)
   enable_testing()

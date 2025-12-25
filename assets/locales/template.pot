@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 19:58+0100\n"
+"POT-Creation-Date: 2025-12-26 00:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,28 +17,130 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:26
+msgid "A veces encontraras secretos ocultos... ¡Anímate a explorar!"
+msgstr ""
+
+msgid "ASIGNAR TECLAS"
+msgstr ""
+
+msgid "Ataque:"
+msgstr ""
+
+msgid "Ataque: "
+msgstr ""
+
+msgid "CANCELAR"
+msgstr ""
+
+#. Título
+msgid "CONFIGURACION DE TECLAS"
+msgstr ""
+
+msgid "Click en una tecla para cambiarla | ESC: Cancelar"
+msgstr ""
+
+msgid ""
+"Controles:\n"
+"\n"
+msgstr ""
+
+msgid "Derecha:"
+msgstr ""
+
+msgid "ENGLISH"
+msgstr ""
+
+#. Texto de ayuda para volver
+msgid "ESC: Volver"
+msgstr ""
+
+msgid "ESPAÑOL"
+msgstr ""
+
+msgid "GUARDAR"
+msgstr ""
+
+msgid "Game Over"
+msgstr ""
+
 msgid ""
 "Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... "
 "¡Diviértete!\n"
 "\n"
 msgstr ""
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:27
-msgid ""
-"Controles:\n"
-"\n"
+#. Dibujar botones de teclas - Fuego
+#. Dibujar botones de teclas - Agua
+msgid "Izquierda:"
 msgstr ""
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:32
+msgid "JUGADOR AGUA"
+msgstr ""
+
+#. Headers de columnas
+msgid "JUGADOR FUEGO"
+msgstr ""
+
+msgid "JUGAR"
+msgstr ""
+
+#. Construimos el string dinámicamente con las teclas actuales
 msgid "Jugador Agua: Movimiento básico: "
 msgstr ""
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:33
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:36
-msgid "Ataque: "
+msgid "Jugador Fuego: Movimiento básico: "
 msgstr ""
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:35
-msgid "Jugador Fuego: Movimiento básico: "
+msgid "MENU PRINCIPAL"
+msgstr ""
+
+msgid "OPCIONES"
+msgstr ""
+
+msgid "PAUSA"
+msgstr ""
+
+msgid "Presiona una tecla..."
+msgstr ""
+
+msgid "Pulsa ESPACIO para reiniciar"
+msgstr ""
+
+msgid "REANUDAR"
+msgstr ""
+
+msgid "REINICIAR"
+msgstr ""
+
+msgid "SALIR"
+msgstr ""
+
+msgid "Saltar:"
+msgstr ""
+
+#. slider volumen efectos
+msgid "VOLUMEN EFECTOS"
+msgstr ""
+
+#. slider volumen general
+msgid "VOLUMEN GENERAL"
+msgstr ""
+
+#. slider volumen musica
+msgid "VOLUMEN MUSICA"
+msgstr ""
+
+msgid "VOLVER"
+msgstr ""
+
+msgid "Volviendo..."
+msgstr ""
+
+msgid "¡Advertencia: Tecla duplicada!"
+msgstr ""
+
+msgid "¡CONFIGURACION GUARDADA!"
+msgstr ""
+
+msgid "¡Nivel Completado!"
 msgstr ""

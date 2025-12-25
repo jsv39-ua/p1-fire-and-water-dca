@@ -24,7 +24,7 @@ OptionsState::OptionsState() :
 const char* getLanguageName(OptionsState::Language lang) {
     switch(lang) {
         case OptionsState::SPANISH: return _("ESPAÑOL");
-        case OptionsState::ENGLISH: return _("ENGLISH (WIP)");
+        case OptionsState::ENGLISH: return _("ENGLISH");
         default: return _("ESPAÑOL");
     }
 }
@@ -226,7 +226,6 @@ void OptionsState::render()
     
     ClearBackground(SKYBLUE);
     
-    // Título (centrado)
     const char* title = _("OPCIONES");
     int titleWidth = MeasureText(title, 40);
     DrawText(title, centerX - titleWidth / 2, 50, 40, BLACK);
@@ -305,7 +304,7 @@ void OptionsState::render()
     int backWidth = MeasureText(backText, 20);
     DrawText(backText, backButton.x + (backButton.width - backWidth) / 2, backButton.y + 15, 20, BLACK);
     
-    // Ayuda (centrada en la parte inferior)
+    // Texto de ayuda para volver
     const char* help = _("ESC: Volver");
     int helpWidth = MeasureText(help, 16);
     DrawText(help, centerX - helpWidth / 2, screenHeight - 60, 16, BLACK);

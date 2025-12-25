@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="49" height="23" tilewidth="18" tileheight="18" infinite="0" nextlayerid="10" nextobjectid="11">
+<map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="49" height="23" tilewidth="18" tileheight="18" infinite="0" nextlayerid="10" nextobjectid="11">
  <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
  <objectgroup id="5" name="Transitions">
   <object id="6" x="881.667" y="153.5" width="60.6667" height="242.333">
@@ -28,21 +28,13 @@
    </properties>
   </object>
  </objectgroup>
- <imagelayer id="4" name="Capa fondo" offsetx="-481.333" offsety="-177.333" parallaxy="0.8">
+ <imagelayer id="4" name="Capa fondo" offsetx="-434.666" offsety="-129.333" parallaxy="0.8">
   <image source="../../../backgrounds/background1.png" width="942" height="514"/>
  </imagelayer>
  <objectgroup id="8" name="Interactables">
   <object id="9" type="sign" gid="87" x="306" y="324" width="18" height="18">
    <properties>
-    <property name="text">Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... ¡Diviértete! 
-
-Controles:
-
-	Jugador Agua: Movimiento básico: LEFT, UP, RIGHT
-		Ataque: DOWN
-
-	Jugador Fuego: Movimiento básico: A, W, D
-		Ataque: S</property>
+    <property name="text" value="SIGN_TUTORIAL_WELCOME"/>
    </properties>
   </object>
  </objectgroup>

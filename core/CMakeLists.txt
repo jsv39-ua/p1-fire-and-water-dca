@@ -22,6 +22,7 @@ set(GAME_CORE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/ResourceManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/SettingsManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/SoundPlayer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/SignDictionary.cpp
 )
 
 # Creamos la librería estática 'game_core' con los fuentes del núcleo del juego

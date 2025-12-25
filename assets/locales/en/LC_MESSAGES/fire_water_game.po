@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 19:58+0100\n"
+"POT-Creation-Date: 2025-12-24 20:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,54 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:26
+msgid "A veces encontraras secretos ocultos... ¡Anímate a explorar!"
+msgstr "Sometimes you will find hidden secrets... Feel free to explore!"
+
+msgid "ASIGNAR TECLAS"
+msgstr "KEY BINDINGS"
+
+msgid "Ataque:"
+msgstr "Attack:"
+
+msgid "Ataque: "
+msgstr "Attack: "
+
+msgid "CANCELAR"
+msgstr "CANCEL"
+
+#. Título
+msgid "CONFIGURACION DE TECLAS"
+msgstr "KEY BINDINGS"
+
+msgid "Click en una tecla para cambiarla | ESC: Cancelar"
+msgstr "Click a key to change it | ESC: Cancel"
+
+msgid ""
+"Controles:\n"
+"\n"
+msgstr ""
+"Controls:\n"
+"\n"
+
+msgid "Derecha:"
+msgstr "Right:"
+
+msgid "ENGLISH"
+msgstr ""
+
+#. Texto de ayuda para volver
+msgid "ESC: Volver"
+msgstr "ESC: Back"
+
+msgid "ESPAÑOL"
+msgstr "SPANISH"
+
+msgid "GUARDAR"
+msgstr "SAVE"
+
+msgid "Game Over"
+msgstr "Game Over"
+
 msgid ""
 "Hola, bienvenido a Elements, vamos a aprender lo básico de forma práctica... "
 "¡Diviértete!\n"
@@ -27,86 +74,72 @@ msgstr ""
 "Have fun!\n"
 "\n"
 
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:27
-msgid ""
-"Controles:\n"
-"\n"
-msgstr ""
-"Controls:\n"
-"\n"
-
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:32
-msgid "Jugador Agua: Movimiento básico: "
-msgstr "Water Player: Basic movement: "
-
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:33
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:36
-msgid "Ataque: "
-msgstr "Attack: "
-
-#: /mnt/c/Users/USUARIO/Desktop/curso 25-26/dca/juego/p1-fire-and-water-dca/src/core/MainGameState.cpp:35
-msgid "Jugador Fuego: Movimiento básico: "
-msgstr "Fire Player: Basic movement: "
-
-msgid "OPCIONES"
-msgstr "OPTIONS"
-
-msgid "ASIGNAR TECLAS"
-msgstr "KEY BINDINGS"
-
-msgid "VOLUMEN GENERAL"
-msgstr "MASTER VOLUME"
-
-msgid "VOLUMEN MUSICA"
-msgstr "MUSIC VOLUME"
-
-msgid "VOLUMEN EFECTOS"
-msgstr "SFX VOLUME"
-
-msgid "VOLVER"
-msgstr "BACK"
-
-msgid "ESC: Volver"
-msgstr "ESC: Back"
-
-msgid "ESPAÑOL"
-msgstr "SPANISH"
-
-msgid "ENGLISH (WIP)"
-msgstr "ENGLISH"
-
-msgid "CONFIGURACION DE TECLAS"
-msgstr "KEY BINDINGS"
-
-msgid "JUGADOR FUEGO"
-msgstr "FIRE PLAYER"
+#. Dibujar botones de teclas - Fuego
+#. Dibujar botones de teclas - Agua
+msgid "Izquierda:"
+msgstr "Left:"
 
 msgid "JUGADOR AGUA"
 msgstr "WATER PLAYER"
 
-msgid "Izquierda:"
-msgstr "Left:"
+#. Headers de columnas
+msgid "JUGADOR FUEGO"
+msgstr "FIRE PLAYER"
 
-msgid "Derecha:"
-msgstr "Right:"
+msgid "JUGAR"
+msgstr "PLAY"
 
-msgid "Saltar:"
-msgstr "Jump:"
+#. Construimos el string dinámicamente con las teclas actuales
+msgid "Jugador Agua: Movimiento básico: "
+msgstr "Water Player: Basic movement: "
 
-msgid "Ataque:"
-msgstr "Attack:"
+msgid "Jugador Fuego: Movimiento básico: "
+msgstr "Fire Player: Basic movement: "
 
-msgid "GUARDAR"
-msgstr "SAVE"
+msgid "MENU PRINCIPAL"
+msgstr "MAIN MENU"
 
-msgid "CANCELAR"
-msgstr "CANCEL"
+msgid "OPCIONES"
+msgstr "OPTIONS"
+
+msgid "PAUSA"
+msgstr "PAUSE"
 
 msgid "Presiona una tecla..."
 msgstr "Press any key..."
 
-msgid "Click en una tecla para cambiarla | ESC: Cancelar"
-msgstr "Click a key to change it | ESC: Cancel"
+msgid "Pulsa ESPACIO para reiniciar"
+msgstr "Press SPACE to restart"
+
+msgid "REANUDAR"
+msgstr "RESUME"
+
+msgid "REINICIAR"
+msgstr "RESTART"
+
+msgid "SALIR"
+msgstr "EXIT"
+
+msgid "Saltar:"
+msgstr "Jump:"
+
+#. slider volumen efectos
+msgid "VOLUMEN EFECTOS"
+msgstr "SFX VOLUME"
+
+#. slider volumen general
+msgid "VOLUMEN GENERAL"
+msgstr "MASTER VOLUME"
+
+#. slider volumen musica
+msgid "VOLUMEN MUSICA"
+msgstr "MUSIC VOLUME"
+
+msgid "VOLVER"
+msgstr "BACK"
+
+msgid "Volviendo..."
+msgstr "Returning..."
 
 msgid "¡Advertencia: Tecla duplicada!"
 msgstr "Warning: Duplicate key!"
@@ -114,23 +147,8 @@ msgstr "Warning: Duplicate key!"
 msgid "¡CONFIGURACION GUARDADA!"
 msgstr "CONFIGURATION SAVED!"
 
-msgid "Volviendo..."
-msgstr "Returning..."
-
-msgid "JUGAR"
-msgstr "PLAY"
-
-msgid "SALIR"
-msgstr "EXIT"
-
-msgid "Game Over"
-msgstr "Game Over"
-
 msgid "¡Nivel Completado!"
 msgstr "Level Completed!"
 
-msgid "Pulsa ESPACIO para reiniciar"
-msgstr "Press SPACE to restart"
-
-msgid "MENU PRINCIPAL"
-msgstr "MAIN MENU"
+#~ msgid "ENGLISH (WIP)"
+#~ msgstr "ENGLISH"

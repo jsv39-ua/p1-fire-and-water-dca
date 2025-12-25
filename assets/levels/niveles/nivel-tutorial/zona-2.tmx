@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="18" tileheight="18" infinite="0" nextlayerid="6" nextobjectid="40">
+<map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="18" tileheight="18" infinite="0" nextlayerid="6" nextobjectid="40">
  <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
  <objectgroup id="4" name="Transitions">
   <object id="9" x="-149.667" y="290.833" width="530" height="69">
@@ -18,7 +18,7 @@
  <objectgroup id="5" name="Interactables">
   <object id="39" type="sign" gid="87" x="90" y="234" width="18" height="18">
    <properties>
-    <property name="text" value="A veces encontraras secretos ocultos... ¡Anímate a explorar!"/>
+    <property name="text" value="SIGN_SECRET_1"/>
    </properties>
   </object>
  </objectgroup>
