@@ -41,6 +41,36 @@ CXX = g++
 CXXFLAGS = -I vendor/include/ -I include/ -I core/include/ -Wall -MMD -MP
 LDFLAGS = -L $(LIB_DIR)
 
+# --- GETTEXT/INTL (opcional) ---
+# Igual que en CMake: si libintl está disponible, activamos HAVE_GETTEXT.
+# Si no, el juego compila con stubs (sin traducciones).
+PKG_CONFIG ?= pkg-config
+INTL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libintl 2>/dev/null)
+INTL_LIBS := $(shell $(PKG_CONFIG) --libs libintl 2>/dev/null)
+
+# En muchas distros (glibc), Intl viene "built-in" y no hay libintl.pc.
+# Para no romper Linux, activamos gettext por defecto en no-Windows.
+ifeq ($(DETECTED_OS),Windows)
+	HAVE_GETTEXT := 0
+else
+	HAVE_GETTEXT := 1
+	CXXFLAGS += -DHAVE_GETTEXT=1
+endif
+
+# Si existe libintl por pkg-config, añadimos flags/libs extra.
+ifneq ($(strip $(INTL_LIBS)),)
+	CXXFLAGS += $(INTL_CFLAGS)
+	LIBS += $(INTL_LIBS)
+endif
+
+# --- INSTALL (estilo GNU) ---
+PREFIX ?= /usr/local
+DESTDIR ?=
+BINDIR ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share
+INSTALL_BIN_DIR := $(DESTDIR)$(BINDIR)
+INSTALL_DATA_DIR := $(DESTDIR)$(DATADIR)/p1-fire-and-water-dca
+
 # --- ARCHIVOS OBJETO ---
 OBJ_DIR = obj
 # Esto convierte ej: "core/src/systems/MapLoader.cpp" -> "obj/systems/MapLoader.o"
@@ -75,8 +105,8 @@ ifeq ($(DETECTED_OS),Windows)
 	@if not exist "$(subst /,\,$(dir $@))" mkdir "$(subst /,\,$(dir $@))"
 else
 	@$(MKDIR) $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
 endif
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/app/%.o: app/src/%.cpp
 	@echo "Compilando $<..."
@@ -107,10 +137,22 @@ endif
 # --- REGLAS DE ENTREGA (NO TOCAR) ---
 install: all
 ifeq ($(DETECTED_OS),Linux)
-	@echo "Instalando..."
-	sudo cp $(TARGET) $(INSTALL_DIR)/$(TARGET)
+	@echo "Instalando en $(INSTALL_BIN_DIR) y datos en $(INSTALL_DATA_DIR)..."
+	@$(MKDIR) "$(INSTALL_BIN_DIR)"
+	@$(MKDIR) "$(INSTALL_DATA_DIR)"
+	install -m 0755 "$(TARGET)" "$(INSTALL_BIN_DIR)/$(TARGET)"
+	cp -R "assets" "$(INSTALL_DATA_DIR)/assets"
 else
 	@echo "Install en Windows requiere admin manual."
+endif
+
+uninstall:
+ifeq ($(DETECTED_OS),Linux)
+	@echo "Desinstalando de $(INSTALL_BIN_DIR) y $(INSTALL_DATA_DIR)..."
+	@$(RM) "$(INSTALL_BIN_DIR)/$(TARGET)"
+	@$(RM) "$(INSTALL_DATA_DIR)"
+else
+	@echo "Uninstall en Windows requiere admin manual."
 endif
 
 dist:
@@ -122,4 +164,4 @@ dist:
 	mv $(BUILD_CMAKE_DIR)/*.deb .
 	$(RM) $(BUILD_CMAKE_DIR)
 
-.PHONY: all clean run info install dist
+.PHONY: all clean run info install uninstall dist

@@ -51,6 +51,7 @@ build/
 
 # CMake build directories/files
 build_cmake/
+build_dist/
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
