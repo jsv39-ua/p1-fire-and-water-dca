@@ -1,23 +1,20 @@
-# --- DETECCIÓN DEL SISTEMA OPERATIVO ---
+
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
-    # Ajusta estas rutas según donde tengas tus librerías en Windows
+    
     LIB_DIR = vendor/lib/windows
     LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
     EXT = .exe
     RM = del /Q
-    
-    # Comandos específicos de Windows para crear carpetas
-    # Usamos if not exist para evitar errores si ya existe
+ 
     MKDIR = if not exist
-    
-	# BUSQUEDA RECURSIVA (WINDOWS):
-	# Busca en core/src y app/src
+	
+    # Buscamos dentro de todas las carpetas y subcarpetas
 	SRC := $(filter-out core/src/main.cpp, \
 	       $(wildcard core/src/*.cpp) $(wildcard core/src/*/*.cpp) $(wildcard core/src/*/*/*.cpp) \
 	       $(wildcard app/src/*.cpp)  $(wildcard app/src/*/*.cpp)  $(wildcard app/src/*/*/*.cpp))
     
-    INSTALL_DIR = "C:/Program Files/TuJuego" 
+    INSTALL_DIR = "C:/Program Files/ElementsDCA" 
 else
     DETECTED_OS := Linux
     LIB_DIR = vendor/lib/linux
@@ -26,24 +23,21 @@ else
     RM = rm -rf
     MKDIR = mkdir -p
     
-	# BUSQUEDA RECURSIVA (LINUX):
-	# 'find' busca en todas las subcarpetas automáticamente
-	# Excluimos core/src/main.cpp: el main vive en app/src/main.cpp
+
+    # 'find' busca en todas las subcarpetas automáticamente
+    # Excluimos core/src/main.cpp
 	SRC := $(shell find core/src app/src -name '*.cpp' ! -path 'core/src/main.cpp')
     
     INSTALL_DIR = /usr/local/bin
 endif
 
-# --- CONFIGURACIÓN DEL COMPILADOR ---
+# Opciones del compilador
 CXX = g++
-# -I vendor/include/ es CRUCIAL porque ahí tienes tus headers (.hpp)
-# Agregamos -I include/ para headers propios del proyecto
 CXXFLAGS = -I vendor/include/ -I include/ -I core/include/ -Wall -MMD -MP
 LDFLAGS = -L $(LIB_DIR)
 
-# --- GETTEXT/INTL (opcional) ---
-# Igual que en CMake: si libintl está disponible, activamos HAVE_GETTEXT.
-# Si no, el juego compila con stubs (sin traducciones).
+
+# 
 PKG_CONFIG ?= pkg-config
 INTL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libintl 2>/dev/null)
 INTL_LIBS := $(shell $(PKG_CONFIG) --libs libintl 2>/dev/null)
@@ -81,7 +75,6 @@ DEPS := $(OBJ:.o=.d)
 TARGET = game$(EXT)
 BUILD_CMAKE_DIR = build_dist
 
-# --- REGLAS PRINCIPALES ---
 
 all: info $(TARGET)
 
@@ -98,7 +91,9 @@ $(TARGET): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 	@echo "--> EXITO: Ejecutable $(TARGET) creado."
 
-# --- REGLA DE COMPILACIÓN (MAGIA MULTIDIRECTORIO) ---
+# La 'magia multidirectorio' consiste en crear el directorio correspondiente antes de compilar cada archivo, ya que si
+# por ejemplo intentamos compilar "obj/systems/MapLoader.o" pero "obj/systems/" no existe, fallará.
+
 $(OBJ_DIR)/%.o: core/src/%.cpp
 	@echo "Compilando $<..."
 ifeq ($(DETECTED_OS),Windows)
@@ -117,10 +112,7 @@ else
 endif
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Incluir dependencias generadas (.d)
 -include $(DEPS)
-
-# --- UTILIDADES ---
 
 run: $(TARGET)
 	./$(TARGET)
@@ -134,7 +126,6 @@ else
 endif
 	@echo "Limpieza completada."
 
-# --- REGLAS DE ENTREGA (NO TOCAR) ---
 install: all
 ifeq ($(DETECTED_OS),Linux)
 	@echo "Instalando en $(INSTALL_BIN_DIR) y datos en $(INSTALL_DATA_DIR)..."
