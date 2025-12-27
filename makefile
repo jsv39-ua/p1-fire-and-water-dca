@@ -39,8 +39,14 @@ LDFLAGS = -L $(LIB_DIR)
 
 # 
 PKG_CONFIG ?= pkg-config
-INTL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libintl 2>/dev/null)
-INTL_LIBS := $(shell $(PKG_CONFIG) --libs libintl 2>/dev/null)
+ifeq ($(DETECTED_OS),Windows)
+	# En Windows no tenemos /dev/null y generalmente no usamos pkg-config para libintl
+	INTL_CFLAGS :=
+	INTL_LIBS :=
+else
+	INTL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libintl 2>/dev/null)
+	INTL_LIBS := $(shell $(PKG_CONFIG) --libs libintl 2>/dev/null)
+endif
 
 # En muchas distros (glibc), Intl viene "built-in" y no hay libintl.pc.
 # Para no romper Linux, activamos gettext por defecto en no-Windows.
@@ -119,8 +125,8 @@ run: $(TARGET)
 
 clean:
 ifeq ($(DETECTED_OS),Windows)
-	@if exist $(OBJ_DIR) rmdir /s /q $(OBJ_DIR)
-	@if exist $(TARGET) del /q $(TARGET)
+	@if exist "$(OBJ_DIR)" (rmdir /s /q "$(OBJ_DIR)" & echo Directorio obj eliminado) else (echo No hay obj para limpiar)
+	@if exist "$(TARGET)" (del /q "$(TARGET)" & echo Ejecutable eliminado) else (echo No hay ejecutable para limpiar)
 else
 	$(RM) $(OBJ_DIR) $(TARGET) $(BUILD_CMAKE_DIR) *.deb *.d
 endif
