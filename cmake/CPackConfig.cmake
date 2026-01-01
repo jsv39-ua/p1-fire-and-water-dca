@@ -10,9 +10,14 @@ set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 # DATOS REALES DE CONTACTO
 set(CPACK_PACKAGE_CONTACT "Juan Carlos Ponce <jcpd4@alu.ua.es>")
 
-# Configure generators; produce DEB/TGZ for Linux and ZIP for Windows
-# Añadido TGZ para asegurar compatibilidad universal en Linux
-set(CPACK_GENERATOR "DEB;TGZ;ZIP")
+# Comprobamos la plataforma para definir el tipo de paquete
+if(WIN32)
+  # Windows: ZIP portable
+  set(CPACK_GENERATOR "ZIP")
+else()
+  # Linux: DEB + TGZ
+  set(CPACK_GENERATOR "DEB;TGZ")
+endif()
 
 # Debian metadata
 # DATOS REALES DE MANTENEDOR (Requerido para paquetes .deb válidos)
