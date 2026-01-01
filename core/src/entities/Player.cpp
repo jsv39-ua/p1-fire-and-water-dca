@@ -17,12 +17,10 @@ Player::Player() : Entity() {
     key_attack = 0;
     jump_hold_timer = 0.0f;
     isWalkMusicPlaying = false;
-    
-    jumpSound.init("assets/characters/sounds/fire_sounds/damage/Fire-Player-Damage-2-2.mp3");
-    jumpSound.setVolume(1.0f);
     life_count = 3;
     invincibility_timer = 0.0f;
     attack_cooldown = 0.0f;
+    walkMusic = {0};
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
@@ -146,7 +144,9 @@ void Player::update(float deltaTime) {
     bounds.y = position.y;
     
     // Actualizar música de caminar
-    UpdateMusicStream(walkMusic);
+    if (IsMusicValid(walkMusic)) {
+        UpdateMusicStream(walkMusic);
+    }
 }
 
 void Player::render() {

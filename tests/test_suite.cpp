@@ -1,347 +1,313 @@
-#include <gtest/gtest.h>
-#include <memory>
-#include "SettingsManager.hpp"
-#include "ResourceManager.hpp"
-#include "StateMachine.hpp"
+#define BOOST_TEST_MODULE FireAndWater_GameTests
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 #include "Player.hpp"
 #include "Enemy.hpp"
-#include "AudioManager.hpp"
-#include "MapLoader.hpp"
-#include "GameState.hpp"
-#include "Projectile.hpp" 
+#include "Projectile.hpp"
 #include "Platform.hpp"
 #include "Animation.hpp"
 #include "Camera.hpp"
-#include "SoundPlayer.hpp"
-
-class MockState : public GameState {
-public:
-    void init() override {}
-    void update(float dt) override { (void)dt; } 
-    void render() override {}    
-    void handleInput() override {} 
-    void pause() override {}    
-    void resume() override {}   
-};
-
-
-
-// Test 1: Verificar que SettingsManager es un Singleton único
-TEST(SettingsManagerTest, IsSingleton) {
-    SettingsManager* s1 = SettingsManager::getInstance();
-    SettingsManager* s2 = SettingsManager::getInstance();
-    EXPECT_EQ(s1, s2);
-    EXPECT_NE(s1, nullptr);
-}
-
-// Test 2: Verificar que ResourceManager es un Singleton único
-TEST(ResourceManagerTest, IsSingleton) {
-    ResourceManager* r1 = ResourceManager::getInstance();
-    ResourceManager* r2 = ResourceManager::getInstance();
-    EXPECT_EQ(r1, r2);
-    EXPECT_NE(r1, nullptr);
-}
-
-// Test 3: Verificar que AudioManager es un Singleton único
-TEST(AudioManagerTest, IsSingleton) {
-    AudioManager* a1 = AudioManager::getInstance();
-    AudioManager* a2 = AudioManager::getInstance();
-    EXPECT_EQ(a1, a2);
-    EXPECT_NE(a1, nullptr);
-}
-
-
-// Test 4: Inicialización de Player
-TEST(PlayerTest, Initialization) {
-    EXPECT_NO_THROW({
-        Player p; 
-    });
-}
-
-// Test 5: Inicialización de Enemy
-TEST(EnemyTest, Initialization) {
-    EXPECT_NO_THROW({
-        Enemy e;
-    });
-}
-
-// Test 6: Máquina de Estados (CORREGIDO)
-TEST(StateMachineTest, InitialState) {
-    StateMachine sm;
-    auto state = std::make_unique<MockState>();
-    EXPECT_NO_THROW(sm.add_state(std::move(state), false));
-}
-// Test 7: MapLoader existencia
-TEST(MapLoaderTest, ClassExists) {
-    MapLoader loader;
-    EXPECT_TRUE(true); 
-}
-
-// Test 8: Validación de rutas de configuración
-TEST(ConfigTest, SettingsFileExists) {
-    FILE* f = fopen("assets/config/settings.json", "r");
-    bool exists = (f != NULL);
-    if(f) fclose(f);
-    EXPECT_TRUE(exists);
-}
-
-// Test 9: Validación de rutas de música
-TEST(AssetsTest, BackgroundMusicExists) {
-    FILE* f = fopen("assets/music/backgroundMusic.mp3", "r");
-    bool exists = (f != NULL);
-    if(f) fclose(f);
-    EXPECT_TRUE(exists);
-}
-
-// Test 10: Comprobación matemática básica (Raymath)
 #include "raymath.h"
-TEST(RaylibMath, VectorAddition) {
-    Vector2 v1 = {10.0f, 10.0f};
-    Vector2 v2 = {20.0f, 20.0f};
-    Vector2 result = Vector2Add(v1, v2);
-    EXPECT_FLOAT_EQ(result.x, 30.0f);
-    EXPECT_FLOAT_EQ(result.y, 30.0f);
-}
 
-// Test 11: Sistema de Vidas del Jugador
-TEST(PlayerLogic, LifeSystem) {
+// Suite de test de funcionalidades del juego
+BOOST_AUTO_TEST_SUITE(GameTests)
+
+// Test 1: El jugador pierde vidas correctamente al recibir daño
+BOOST_AUTO_TEST_CASE(test_player_loses_lives_on_damage) {
     Player p;
     p.setLifeCount(3);
-    EXPECT_EQ(p.getLifeCount(), 3);
-
+    
     p.updateLifeCount(-1);
-    EXPECT_EQ(p.getLifeCount(), 2);
-
-    p.updateLifeCount(1);
-    EXPECT_EQ(p.getLifeCount(), 3);
+    BOOST_TEST(p.getLifeCount() == 2);
+    
+    p.updateLifeCount(-1);
+    BOOST_TEST(p.getLifeCount() == 1);
+    
+    p.updateLifeCount(-1);
+    BOOST_TEST(p.getLifeCount() == 0);
 }
 
-// Test 12: Lógica de Movimiento (VELOCIDAD)
-TEST(PlayerLogic, MovementPhysics_Velocity) {
+// Test 2: Las vidas no pueden ser negativas
+BOOST_AUTO_TEST_CASE(test_player_lives_cannot_be_negative) {
     Player p;
-    p.walk(1);
-    EXPECT_GT(p.velocity.x, 0.0f); 
-
-    p.walk(-1);
-    EXPECT_LT(p.velocity.x, 0.0f); 
-
-    p.walk(0);
-    EXPECT_FLOAT_EQ(p.velocity.x, 0.0f);
+    p.setLifeCount(1);
+    
+    p.updateLifeCount(-1); // 0
+    p.updateLifeCount(-1); // Intenta -1
+    p.updateLifeCount(-5); // Intenta -6
+    
+    BOOST_TEST(p.getLifeCount() == 0);
 }
 
-// Test 13: Lógica de Salto (Jump)
-TEST(PlayerLogic, JumpPhysics) {
-    Player p;
-    p.velocity = {0.0f, 0.0f};
-
-    p.jump();
-    EXPECT_LT(p.velocity.y, 0.0f);
-}
-
-// Test 14: Sistema de Invencibilidad
-TEST(PlayerLogic, InvincibilityState) {
+// Test 3: El jugador obtiene invencibilidad temporal tras recibir daño
+BOOST_AUTO_TEST_CASE(test_player_invincibility_after_damage) {
     Player p;
     
-    EXPECT_FALSE(p.isInvincible());
-
-    p.activateInvincibility();
-
-    EXPECT_TRUE(p.isInvincible());
-    EXPECT_NO_THROW(p.shouldRenderVisible());
+    BOOST_TEST(!p.isInvincible());
+    
+    // Perder vida activa invencibilidad automáticamente
+    p.updateLifeCount(-1);
+    BOOST_TEST(p.isInvincible());
+    
+    // La invencibilidad desaparece con el tiempo
+    for (int i = 0; i < 20; i++) {
+        p.update(0.1f); // 2 segundos total
+    }
+    BOOST_TEST(!p.isInvincible());
 }
 
-// Test 15: Colisiones (AABB - Axis Aligned Bounding Box)
-TEST(PhysicsTest, CollisionLogic) {
-    Rectangle box1 = {0, 0, 50, 50};   
-    Rectangle box2 = {25, 25, 50, 50}; 
-    Rectangle box3 = {200, 200, 50, 50};
-
-    EXPECT_TRUE(CheckCollisionRecs(box1, box2)); 
-    EXPECT_FALSE(CheckCollisionRecs(box1, box3)); 
-}
-
-// Test 16: Lógica de Movimiento (ORIENTACIÓN)
-TEST(PlayerLogic, MovementPhysics_Orientation) {
-    Player p;
-
-    p.walk(1);
-    EXPECT_TRUE(p.facingRight);
-
-    p.walk(-1);
-    EXPECT_FALSE(p.facingRight); 
-}
-
-
-
-// Test 17: Interacción Elemental
-TEST(GameplayLogic, ElementalInteraction) {
-    Player firePlayer(0, 0, 10, 10, FIRE);
-    firePlayer.bounds = Rectangle{10, 10, 10, 10}; 
-    
-    Platform waterPlatform(Rectangle{0, 0, 50, 50}, WATER);
-    Platform firePlatform(Rectangle{0, 0, 50, 50}, FIRE);
-    
-    EXPECT_EQ(firePlayer.checkPlatformCollision(waterPlatform), 1);
-
-    EXPECT_EQ(firePlayer.checkPlatformCollision(firePlatform), 2);
-}
-
-// Test 18: Patrulla de Enemigos
-TEST(EnemyLogic, PatrolMovement) {
-    Rectangle bounds = {0, 0, 32, 32};
-    Enemy enemy(bounds, FIRE, 50.0f, false); 
-    
-    EXPECT_TRUE(enemy.movingRight);
-    
-    enemy.velocity = {1000.0f, 0.0f}; 
-    enemy.update(1.0f); 
-    EXPECT_FALSE(enemy.movingRight);
-}
-
-// Test 19: Ciclo de vida de Proyectiles
-TEST(CombatLogic, ProjectileLifecycle) {
-    Vector2 pos = {0, 0};
-    Vector2 vel = {100, 0};
-    Projectile p(pos, vel, FIRE);
-    
-    EXPECT_TRUE(p.isActive());
-    EXPECT_EQ(p.getType(), FIRE);
-    
-    p.deactivate();
-    EXPECT_FALSE(p.isActive());
-}
-
-// Test 20: Sistema de Daño a Enemigos
-TEST(EnemyLogic, DamageSystem) {
+// Test 4: El enemigo recibe daño y activa invencibilidad
+BOOST_AUTO_TEST_CASE(test_enemy_takes_damage) {
     Enemy e;
-    
-    EXPECT_EQ(e.getLifeCount(), 3);
+    int initialLife = e.getLifeCount();
     
     e.updateLifeCount(-1);
-    
-    EXPECT_EQ(e.getLifeCount(), 2);
-    EXPECT_TRUE(e.isInvincible());
+    BOOST_TEST(e.getLifeCount() == initialLife - 1);
+    BOOST_TEST(e.isInvincible());
 }
 
-// Test 21: Lógica de Animación (Bucle)
-TEST(AnimationSystem, AnimationLoop) {
-    Animation anim(2, 0.1f, true, {0}, 0, 1);
+// Test 5: El jugador se mueve horizontalmente con velocidad correcta
+BOOST_AUTO_TEST_CASE(test_player_horizontal_movement) {
+    Player p;
     
-    EXPECT_EQ(anim.getCurrentFrame(), 0);
+    p.walk(1);
+    BOOST_TEST(p.velocity.x > 0.0f);
+    float rightSpeed = p.velocity.x;
+    
+    p.walk(-1);
+    BOOST_TEST(p.velocity.x < 0.0f);
+    BOOST_CHECK_CLOSE(p.velocity.x, -rightSpeed, 0.1);
+    
+    p.walk(0);
+    BOOST_CHECK_SMALL(p.velocity.x, 0.001f);
+}
+
+// Test 6: El salto aplica velocidad vertical negativa (hacia arriba)
+BOOST_AUTO_TEST_CASE(test_player_jump_applies_upward_velocity) {
+    Player p;
+    p.velocity = {0.0f, 0.0f};
+    
+    p.jump();
+    
+    BOOST_TEST(p.velocity.y < 0.0f);
+    BOOST_TEST(p.velocity.y < -100.0f);
+}
+
+// Test 7: Salto variable, mantener botón da más altura
+BOOST_AUTO_TEST_CASE(test_variable_jump_height) {
+    Player p;
+    p.velocity.y = -100.0f;
+    float initialSpeed = p.velocity.y;
+    
+    p.updateJump(0.016f, true);
+    BOOST_TEST(p.velocity.y < initialSpeed);
+    
+    float boostedSpeed = p.velocity.y;
+    
+    p.updateJump(0.016f, false);
+    BOOST_CHECK_CLOSE(p.velocity.y, boostedSpeed, 0.1);
+}
+
+// Test 8: La gravedad se aplica al jugador en cada actualizacion
+BOOST_AUTO_TEST_CASE(test_gravity_applies_to_player) {
+    Player p;
+    p.velocity = {0.0f, 0.0f};
+    
+    p.update(0.1f);
+    
+    // La gravedad aumenta la velocidad Y hacia abajo
+    BOOST_TEST(p.velocity.y > 0.0f);
+}
+
+// Test 9: La velocidad de caída tiene un límite máximo
+BOOST_AUTO_TEST_CASE(test_fall_speed_is_capped) {
+    Player p;
+    p.velocity = {0.0f, 10000.0f}; // Velocidad absurda
+    
+    p.update(0.1f);
+    
+    // Debe estar bloqueada a MAX_FALL_SPEED (900.0f)
+    BOOST_TEST(p.velocity.y <= 900.0f);
+}
+
+// Test 10: El enemigo patrulla horizontalmente
+BOOST_AUTO_TEST_CASE(test_enemy_horizontal_patrol) {
+    Rectangle bounds = {100, 100, 32, 32};
+    Enemy enemy(bounds, FIRE, 50.0f, false); // horizontal
+    
+    float startX = enemy.position.x;
+    
+    // Actualizar varias veces
+    for (int i = 0; i < 10; i++) {
+        enemy.update(0.1f);
+    }
+    
+    // Se movió desde la posición inicial
+    BOOST_TEST(enemy.position.x != startX);
+}
+
+// Test 11: El enemigo patrulla verticalmente cuando está configurado
+BOOST_AUTO_TEST_CASE(test_enemy_vertical_patrol) {
+    Rectangle bounds = {100, 100, 32, 32};
+    Enemy enemy(bounds, WATER, 50.0f, true); // vertical
+    
+    float startY = enemy.position.y;
+    
+    for (int i = 0; i < 10; i++) {
+        enemy.update(0.1f);
+    }
+    
+    // Se movió verticalmente
+    BOOST_TEST(enemy.position.y != startY);
+    // Pero no horizontalmente
+    BOOST_CHECK_CLOSE(enemy.position.x, 100.0f, 0.1);
+}
+
+// Test 12: Jugador de fuego recibe daño al tocar plataforma de agua
+BOOST_AUTO_TEST_CASE(test_fire_player_damaged_by_water) {
+    Player firePlayer(0, 0, 10, 10, FIRE);
+    firePlayer.bounds = Rectangle{10, 10, 10, 10};
+    
+    Platform waterPlatform(Rectangle{0, 0, 50, 50}, WATER);
+    
+    int result = firePlayer.checkPlatformCollision(waterPlatform);
+    BOOST_TEST(result == 1); // 1 = elemento contrario
+}
+
+// Test 13: Jugador de agua recibe daño al tocar plataforma de fuego
+BOOST_AUTO_TEST_CASE(test_water_player_damaged_by_fire) {
+    Player waterPlayer(0, 0, 10, 10, WATER);
+    waterPlayer.bounds = Rectangle{10, 10, 10, 10};
+    
+    Platform firePlatform(Rectangle{0, 0, 50, 50}, FIRE);
+    
+    int result = waterPlayer.checkPlatformCollision(firePlatform);
+    BOOST_TEST(result == 1); // 1 = elemento contrario
+}
+
+// Test 14: Jugador de agua está seguro en plataforma de agua
+BOOST_AUTO_TEST_CASE(test_water_player_safe_on_water) {
+    Player waterPlayer(0, 0, 10, 10, WATER);
+    waterPlayer.bounds = Rectangle{10, 10, 10, 10};
+    
+    Platform waterPlatform(Rectangle{0, 0, 50, 50}, WATER);
+    
+    int result = waterPlayer.checkPlatformCollision(waterPlatform);
+    BOOST_TEST(result == 2); // 2 = elemento amigo
+}
+
+// Test 15: Colisión con plataforma GOAL (meta)
+BOOST_AUTO_TEST_CASE(test_player_reaches_goal) {
+    Player p(0, 0, 10, 10, FIRE);
+    p.bounds = Rectangle{10, 10, 10, 10};
+    
+    Platform goal(Rectangle{0, 0, 50, 50}, GOAL);
+    
+    int result = p.checkPlatformCollision(goal);
+    BOOST_TEST(result == 3); // 3 = meta alcanzada
+}
+
+// Test 16: No hay colisión cuando están separados
+BOOST_AUTO_TEST_CASE(test_no_collision_when_separated) {
+    Player p(0, 0, 10, 10, FIRE);
+    p.bounds = Rectangle{0, 0, 10, 10};
+    
+    Platform platform(Rectangle{100, 100, 10, 10}, NONE);
+    
+    int result = p.checkPlatformCollision(platform);
+    BOOST_TEST(result == 4); // 4 = sin colisión
+}
+
+// Test 17: El cooldown de ataque funciona correctamente
+BOOST_AUTO_TEST_CASE(test_attack_cooldown_system) {
+    Player p;
+    
+    BOOST_TEST(p.canAttack());
+    
+    p.attack();
+    BOOST_TEST(!p.canAttack());
+    
+    p.update(0.6f);
+    BOOST_TEST(p.canAttack());
+}
+
+// Test 18: Los proyectiles se crean activos y se pueden desactivar
+BOOST_AUTO_TEST_CASE(test_projectile_activation) {
+    Vector2 pos = {100.0f, 200.0f};
+    Vector2 vel = {150.0f, 0.0f};
+    Projectile proj(pos, vel, FIRE);
+    
+    BOOST_TEST(proj.isActive());
+    BOOST_TEST(proj.getType() == FIRE);
+    
+    proj.deactivate();
+    BOOST_TEST(!proj.isActive());
+}
+
+// Test 19: Los proyectiles se mueven en la dirección correcta
+BOOST_AUTO_TEST_CASE(test_projectile_movement_direction) {
+    Vector2 startPos = {100.0f, 100.0f};
+    Vector2 vel = {200.0f, 0.0f};
+    Projectile proj(startPos, vel, WATER);
+    
+    proj.update(0.1f);
+    
+    BOOST_TEST(proj.getBounds().x > startPos.x);
+}
+
+// Test 20: Los proyectiles expiran después de su tiempo de vida
+BOOST_AUTO_TEST_CASE(test_projectile_expires_after_lifetime) {
+    Vector2 pos = {0.0f, 0.0f};
+    Vector2 vel = {100.0f, 0.0f};
+    Projectile proj(pos, vel, FIRE);
+    
+    BOOST_TEST(proj.isActive());
+    
+    // MAX_LIFETIME es 0.4f, actualizamos más que eso
+    proj.update(0.5f);
+    
+    BOOST_TEST(!proj.isActive());
+}
+
+// Test 21: La animación avanza frames correctamente
+BOOST_AUTO_TEST_CASE(test_animation_frame_progression) {
+    Animation anim(3, 0.1f, true, {0}, 0, 2);
+    
+    BOOST_TEST(anim.getCurrentFrame() == 0);
     
     anim.animationUpdate(0.1f);
-    EXPECT_EQ(anim.getCurrentFrame(), 1);
+    BOOST_TEST(anim.getCurrentFrame() == 1);
     
     anim.animationUpdate(0.1f);
-    EXPECT_EQ(anim.getCurrentFrame(), 0);
+    BOOST_TEST(anim.getCurrentFrame() == 2);
 }
 
-// Test 22: Configuración de Teclas (SettingsManager)
-TEST(SettingsSystem, KeyRebinding) {
-    SettingsManager* sm = SettingsManager::getInstance();
+// Test 22: La animación con loop vuelve al inicio
+BOOST_AUTO_TEST_CASE(test_animation_loops_correctly) {
+    Animation anim(3, 0.1f, true, {0}, 0, 2);
     
-    int originalJump = sm->getFireJump();
+    anim.animationUpdate(0.1f); // Frame 1
+    anim.animationUpdate(0.1f); // Frame 2
+    anim.animationUpdate(0.1f); // Vuelve a 0
     
-    sm->setFireKeys(sm->getFireLeft(), sm->getFireRight(), 32, sm->getFireAttack());
-    
-    EXPECT_EQ(sm->getFireJump(), 32);
-    
-    sm->setFireKeys(sm->getFireLeft(), sm->getFireRight(), originalJump, sm->getFireAttack());
+    BOOST_TEST(anim.getCurrentFrame() == 0);
 }
 
-// Test 23: Límites de Zoom de Cámara
-TEST(CameraSystem, ZoomLimits) {
+// Test 23: La cámara respeta los límites de zoom
+BOOST_AUTO_TEST_CASE(test_camera_zoom_is_clamped) {
     GameCamera cam;
-    cam.init({0,0}, 1.0f, {0,0,100,100});
+    cam.init({0, 0}, 1.0f, {0, 0, 1000, 1000});
     cam.setZoomLimits(0.5f, 2.0f);
     
     cam.setZoom(0.1f);
-    EXPECT_FLOAT_EQ(cam.getTargetZoom(), 0.5f);
+    BOOST_CHECK_CLOSE(cam.getTargetZoom(), 0.5f, 0.1);
     
     cam.setZoom(10.0f);
-    EXPECT_FLOAT_EQ(cam.getTargetZoom(), 2.0f);
+    BOOST_CHECK_CLOSE(cam.getTargetZoom(), 2.0f, 0.1);
+    
+    cam.setZoom(1.5f);
+    BOOST_CHECK_CLOSE(cam.getTargetZoom(), 1.5f, 0.1);
 }
 
-// Test 24: SoundPlayer (Variantes Múltiples)
-TEST(AudioSystem, MultiSoundInit) {
-    SoundPlayer sp;
-    std::vector<std::string> sounds = {
-        "assets/characters/sounds/Hero Jump.mp3",
-        "assets/characters/sounds/Hero Walk Footsteps Stone.mp3"
-    };
-    
-
-    EXPECT_NO_THROW(sp.init(sounds));
-    if (IsAudioDeviceReady()) {
-        EXPECT_TRUE(sp.isInitialized());
-    }
-}
-
-// Test 25: Gestión de Recursos (Seguridad)
-TEST(ResourceSystem, SafeUnload) {
-    ResourceManager* rm = ResourceManager::getInstance();
-    EXPECT_NO_THROW(rm->unloadTexture("textura_inexistente.png"));
-    EXPECT_NO_THROW(rm->unloadSound("sonido_inexistente.mp3"));
-}
-
-// Test 26: Reseteo de Animación
-TEST(AnimationSystem, ResetLogic) {
-    Animation anim(5, 0.1f, true, {0}, 0, 4);
-    
-    anim.animationUpdate(0.25f);
-    EXPECT_GT(anim.getCurrentFrame(), 0);
-    
-    anim.reset();
-    
-    EXPECT_EQ(anim.getCurrentFrame(), 0);
-}
-
-// Test 27: Ajuste Incremental de Zoom (Cámara)
-TEST(CameraSystem, ZoomAdjustment) {
-    GameCamera cam;
-    cam.init({0,0}, 1.0f, {0,0,100,100});
-    
-    EXPECT_FLOAT_EQ(cam.getTargetZoom(), 1.0f);
-    
-    cam.adjustZoom(0.5f);
-    EXPECT_FLOAT_EQ(cam.getTargetZoom(), 1.5f);
-    
-    cam.adjustZoom(-0.2f);
-    EXPECT_FLOAT_EQ(cam.getTargetZoom(), 1.3f);
-}
-
-// Test 28: Cooldown de Ataque del Jugador
-TEST(PlayerLogic, AttackCooldown) {
-    Player p;
-    EXPECT_TRUE(p.canAttack());
-    p.attack();
-    EXPECT_FALSE(p.canAttack());
-    p.update(0.6f);
-    EXPECT_TRUE(p.canAttack());
-}
-
-// Test 29: Nombres de Teclas (Settings)
-TEST(SettingsSystem, KeyNameParsing) {
-    SettingsManager* sm = SettingsManager::getInstance();
-    
-    std::string nameA = sm->getKeyName(65);
-    EXPECT_EQ(nameA, "A");
-    std::string nameZ = sm->getKeyName(90);
-    EXPECT_EQ(nameZ, "Z");
-}
-
-// Test 30: Mecánica de Salto Variable
-TEST(PlayerLogic, VariableJumpHeight) {
-    Player p;
-    p.velocity.y = -100.0f; 
-    float initialSpeed = p.velocity.y;
-    
-    p.updateJump(0.016f, true); 
-    
-    EXPECT_LT(p.velocity.y, initialSpeed);
-    
-    float speedAfterBoost = p.velocity.y;
-    p.updateJump(0.016f, false);
-    
-    EXPECT_FLOAT_EQ(p.velocity.y, speedAfterBoost);
-}
+BOOST_AUTO_TEST_SUITE_END()

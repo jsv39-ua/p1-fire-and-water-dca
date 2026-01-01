@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_GAME_TESTS "Build game tests" OFF)
 
 include(GNUInstallDirs)
 include(FetchContent)
@@ -50,7 +50,7 @@ add_subdirectory(core)
 add_subdirectory(app)
 add_subdirectory(assets/locales)
 
-if(BUILD_TESTS)
+if(BUILD_GAME_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()

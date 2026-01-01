@@ -1,107 +1,277 @@
 # Cómo ejecutar los Tests Unitarios
 
-Este proyecto utiliza **GoogleTest** como framework de pruebas y **CTest** como gestor de ejecución para verificar la lógica del juego.
-
-Los tests están **desactivados por defecto** para no ralentizar el desarrollo normal del juego. Para ejecutarlos, debes seguir estas instrucciones.
+Este proyecto utiliza **Boost.Test** como framework de pruebas y **CTest** como gestor de ejecución.
 
 ## Guía Rápida
 
-Para habilitar y ejecutar los tests, debes configurar CMake con la opción personalizada `BUILD_GAME_TESTS=ON`.
-
-### Paso 1: Configurar (Activando Tests)
-
-Abre una terminal en la raíz del proyecto (donde está el `CMakeLists.txt` principal) y ejecuta:
-
 ```bash
-# Recomendable: Si ya tienes una carpeta build, límpiala para evitar conflictos de caché
-rm -rf build 
-```
-```bash
-# Configura el proyecto activando el flag específico de tests
+# Configurar con tests habilitados
 cmake -S . -B build -DBUILD_GAME_TESTS=ON
-```
-### Paso 2: Compilar
 
-Compila el proyecto. Esto generará tanto el juego como el ejecutable de pruebas (unit_tests).
-
-```Bash
+# Compilar
 cmake --build build
-```
-Nota: Al compilar, también se copian automáticamente los archivos de la carpeta assets/ dentro de build/ para que los tests puedan encontrarlos.
 
-### Paso 3: Ejecutar los Tests
-
-Entra en la carpeta de compilación y utiliza CTest. Usamos el flag --output-on-failure para que, si algo falla, nos dé detalles útiles.
-
-```Bash
-cd build
-ctest --output-on-failure
+# Ejecutar tests
+cd build && ctest --output-on-failure
 ```
 
-### Solución de Problemas Comunes
-##### Error: "No tests were found!!!"
-**Causa**: CTest no encuentra pruebas registradas. Solución: Probablemente configuraste el proyecto sin el flag -DBUILD_GAME_TESTS=ON. Borra la carpeta build y repite el Paso 1.
+---
 
-##### Error: "SettingsFileExists Failed" (o fallos de carga de Assets)
-**Causa**: Los tests intentan cargar archivos (json, mp3) y no los encuentran. Solución: Asegúrate de ejecutar cmake --build build después de cualquier cambio. CMake tiene una regla file(COPY...) que actualiza los assets en la carpeta de construcción.
+## Suite de Tests: GameTests (23 tests)
 
-##### Advertencias: "Clock skew detected"
-**Causa**: Si estás usando WSL (Linux en Windows), esto ocurre por la sincronización de archivos entre sistemas. Solución: Puedes ignorarlo completamente si el mensaje final dice [100%] Built target....
+Una única suite que prueba las funcionalidades más relevantes del juego.
 
-## EXPLICACIÓN DE QUE HACE CADA TEST:
-## Explicación de los Tests
+---
 
-La suite actual consta de 10 tests automatizados. Aquí tienes el detalle de qué verifica cada uno:
+### 1. Sistema de Vidas y Daño (4 tests)
 
-### 🔹 Patrones de Diseño (Singletons)
-* **Test 1 - SettingsManagerTest.IsSingleton:** Verifica que el gestor de configuración sea único en todo el programa (patrón Singleton), devolviendo siempre la misma dirección de memoria.
-* **Test 2 - ResourceManagerTest.IsSingleton:** Asegura que solo exista una instancia del gestor de recursos para evitar cargas duplicadas de texturas o sonidos.
-* **Test 3 - AudioManagerTest.IsSingleton:** Comprueba que el sistema de audio es único para prevenir conflictos en la reproducción de sonidos.
+#### `test_player_loses_lives_on_damage`
+**Qué prueba:** Que el jugador pierde vidas correctamente cuando recibe daño.
 
-### 🔹 Lógica del Juego (Core)
-* **Test 4 - PlayerTest.Initialization:** Valida que la clase `Player` se puede instanciar correctamente sin provocar errores de memoria o excepciones en su constructor.
-* **Test 5 - EnemyTest.Initialization:** Comprueba la estabilidad al crear objetos de tipo `Enemy`.
-* **Test 6 - StateMachineTest.InitialState:** Test crítico que verifica la gestión de memoria de la Máquina de Estados. Se asegura de que puede recibir y gestionar nuevos estados utilizando punteros inteligentes (`unique_ptr`) sin violaciones de segmento.
+**Cómo funciona:** 
+1. Crea un jugador con 3 vidas
+2. Llama a `updateLifeCount(-1)` tres veces
+3. Verifica que las vidas pasan de 3 → 2 → 1 → 0
 
-### 🔹 Sistemas y Recursos
-* **Test 7 - MapLoaderTest.ClassExists:** Test de integridad básica para confirmar que el cargador de mapas se compila y enlaza correctamente con el proyecto.
-* **Test 8 - ConfigTest.SettingsFileExists:** Verifica que el archivo de configuración (`assets/config/settings.json`) existe y es accesible desde el ejecutable. Si falla, suele indicar problemas en la copia de assets.
-* **Test 9 - AssetsTest.BackgroundMusicExists:** Comprueba que los recursos multimedia (música de fondo) se han copiado correctamente a la carpeta de compilación.
-* **Test 10 - RaylibMath.VectorAddition:** Test de integración ("Smoke Test") que realiza una operación matemática usando Raylib. Sirve para confirmar que la librería gráfica externa está correctamente enlazada y operativa.
+---
 
-## Tests Avanzados
-### 🔹 Gameplay y Físicas 
-* **Test 11 - PlayerLogic.LifeSystem:** Comprueba que el jugador pierde y gana vida correctamente, respetando los límites.
-* **Test 12 - PlayerLogic.MovementPhysics (aceleración y frenado):** Verfica la velocidad La velocidad cambia correctamente.
-* **Test 13 - PlayerLogic.JumpPhysics:** Verifica que la acción de saltar aplica una velocidad vertical negativa (hacia arriba).
-* **Test 14 - PlayerLogic.InvincibilityState:** Comprueba que el sistema de invencibilidad temporal y parpadeo (shouldRenderVisible) se activa tras recibir daño.
-* **Test 15 - PhysicsTest.CollisionLogic:** Verifica la lógica de colisiones AABB (Caja contra Caja) usando las funciones nativas del motor.
-* **Test 16 - PlayerLogic.MovementPhysics (Orientación):** Verifica que al andar, la variable facingRight se actualiza según la dirección de movimiento (Izquierda/Derecha).
+#### `test_player_lives_cannot_be_negative`
+**Qué prueba:** Que las vidas nunca pueden ser un número negativo.
 
-### 🔹 Grupo 5: Elementos y Combate
-Pruebas específicas de la lógica "Fire & Water".
+**Cómo funciona:**
+1. Crea un jugador con 1 vida
+2. Intenta quitarle vidas múltiples veces (-1, -1, -5)
+3. Verifica que el contador se queda en 0, no en -6
 
-* **Test 17 - GameplayLogic.ElementalInteraction:** Verifica la lógica de elementos:
-    * Fuego vs Agua = Daño (Retorno 1).
-    * Fuego vs Fuego = Seguro (Retorno 2).
-* **Test 18 - EnemyLogic.PatrolMovement:** Verifica la IA de los enemigos. Confirma que cambian de dirección (`movingRight` cambia a `false`) cuando superan su rango de patrulla.
-* **Test 19 - CombatLogic.ProjectileLifecycle:** Comprueba que los proyectiles se inicializan activos, tienen el tipo correcto (Fuego/Agua) y pueden desactivarse.
-* **Test 20 - EnemyLogic.DamageSystem:** Verifica que los enemigos tienen vida, la pierden al recibir daño y entran en estado de invencibilidad.
+---
 
+#### `test_player_invincibility_after_damage`
+**Qué prueba:** Que el jugador obtiene invencibilidad temporal tras recibir daño.
 
-### 🔹 Grupo 6: Sistemas Auxiliares
-Pruebas de sistemas de soporte del motor.
-* **Test 21 - AnimationSystem.AnimationLoop:** Verifica que el sistema de animación avanza frames correctamente y hace bucle al final.
-* **Test 22 - SettingsSystem.KeyRebinding:** Comprueba que el gestor de configuración permite cambiar las teclas de control en tiempo de ejecución.
-* **Test 23 - CameraSystem.ZoomLimits:** Verifica que la cámara respeta los límites de zoom mínimo y máximo configurados, ignorando valores fuera de rango.
-* **Test 24 - AudioSystem.MultiSoundInit:** Comprueba que el reproductor de sonido avanzado acepta listas de archivos para sonidos con variaciones aleatorias.
-* **Test 25 - ResourceSystem.SafeUnload:** Verifica la robustez del gestor de recursos, asegurando que intentar liberar recursos no existentes no provoca cierres inesperados.
+**Cómo funciona:**
+1. Verifica que el jugador NO es invencible inicialmente
+2. Le quita una vida (simula recibir daño)
+3. Verifica que AHORA es invencible
+4. Simula el paso del tiempo (2 segundos)
+5. Verifica que la invencibilidad ha expirado
 
+---
 
-### 🔹 Grupo 7: Mecánicas Finas
-Pruebas de detalle y "game feel".
-* **Test 26 - AnimationSystem.ResetLogic:** Verifica que las animaciones pueden reiniciarse forzosamente al primer frame (útil al cambiar de estado idle/walk).
-* **Test 27 - CameraSystem.ZoomAdjustment:** Comprueba la lógica de zoom incremental (acercar/alejar) de la cámara.
-* **Test 28 - PlayerLogic.AttackCooldown:** Verifica el sistema de ritmo de combate. El jugador no debe poder atacar spammeando el botón; debe respetar el tiempo de enfriamiento (`ATTACK_COOLDOWN`).
-* **Test 29 - SettingsSystem.KeyNameParsing:** Verifica que el gestor de configuración traduce correctamente los códigos de tecla internos a texto legible para la UI ("A", "Z", etc.).
-* **Test 30 - PlayerLogic.VariableJumpHeight:** Verifica la mecánica de "salto variable" (estilo Mario Bros). Si el jugador mantiene pulsado el botón de salto mientras sube, recibe un impulso extra vertical.
+#### `test_enemy_takes_damage`
+**Qué prueba:** Que los enemigos también tienen sistema de vidas e invencibilidad.
+
+**Cómo funciona:**
+1. Crea un enemigo y guarda sus vidas iniciales
+2. Le quita una vida
+3. Verifica que tiene una vida menos Y que está invencible
+
+---
+
+### 2. Sistema de Movimiento y Física (7 tests)
+
+#### `test_player_horizontal_movement`
+**Qué prueba:** Que el movimiento horizontal funciona correctamente.
+
+**Cómo funciona:**
+1. Llama a `walk(1)` → verifica que velocity.x es positiva (derecha)
+2. Llama a `walk(-1)` → verifica que velocity.x es negativa (izquierda) y simétrica
+3. Llama a `walk(0)` → verifica que velocity.x es 0 (parado)
+
+---
+
+#### `test_player_jump_applies_upward_velocity`
+**Qué prueba:** Que el salto aplica velocidad hacia arriba.
+
+**Cómo funciona:**
+1. Pone la velocidad del jugador a 0
+2. Llama a `jump()`
+3. Verifica que velocity.y es negativa (en coordenadas de pantalla, negativo = arriba)
+4. Verifica que la fuerza es significativa (< -100)
+
+---
+
+#### `test_variable_jump_height`
+**Qué prueba:** Que mantener presionado el botón de salto da más altura.
+
+**Cómo funciona:**
+1. Pone al jugador con velocidad vertical -100 (saltando)
+2. Llama a `updateJump(deltaTime, true)` → mantiene el botón
+3. Verifica que la velocidad aumentó (más negativa = más arriba)
+4. Llama a `updateJump(deltaTime, false)` → suelta el botón
+5. Verifica que la velocidad no cambió
+
+---
+
+#### `test_gravity_applies_to_player`
+**Qué prueba:** Que la gravedad afecta al jugador cada frame.
+
+**Cómo funciona:**
+1. Pone velocity.y a 0
+2. Llama a `update(0.1f)` (simula un frame)
+3. Verifica que velocity.y es ahora positiva (cayendo)
+
+---
+
+#### `test_fall_speed_is_capped`
+**Qué prueba:** Que hay una velocidad máxima de caída.
+
+**Cómo funciona:**
+1. Pone velocity.y a 10000 (velocidad absurda)
+2. Llama a `update()`
+3. Verifica que velocity.y está limitada a 900
+
+---
+
+#### `test_enemy_horizontal_patrol`
+**Qué prueba:** Que los enemigos patrullan horizontalmente.
+
+**Cómo funciona:**
+1. Crea un enemigo con patrulla horizontal
+2. Guarda su posición X inicial
+3. Actualiza varias veces
+4. Verifica que la posición X cambió
+
+---
+
+#### `test_enemy_vertical_patrol`
+**Qué prueba:** Que los enemigos pueden patrullar verticalmente.
+
+**Cómo funciona:**
+1. Crea un enemigo con `verticalMovement = true`
+2. Guarda posición Y inicial
+3. Actualiza varias veces
+4. Verifica que Y cambió pero X se mantuvo igual
+
+---
+
+### 3. Sistema Elemental Fire vs Water (5 tests)
+
+#### `test_fire_player_damaged_by_water`
+**Qué prueba:** Que un jugador de fuego recibe daño al tocar agua.
+
+**Cómo funciona:**
+1. Crea un jugador tipo FIRE
+2. Crea una plataforma tipo WATER
+3. Verifica colisión → debe retornar 1 (elemento contrario = daño)
+
+---
+
+#### `test_water_player_damaged_by_fire`
+**Qué prueba:** Lo mismo pero al revés: jugador de agua + plataforma de fuego.
+
+---
+
+#### `test_water_player_safe_on_water`
+**Qué prueba:** Que un jugador de agua es seguro en plataformas de agua.
+
+**Cómo funciona:**
+1. Crea jugador WATER + plataforma WATER
+2. Verifica colisión → debe retornar 2 (elemento amigo = seguro)
+
+---
+
+#### `test_player_reaches_goal`
+**Qué prueba:** Que se detecta cuando el jugador llega a la meta.
+
+**Cómo funciona:**
+1. Crea jugador + plataforma tipo GOAL
+2. Verifica colisión → debe retornar 3 (meta alcanzada)
+
+---
+
+#### `test_no_collision_when_separated`
+**Qué prueba:** Que no hay colisión cuando jugador y plataforma están separados.
+
+**Cómo funciona:**
+1. Crea jugador en (0,0) y plataforma en (100,100)
+2. Verifica colisión → debe retornar 4 (sin colisión)
+
+---
+
+### 4. Sistema de Combate (4 tests)
+
+#### `test_attack_cooldown_system`
+**Qué prueba:** Que hay un cooldown entre ataques.
+
+**Cómo funciona:**
+1. Verifica que `canAttack()` es true inicialmente
+2. Llama a `attack()`
+3. Verifica que `canAttack()` es false (en cooldown)
+4. Simula 0.6 segundos
+5. Verifica que `canAttack()` es true de nuevo
+
+---
+
+#### `test_projectile_activation`
+**Qué prueba:** Que los proyectiles se crean activos y se pueden desactivar.
+
+**Cómo funciona:**
+1. Crea un proyectil
+2. Verifica que está activo y tiene el tipo correcto (FIRE)
+3. Llama a `deactivate()`
+4. Verifica que ya no está activo
+
+---
+
+#### `test_projectile_movement_direction`
+**Qué prueba:** Que los proyectiles se mueven en la dirección correcta.
+
+**Cómo funciona:**
+1. Crea proyectil en X=100 con velocidad positiva
+2. Actualiza
+3. Verifica que la nueva X es mayor que 100
+
+---
+
+#### `test_projectile_expires_after_lifetime`
+**Qué prueba:** Que los proyectiles desaparecen después de su tiempo de vida.
+
+**Cómo funciona:**
+1. Crea un proyectil (MAX_LIFETIME = 0.4 segundos)
+2. Verifica que está activo
+3. Actualiza con 0.5 segundos
+4. Verifica que ya no está activo
+
+---
+
+### 5. Sistema de Animación (2 tests)
+
+#### `test_animation_frame_progression`
+**Qué prueba:** Que los frames de animación avanzan correctamente.
+
+**Cómo funciona:**
+1. Crea animación de 3 frames (0.1s cada uno)
+2. Verifica frame inicial = 0
+3. Actualiza 0.1s → verifica frame = 1
+4. Actualiza 0.1s → verifica frame = 2
+
+---
+
+#### `test_animation_loops_correctly`
+**Qué prueba:** Que las animaciones con loop vuelven al principio.
+
+**Cómo funciona:**
+1. Crea animación de 3 frames con loop
+2. Avanza: frame 0 → 1 → 2 → 0 (loop)
+3. Verifica que después del último frame vuelve al 0
+
+---
+
+### 6. Sistema de Cámara (1 test)
+
+#### `test_camera_zoom_is_clamped`
+**Qué prueba:** Que el zoom de la cámara respeta límites mínimo y máximo.
+
+**Cómo funciona:**
+1. Configura límites de zoom: mínimo 0.5, máximo 2.0
+2. Intenta zoom 0.1 → verifica que queda en 0.5 (mínimo)
+3. Intenta zoom 10.0 → verifica que queda en 2.0 (máximo)
+4. Pone zoom 1.5 → verifica que queda en 1.5 (válido)
+
+---
+
+## CI
+
+Los tests se ejecutan automáticamente en GitHub Actions (`.github/workflows/tests.yml`) en:
+- Pull requests hacia `main`, `master` o `develop`
+- Push a `main`, `master` o `develop`
