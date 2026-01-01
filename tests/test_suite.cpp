@@ -9,6 +9,23 @@
 #include "Animation.hpp"
 #include "Camera.hpp"
 #include "raymath.h"
+#include "systems/MapLoader.hpp"
+#include "systems/ResourceManager.hpp"
+#include <raytmx.h>
+
+// Para tests que requieren contexto de raylib/raytmx
+struct RaylibFixture {
+    RaylibFixture() {
+        // Inicializar raylib en modo headless para tests
+        SetTraceLogLevel(LOG_NONE); // Silenciar logs durante tests
+        SetConfigFlags(FLAG_WINDOW_HIDDEN);
+        InitWindow(1, 1, "Test");
+    }
+    ~RaylibFixture() {
+        ResourceManager::cleanup();
+        CloseWindow();
+    }
+};
 
 // Suite de test de funcionalidades del juego
 BOOST_AUTO_TEST_SUITE(GameTests)
@@ -308,6 +325,115 @@ BOOST_AUTO_TEST_CASE(test_camera_zoom_is_clamped) {
     
     cam.setZoom(1.5f);
     BOOST_CHECK_CLOSE(cam.getTargetZoom(), 1.5f, 0.1);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_FIXTURE_TEST_SUITE(RaytmxIntegrationTests, RaylibFixture)
+
+// Test 24: raytmx carga correctamente un archivo TMX válido
+BOOST_AUTO_TEST_CASE(test_raytmx_loads_valid_tmx_file) {
+    MapLoader loader;
+    
+    // Cargar un mapa real del proyecto
+    BOOST_CHECK_NO_THROW(loader.loadMapa("assets/levels/niveles/nivel-tutorial/zona-1.tmx"));
+    
+    TmxMap* mapa = loader.getMapa();
+    BOOST_TEST(mapa != nullptr);
+}
+
+// Test 25: raytmx parsea correctamente las dimensiones del mapa
+BOOST_AUTO_TEST_CASE(test_raytmx_parses_map_dimensions) {
+    MapLoader loader("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    TmxMap* mapa = loader.getMapa();
+    
+    BOOST_REQUIRE(mapa != nullptr);
+    
+    // Verificar que las dimensiones son válidas (mayores que 0)
+    BOOST_TEST(mapa->width > 0);
+    BOOST_TEST(mapa->height > 0);
+    BOOST_TEST(mapa->tileWidth > 0);
+    BOOST_TEST(mapa->tileHeight > 0);
+}
+
+// Test 26: MapLoader calcula correctamente los límites del mapa desde raytmx
+BOOST_AUTO_TEST_CASE(test_maploader_calculates_map_bounds_from_raytmx) {
+    MapLoader loader("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    TmxMap* mapa = loader.getMapa();
+    
+    BOOST_REQUIRE(mapa != nullptr);
+    
+    Rectangle bounds = loader.getMapBounds();
+    
+    // Los límites deben coincidir con width*tileWidth y height*tileHeight
+    float expectedWidth = (float)(mapa->width * mapa->tileWidth);
+    float expectedHeight = (float)(mapa->height * mapa->tileHeight);
+    
+    BOOST_CHECK_CLOSE(bounds.width, expectedWidth, 0.01);
+    BOOST_CHECK_CLOSE(bounds.height, expectedHeight, 0.01);
+    BOOST_CHECK_CLOSE(bounds.x, 0.0f, 0.01);
+    BOOST_CHECK_CLOSE(bounds.y, 0.0f, 0.01);
+}
+
+// Test 27: raytmx detecta capas en el mapa TMX
+BOOST_AUTO_TEST_CASE(test_raytmx_detects_layers_in_tmx) {
+    MapLoader loader("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    TmxMap* mapa = loader.getMapa();
+    
+    BOOST_REQUIRE(mapa != nullptr);
+    
+    // Un mapa válido debe tener al menos una capa
+    BOOST_TEST(mapa->layersLength > 0);
+}
+
+// Test 28: MapLoader extrae plataformas desde datos de raytmx
+BOOST_AUTO_TEST_CASE(test_maploader_extracts_platforms_from_raytmx) {
+    MapLoader loader("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    
+    std::vector<Platform> platforms = loader.extractPlatforms();
+    
+    // El mapa debe tener plataformas de colisión definidas
+    BOOST_TEST(platforms.size() > 0);
+    
+    // Verificar que las plataformas tienen dimensiones válidas
+    for (const auto& platform : platforms) {
+        BOOST_TEST(platform.bounds.width > 0);
+        BOOST_TEST(platform.bounds.height > 0);
+    }
+}
+
+// Test 29: MapLoader maneja correctamente un mapa no cargado
+BOOST_AUTO_TEST_CASE(test_maploader_handles_null_map) {
+    MapLoader loader; // Sin cargar mapa
+    
+    // getMapBounds debe devolver rectángulo vacío
+    Rectangle bounds = loader.getMapBounds();
+    BOOST_CHECK_CLOSE(bounds.width, 0.0f, 0.01);
+    BOOST_CHECK_CLOSE(bounds.height, 0.0f, 0.01);
+    
+    // extractPlatforms debe devolver vector vacío sin crashear
+    std::vector<Platform> platforms = loader.extractPlatforms();
+    BOOST_TEST(platforms.empty());
+    
+    // extractEnemies debe devolver vector vacío sin crashear
+    std::vector<Enemy> enemies = loader.extractEnemies();
+    BOOST_TEST(enemies.empty());
+}
+
+// Test 30: raytmx carga correctamente los tilesets del mapa
+BOOST_AUTO_TEST_CASE(test_raytmx_loads_tilesets) {
+    MapLoader loader("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    TmxMap* mapa = loader.getMapa();
+    
+    BOOST_REQUIRE(mapa != nullptr);
+    
+    // Un mapa con tiles debe tener al menos un tileset
+    BOOST_TEST(mapa->tilesetsLength > 0);
+    
+    // El primer tileset debe tener un firstGid válido (normalmente 1)
+    if (mapa->tilesetsLength > 0) {
+        BOOST_TEST(mapa->tilesets[0].firstGid >= 1);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
