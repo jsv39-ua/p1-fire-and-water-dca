@@ -23,7 +23,7 @@ cmake --build build -j4
 
 ### Ejecución CMake
 ```bash
-./build/game
+./build/app/game.bin
 ```
 
 ## Otra forma de ejecutar el CMake
