@@ -153,12 +153,22 @@ else
 endif
 
 dist:
-	@echo "Generando paquete .deb..."
+ifeq ($(DETECTED_OS),Windows)
+	@echo "Generando paquete .zip para Windows..."
+	@if exist "$(BUILD_CMAKE_DIR)" rmdir /s /q "$(BUILD_CMAKE_DIR)"
+	cmake -S . -B $(BUILD_CMAKE_DIR) -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(BUILD_CMAKE_DIR) --config Release
+	cd $(BUILD_CMAKE_DIR) && cpack -G ZIP
+	move $(BUILD_CMAKE_DIR)\*.zip .
+	rmdir /s /q $(BUILD_CMAKE_DIR)
+else
+	@echo "Generando paquete .deb para Linux..."
 	@$(RM) $(BUILD_CMAKE_DIR)
-	cmake -S . -B $(BUILD_CMAKE_DIR) -DCPACK_GENERATOR="DEB" -DCMAKE_BUILD_TYPE=Release
+	cmake -S . -B $(BUILD_CMAKE_DIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BUILD_CMAKE_DIR) --config Release
 	cd $(BUILD_CMAKE_DIR) && cpack
 	mv $(BUILD_CMAKE_DIR)/*.deb .
 	$(RM) $(BUILD_CMAKE_DIR)
+endif
 
 .PHONY: all clean run info install uninstall dist
