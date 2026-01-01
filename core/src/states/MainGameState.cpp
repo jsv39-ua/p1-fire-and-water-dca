@@ -301,7 +301,9 @@ void MainGameState::update(float deltaTime)
             }
         } else {
             if (players[i].isWalkMusicPlaying) {
-                StopMusicStream(players[i].walkMusic);
+                if (IsMusicValid(players[i].walkMusic)) {
+                    StopMusicStream(players[i].walkMusic);
+                }
                 players[i].isWalkMusicPlaying = false;
                 TraceLog(LOG_INFO, "[MainGameState] Player %d walk music stopped", i);
             }

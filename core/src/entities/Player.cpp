@@ -146,7 +146,9 @@ void Player::update(float deltaTime) {
     bounds.y = position.y;
     
     // Actualizar música de caminar
-    UpdateMusicStream(walkMusic);
+    if (IsMusicValid(walkMusic)) {
+        UpdateMusicStream(walkMusic);
+    }
 }
 
 void Player::render() {
