@@ -20,6 +20,7 @@ Player::Player() : Entity() {
     life_count = 3;
     invincibility_timer = 0.0f;
     attack_cooldown = 0.0f;
+    walkMusic = {0}; // Initialize Music struct to zero for safe IsMusicValid checks
 }
 
 Player::Player(float x, float y, float height, float width, ElementType t) 
