@@ -10,7 +10,7 @@
 #include "Camera.hpp"
 #include "raymath.h"
 
-// suite de test de funcionalidades del juego
+// Suite de test de funcionalidades del juego
 BOOST_AUTO_TEST_SUITE(GameTests)
 
 // Test 1: El jugador pierde vidas correctamente al recibir daño
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_player_lives_cannot_be_negative) {
     p.updateLifeCount(-1); // Intenta -1
     p.updateLifeCount(-5); // Intenta -6
     
-    BOOST_TEST(p.getLifeCount() == 0); // Clampeado a 0
+    BOOST_TEST(p.getLifeCount() == 0);
 }
 
 // Test 3: El jugador obtiene invencibilidad temporal tras recibir daño
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_player_invincibility_after_damage) {
     p.updateLifeCount(-1);
     BOOST_TEST(p.isInvincible());
     
-    // La invencibilidad expira con el tiempo
+    // La invencibilidad desaparece con el tiempo
     for (int i = 0; i < 20; i++) {
         p.update(0.1f); // 2 segundos total
     }
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_player_jump_applies_upward_velocity) {
     BOOST_TEST(p.velocity.y < -100.0f);
 }
 
-// Test 7: Salto variable - mantener botón da más altura
+// Test 7: Salto variable, mantener botón da más altura
 BOOST_AUTO_TEST_CASE(test_variable_jump_height) {
     Player p;
     p.velocity.y = -100.0f;
@@ -109,14 +109,14 @@ BOOST_AUTO_TEST_CASE(test_variable_jump_height) {
     BOOST_CHECK_CLOSE(p.velocity.y, boostedSpeed, 0.001);
 }
 
-// Test 8: La gravedad se aplica al jugador en cada update
+// Test 8: La gravedad se aplica al jugador en cada actualizacion
 BOOST_AUTO_TEST_CASE(test_gravity_applies_to_player) {
     Player p;
     p.velocity = {0.0f, 0.0f};
     
     p.update(0.1f);
     
-    // La gravedad aumenta la velocidad Y (hacia abajo)
+    // La gravedad aumenta la velocidad Y hacia abajo
     BOOST_TEST(p.velocity.y > 0.0f);
 }
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_fall_speed_is_capped) {
     
     p.update(0.1f);
     
-    // Debe estar clampeada a MAX_FALL_SPEED (900.0f)
+    // Debe estar bloqueada a MAX_FALL_SPEED (900.0f)
     BOOST_TEST(p.velocity.y <= 900.0f);
 }
 
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_water_player_damaged_by_fire) {
     BOOST_TEST(result == 1); // 1 = elemento contrario
 }
 
-// Test 14: Jugador de agua es seguro en plataforma de agua
+// Test 14: Jugador de agua está seguro en plataforma de agua
 BOOST_AUTO_TEST_CASE(test_water_player_safe_on_water) {
     Player waterPlayer(0, 0, 10, 10, WATER);
     waterPlayer.bounds = Rectangle{10, 10, 10, 10};
