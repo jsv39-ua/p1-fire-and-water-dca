@@ -63,6 +63,17 @@ void MainGameState::init()
     // Inicialización del MapLoader
     loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
 
+    // Log de depuración para ver posiciones iniciales
+    TraceLog(LOG_INFO, "=== DEBUG: Posiciones iniciales de jugadores ===");
+    TraceLog(LOG_INFO, "FIRE: (%.2f, %.2f) | WATER: (%.2f, %.2f)", 
+        players[0].position.x, players[0].position.y,
+        players[1].position.x, players[1].position.y);
+    Rectangle debugMapBounds = mapLoader.getMapBounds();
+    TraceLog(LOG_INFO, "Map Bounds: x=%.2f, y=%.2f, w=%.2f, h=%.2f (bottom=%.2f)", 
+        debugMapBounds.x, debugMapBounds.y, debugMapBounds.width, debugMapBounds.height,
+        debugMapBounds.y + debugMapBounds.height);
+    TraceLog(LOG_INFO, "================================================");
+
     // Inicializar cámara con bounds del mapa
     Rectangle mapBounds = mapLoader.getMapBounds();
     camera.init({DEFAULT_SCREEN_WIDTH / 2.0f, DEFAULT_SCREEN_HEIGHT / 2.0f}, 2.0f, mapBounds);
@@ -437,17 +448,21 @@ void MainGameState::handleTransitions() {
         // guardo las velocidades para mantenerlas tras cargar el nivel
         Vector2 fire_vel = players[0].velocity;
         Vector2 water_vel = players[1].velocity;
+
+        // Store target spawn BEFORE loading level (which clears transitions vector)
+        Vector2 targetSpawn = active_transition->targetSpawn;
         
         // cargar nuevo nivel
         std::string fullPath = active_transition->targetMap;
         if (fullPath.find("assets/") == std::string::npos) {
             fullPath = LEVEL_BASE_PATH + fullPath;
         }
+                
         loadLevel(fullPath);
         
         // Reposicionar jugadores en spawn del nuevo nivel
-        players[0].position = active_transition->targetSpawn;
-        players[1].position = { active_transition->targetSpawn.x + PLAYER_SPAWN_OFFSET, active_transition->targetSpawn.y }; 
+        players[0].position = targetSpawn;
+        players[1].position = { targetSpawn.x + PLAYER_SPAWN_OFFSET, targetSpawn.y }; 
 
         // Restaurar velocidades
         players[0].velocity = fire_vel;
