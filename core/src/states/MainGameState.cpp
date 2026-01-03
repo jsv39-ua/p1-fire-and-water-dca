@@ -40,8 +40,8 @@ void MainGameState::init()
     float hitboxHeight = frameHeight;
    
     // Inicializar jugadores: [0] = FIRE, [1] = WATER
-    players[0] = Player(100.0f, 275.0f, hitboxWidth, hitboxHeight, FIRE);
-    players[1] = Player(150.0f, 275.0f, hitboxWidth, hitboxHeight, WATER);
+    players[0] = Player(100.0f, 250.0f, hitboxWidth, hitboxHeight, FIRE);
+    players[1] = Player(150.0f, 250.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
     players[0].setKeys(
