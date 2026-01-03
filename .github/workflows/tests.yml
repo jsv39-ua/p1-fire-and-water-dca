@@ -8,7 +8,7 @@ on:
 
 jobs:
   test_ubuntu:
-    name: Build and Run Tests
+    name: Ejecutar tests en Ubuntu
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install boost-msvc2019
+          choco install boost-msvc-14.2
 
       - name: Configure CMake with Tests
         run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release
