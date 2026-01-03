@@ -19,9 +19,11 @@ struct RaylibFixture {
         SetTraceLogLevel(LOG_NONE); // Silenciar logs durante tests
         SetConfigFlags(FLAG_WINDOW_HIDDEN);
         InitWindow(1, 1, "Test");
+        InitAudioDevice();
     }
     ~RaylibFixture() {
         ResourceManager::cleanup();
+        CloseAudioDevice();
         CloseWindow();
     }
 };
