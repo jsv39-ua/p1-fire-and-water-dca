@@ -13,27 +13,13 @@ cmake --build build
 
 # Ejecutar tests
 cd build && ctest --output-on-failure
-
-# En Windows:
-cd build; ctest --output-on-failure -C Debug
 ```
 
 ---
 
-## Suites de Tests
+## Suite de Tests: GameTests (23 tests)
 
-El proyecto cuenta con **30 tests** organizados en 2 suites:
-
-| Suite | Tests | Descripción |
-|-------|-------|-------------|
-| `GameTests` | 23 | Tests de lógica del juego (no requieren raylib) |
-| `RaytmxIntegrationTests` | 7 | Tests de integración con la librería raytmx (requieren raylib) |
-
----
-
-## Suite 1: GameTests (23 tests)
-
-Prueba las funcionalidades de lógica del juego sin dependencias gráficas.
+Una única suite que prueba las funcionalidades más relevantes del juego.
 
 ---
 
@@ -281,87 +267,6 @@ Prueba las funcionalidades de lógica del juego sin dependencias gráficas.
 2. Intenta zoom 0.1 → verifica que queda en 0.5 (mínimo)
 3. Intenta zoom 10.0 → verifica que queda en 2.0 (máximo)
 4. Pone zoom 1.5 → verifica que queda en 1.5 (válido)
-
----
-
-## Suite 2: RaytmxIntegrationTests (7 tests)
-
-Tests de integración con la librería externa **raytmx** (carga de mapas TMX de Tiled).
-
-> ⚠️ Estos tests requieren inicializar raylib. Usan un **fixture** (`RaylibFixture`) que crea una ventana oculta de 1x1 píxel antes de cada test y la cierra después.
-
----
-
-### 7. Integración con raytmx (7 tests)
-
-#### `test_raytmx_loads_valid_tmx_file`
-**Qué prueba:** Que raytmx puede cargar correctamente un archivo TMX válido.
-
-**Cómo funciona:**
-1. Crea un `MapLoader` vacío
-2. Llama a `loadMapa()` con un mapa real del proyecto
-3. Verifica que no lanza excepciones y que el mapa no es `nullptr`
-
----
-
-#### `test_raytmx_parses_map_dimensions`
-**Qué prueba:** Que raytmx parsea correctamente las dimensiones del mapa.
-
-**Cómo funciona:**
-1. Carga un mapa TMX
-2. Verifica que `mapa->width`, `height`, `tileWidth` y `tileHeight` son mayores que 0
-
----
-
-#### `test_maploader_calculates_map_bounds_from_raytmx`
-**Qué prueba:** Que `MapLoader::getMapBounds()` calcula correctamente los límites usando datos de raytmx.
-
-**Cómo funciona:**
-1. Carga un mapa y obtiene el puntero TMX
-2. Calcula el tamaño esperado: `width * tileWidth` y `height * tileHeight`
-3. Llama a `getMapBounds()`
-4. Verifica que coinciden los valores
-
----
-
-#### `test_raytmx_detects_layers_in_tmx`
-**Qué prueba:** Que raytmx detecta las capas definidas en el archivo TMX.
-
-**Cómo funciona:**
-1. Carga un mapa
-2. Verifica que `mapa->layersLength > 0`
-
----
-
-#### `test_maploader_extracts_platforms_from_raytmx`
-**Qué prueba:** Que `MapLoader::extractPlatforms()` extrae plataformas desde los datos parseados por raytmx.
-
-**Cómo funciona:**
-1. Carga un mapa
-2. Llama a `extractPlatforms()`
-3. Verifica que el vector no está vacío
-4. Verifica que cada plataforma tiene dimensiones válidas (width > 0, height > 0)
-
----
-
-#### `test_maploader_handles_null_map`
-**Qué prueba:** Que `MapLoader` maneja correctamente el caso de no tener mapa cargado.
-
-**Cómo funciona:**
-1. Crea un `MapLoader` sin cargar ningún mapa
-2. Llama a `getMapBounds()` → debe retornar rectángulo vacío (0,0,0,0)
-3. Llama a `extractPlatforms()` → debe retornar vector vacío sin crashear
-4. Llama a `extractEnemies()` → debe retornar vector vacío sin crashear
-
----
-
-#### `test_raytmx_loads_tilesets`
-**Qué prueba:** Que raytmx carga correctamente los tilesets definidos en el mapa.
-
-**Cómo funciona:**
-1. Carga un mapa
-2. Verifica que `mapa->tilesetsLength > 0`
-3. Verifica que el primer tileset tiene `firstGid >= 1`
 
 ---
 
