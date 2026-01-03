@@ -49,13 +49,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install boost-msvc-14.2
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+
+      - name: Install Boost via vcpkg
+        run: vcpkg install boost-test:x64-windows
 
       - name: Configure CMake with Tests
-        run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
 
       - name: Build
         run: cmake --build build --config Release --parallel
