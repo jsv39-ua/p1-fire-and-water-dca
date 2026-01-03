@@ -54,7 +54,7 @@ SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
 }
 
 void SoundPlayer::cleanup() {
-    if (initialized && IsAudioDeviceReady()) {
+    if (initialized && IsWindowReady() && IsAudioDeviceReady()) {
         // Descargar los aliases de todas las variantes
         for (int v = 0; v < numVariants; v++) {
             for (int i = 0; i < MAX_SOUNDS; i++) {

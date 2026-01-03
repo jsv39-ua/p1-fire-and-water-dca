@@ -25,9 +25,9 @@ Player::Player() : Entity() {
 }
 
 Player::~Player() {
-    // Solo intentar detener la música si el audio está disponible y walkMusic fue realmente cargada
-    // walkMusic.ctxData es nullptr si nunca se cargó música
-    if (IsAudioDeviceReady() && walkMusic.ctxData != nullptr && IsMusicValid(walkMusic)) {
+    // Solo intentar detener la música si el audio está disponible, la ventana está abierta 
+    // y walkMusic fue realmente cargada
+    if (IsWindowReady() && IsAudioDeviceReady() && walkMusic.ctxData != nullptr) {
         StopMusicStream(walkMusic);
     }
 }

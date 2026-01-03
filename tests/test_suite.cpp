@@ -14,16 +14,22 @@
 
 // Para tests que requieren contexto de raylib/raytmx
 struct RaylibFixture {
+    bool audioInitialized = false;
+    
     RaylibFixture() {
         // Inicializar raylib en modo headless para tests
         SetTraceLogLevel(LOG_NONE); // Silenciar logs durante tests
         SetConfigFlags(FLAG_WINDOW_HIDDEN);
         InitWindow(1, 1, "Test");
+        // Intentar inicializar audio, pero no fallar si no es posible
         InitAudioDevice();
+        audioInitialized = IsAudioDeviceReady();
     }
     ~RaylibFixture() {
         ResourceManager::cleanup();
-        CloseAudioDevice();
+        if (audioInitialized) {
+            CloseAudioDevice();
+        }
         CloseWindow();
     }
 };
