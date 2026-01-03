@@ -24,6 +24,14 @@ Player::Player() : Entity() {
     walkMusic = {0};
 }
 
+Player::~Player() {
+    // Solo intentar detener la música si el audio está disponible, la ventana está abierta 
+    // y walkMusic fue realmente cargada
+    if (IsWindowReady() && IsAudioDeviceReady() && walkMusic.ctxData != nullptr) {
+        StopMusicStream(walkMusic);
+    }
+}
+
 Player::Player(float x, float y, float height, float width, ElementType t) 
     : Entity({x, y}, {0.0f, 0.0f}, height, width, t) {
     // Inicializar teclas a 0 por defecto

@@ -176,13 +176,15 @@ void ResourceManager::unloadMap(const std::string& filePath) {
 // LIMPIEZA GENERAL
 void ResourceManager::clearAllCache() {
     // Liberar todas las texturas
-    for (auto& pair : textureCache) {
-        UnloadTexture(pair.second);
+    if (IsWindowReady()) {
+        for (auto& pair : textureCache) {
+            UnloadTexture(pair.second);
+        }
     }
     textureCache.clear();
     
     // Liberar todos los sonidos
-    if (IsAudioDeviceReady()) {
+    if (IsWindowReady() && IsAudioDeviceReady()) {
         for (auto& pair : soundCache) {
             UnloadSound(pair.second);
         }
@@ -190,7 +192,7 @@ void ResourceManager::clearAllCache() {
     soundCache.clear();
     
     // Liberar toda la música
-    if (IsAudioDeviceReady()) {
+    if (IsWindowReady() && IsAudioDeviceReady()) {
         for (auto& pair : musicCache) {
             UnloadMusicStream(pair.second);
         }
@@ -198,8 +200,10 @@ void ResourceManager::clearAllCache() {
     musicCache.clear();
     
     // Liberar todos los mapas
-    for (auto& pair : mapCache) {
-        UnloadTMX(pair.second);
+    if (IsWindowReady()) {
+        for (auto& pair : mapCache) {
+            UnloadTMX(pair.second);
+        }
     }
     mapCache.clear();
 }

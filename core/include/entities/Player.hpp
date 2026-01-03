@@ -16,6 +16,7 @@ public:
 
     Player();
     Player(float x, float y, float height, float width, ElementType t);
+    ~Player();
     
     void update(float deltaTime) override;
     void render() override;

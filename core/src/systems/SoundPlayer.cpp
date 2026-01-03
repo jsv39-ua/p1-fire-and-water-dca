@@ -54,7 +54,7 @@ SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
 }
 
 void SoundPlayer::cleanup() {
-    if (initialized) {
+    if (initialized && IsWindowReady() && IsAudioDeviceReady()) {
         // Descargar los aliases de todas las variantes
         for (int v = 0; v < numVariants; v++) {
             for (int i = 0; i < MAX_SOUNDS; i++) {
@@ -64,6 +64,10 @@ void SoundPlayer::cleanup() {
                 }
             }
         }
+        initialized = false;
+        numVariants = 0;
+        loadedFilePaths.clear();
+    } else if (initialized) {
         initialized = false;
         numVariants = 0;
         loadedFilePaths.clear();
