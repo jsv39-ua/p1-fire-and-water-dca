@@ -52,7 +52,6 @@ jobs:
       - name: Install dependencies
         run: |
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install boost-msvc-14.3
 
       - name: Configure CMake with Tests
         run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release
