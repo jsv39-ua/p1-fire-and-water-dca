@@ -67,6 +67,11 @@ Sound ResourceManager::loadSound(const std::string& filePath) {
         TraceLog(LOG_INFO, "[ResourceManager] Sonido cargado desde CACHE: %s", filePath.c_str());
         return it->second;
     }
+
+    if (!IsAudioDeviceReady()) {
+        TraceLog(LOG_WARNING, "[ResourceManager] Audio device not ready, skipping sound load: %s", filePath.c_str());
+        return { 0 };
+    }
     
     // Si no esta cargo desde disco
     TraceLog(LOG_INFO, "[ResourceManager] Cargando sonido desde DISCO: %s", filePath.c_str());
@@ -86,7 +91,9 @@ Sound ResourceManager::loadSound(const std::string& filePath) {
 void ResourceManager::unloadSound(const std::string& filePath) {
     auto it = soundCache.find(filePath);
     if (it != soundCache.end()) {
-        UnloadSound(it->second);
+        if (IsAudioDeviceReady()) {
+            UnloadSound(it->second);
+        }
         soundCache.erase(it);
     }
 }
@@ -99,6 +106,11 @@ Music ResourceManager::loadMusic(const std::string& filePath) {
     if (it != musicCache.end()) {
         TraceLog(LOG_INFO, "[ResourceManager] Música cargada desde CACHE: %s", filePath.c_str());
         return it->second;
+    }
+
+    if (!IsAudioDeviceReady()) {
+        TraceLog(LOG_WARNING, "[ResourceManager] Audio device not ready, skipping music load: %s", filePath.c_str());
+        return { 0 };
     }
     
     // Si no esta cargo desde disco
@@ -120,7 +132,9 @@ Music ResourceManager::loadMusic(const std::string& filePath) {
 void ResourceManager::unloadMusic(const std::string& filePath) {
     auto it = musicCache.find(filePath);
     if (it != musicCache.end()) {
-        UnloadMusicStream(it->second);
+        if (IsAudioDeviceReady()) {
+            UnloadMusicStream(it->second);
+        }
         musicCache.erase(it);
     }
 }
@@ -168,14 +182,18 @@ void ResourceManager::clearAllCache() {
     textureCache.clear();
     
     // Liberar todos los sonidos
-    for (auto& pair : soundCache) {
-        UnloadSound(pair.second);
+    if (IsAudioDeviceReady()) {
+        for (auto& pair : soundCache) {
+            UnloadSound(pair.second);
+        }
     }
     soundCache.clear();
     
     // Liberar toda la música
-    for (auto& pair : musicCache) {
-        UnloadMusicStream(pair.second);
+    if (IsAudioDeviceReady()) {
+        for (auto& pair : musicCache) {
+            UnloadMusicStream(pair.second);
+        }
     }
     musicCache.clear();
     

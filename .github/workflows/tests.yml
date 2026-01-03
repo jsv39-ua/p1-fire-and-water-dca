@@ -2,13 +2,13 @@ name: C++ Tests
 
 on:
   pull_request:
-    branches: [main, master, develop]
+    branches: [main]
   push:
-    branches: [main, master, develop]
+    branches: [main]
 
 jobs:
-  test:
-    name: Build and Run Tests
+  test_ubuntu:
+    name: Ejecutar tests en Ubuntu
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,8 @@ jobs:
             libxi-dev \
             libxcursor-dev \
             libxinerama-dev \
-            libasound2-dev
+            libasound2-dev \
+            xvfb
 
       - name: Configure CMake with Tests
         run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release
@@ -38,4 +39,28 @@ jobs:
 
       - name: Run CTest
         working-directory: build
-        run: ctest --output-on-failure
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" ctest --output-on-failure
+
+  test_windows:
+    name: Ejecutar tests en Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          choco install boost-msvc-14.2
+
+      - name: Configure CMake with Tests
+        run: cmake -B build -S . -DBUILD_GAME_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run CTest
+        working-directory: build
+        run: ctest --output-on-failure -C Release
+    
