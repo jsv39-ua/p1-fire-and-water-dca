@@ -97,8 +97,8 @@ $(TARGET): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 	@echo "--> EXITO: Ejecutable $(TARGET) creado."
 
-# La 'magia multidirectorio' consiste en crear el directorio correspondiente antes de compilar cada archivo, ya que si
-# por ejemplo intentamos compilar "obj/systems/MapLoader.o" pero "obj/systems/" no existe, fallará.
+# Aqui creamos el directorio correspondiente antes de compilar cada archivo, ya que si
+# por ejemplo intentamos compilar "obj/systems/MapLoader.o" pero "obj/systems/" no existe, fallara
 
 $(OBJ_DIR)/%.o: core/src/%.cpp
 	@echo "Compilando $<..."
