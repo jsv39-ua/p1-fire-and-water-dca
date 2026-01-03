@@ -22,15 +22,17 @@ struct RaylibFixture {
         SetTraceLogLevel(LOG_NONE); // Silenciar logs durante tests
         SetConfigFlags(FLAG_WINDOW_HIDDEN);
         InitWindow(1, 1, "Test");
+        InitAudioDevice();
     }
     ~RaylibFixture() {
         ResourceManager::cleanup();
+        CloseAudioDevice();
         CloseWindow();
     }
 };
 
 // Suite de test de funcionalidades del juego
-BOOST_AUTO_TEST_SUITE(GameTests)
+BOOST_FIXTURE_TEST_SUITE(GameTests, RaylibFixture)
 
 // Test 1: El jugador pierde vidas correctamente al recibir daño
 BOOST_AUTO_TEST_CASE(test_player_loses_lives_on_damage) {
