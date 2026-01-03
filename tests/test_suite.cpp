@@ -1,5 +1,7 @@
 #define BOOST_TEST_MODULE FireAndWater_GameTests
-#define BOOST_TEST_DYN_LINK
+#if !defined(WIN32)
+    #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/unit_test.hpp>
 
 #include "Player.hpp"

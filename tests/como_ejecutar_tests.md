@@ -13,6 +13,9 @@ cmake --build build
 
 # Ejecutar tests
 cd build && ctest --output-on-failure
+
+# En Windows:
+cd build; ctest --output-on-failure -C Debug
 ```
 
 ---
