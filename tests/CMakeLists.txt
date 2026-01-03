@@ -11,7 +11,7 @@ else()
 
     FetchContent_Declare(
         Boost
-        URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0-cmake.tar.xz
+        URL https://github.com/boostorg/boost/releases/download/boost-1.90.0/boost-1.90.0-cmake.7z
         DOWNLOAD_EXTRACT_TIMESTAMP ON
         EXCLUDE_FROM_ALL
     )
