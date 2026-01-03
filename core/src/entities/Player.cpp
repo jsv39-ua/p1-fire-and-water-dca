@@ -24,6 +24,12 @@ Player::Player() : Entity() {
     walkMusic = {0};
 }
 
+Player::~Player() {
+    if (IsAudioDeviceReady() && IsMusicValid(walkMusic)) {
+        StopMusicStream(walkMusic);
+    }
+}
+
 Player::Player(float x, float y, float height, float width, ElementType t) 
     : Entity({x, y}, {0.0f, 0.0f}, height, width, t) {
     // Inicializar teclas a 0 por defecto
