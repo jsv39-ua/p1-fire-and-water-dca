@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+
 extern "C" {
     #include <raylib.h>
 }
+
+class SoundPlayer;
 
 class AudioManager {
 private:
@@ -23,6 +27,12 @@ private:
     // Métodos privados de actualización
     void updateMusicVolume();
     void updateSfxVolumes();
+    void updateRegisteredSoundPlayers();
+    void updateRegisteredWalkMusic();
+    
+    // Listas de SoundPlayers y walkMusic registrados
+    std::vector<SoundPlayer*> registeredSoundPlayers;
+    std::vector<Music*> registeredWalkMusic;
     
 public:
     static AudioManager* getInstance();
@@ -42,6 +52,14 @@ public:
     float getMasterVolume() const;
     float getMusicVolume() const;
     float getSfxVolume() const;
+    
+    // Sistema de registro de SoundPlayers
+    void registerSoundPlayer(SoundPlayer* player);
+    void unregisterSoundPlayer(SoundPlayer* player);
+    
+    // Sistema de registro de walkMusic
+    void registerWalkMusic(Music* music);
+    void unregisterWalkMusic(Music* music);
     
     ~AudioManager(); 
 };

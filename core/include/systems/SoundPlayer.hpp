@@ -43,11 +43,16 @@ class SoundPlayer {
         int currentSound;
         int numVariants;  // Número de variantes cargadas
         bool initialized;
+        bool registeredInAudioManager;  // Para saber si está registrado
         std::vector<std::string> loadedFilePaths;
         float currentVolume;  // Rastrear el volumen actual
         
         // Método privado para limpiar recursos
         void cleanup();
+        
+        // Métodos registro en AudioManager
+        void registerWithAudioManager();
+        void unregisterFromAudioManager();
 };
 
 
