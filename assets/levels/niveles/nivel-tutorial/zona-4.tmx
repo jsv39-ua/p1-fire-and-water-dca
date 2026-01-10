@@ -14,9 +14,9 @@
   <object id="23" x="720" y="104.75" width="60.6667" height="242.333">
    <properties>
     <property name="direction" value="left"/>
-    <property name="targetMap" value="GOAL"/>
-    <property name="targetSpawnX" type="float" value="800"/>
-    <property name="targetSpawnY" type="float" value="165"/>
+    <property name="targetMap" value="nivel-1/zona-1.tmx"/>
+    <property name="targetSpawnX" type="float" value="100"/>
+    <property name="targetSpawnY" type="float" value="100"/>
     <property name="transitionType" value="instant"/>
    </properties>
   </object>

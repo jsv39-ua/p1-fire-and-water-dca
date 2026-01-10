@@ -37,25 +37,25 @@
   <image source="../../../backgrounds/background1.png" width="942" height="514"/>
  </imagelayer>
  <objectgroup id="5" name="Interactables">
-  <object id="4" type="platform" gid="2" x="557.986" y="270.022" width="18" height="18">
+  <object id="4" type="platform" gid="2" x="558" y="270" width="18" height="18">
    <properties>
     <property name="active" type="bool" value="false"/>
     <property name="tag" value="puente1"/>
    </properties>
   </object>
-  <object id="5" type="platform" gid="3" x="576" y="270.031" width="18" height="18">
+  <object id="5" type="platform" gid="3" x="576" y="270" width="18" height="18">
    <properties>
     <property name="active" type="bool" value="false"/>
     <property name="tag" value="puente1"/>
    </properties>
   </object>
-  <object id="7" type="platform" gid="3" x="594.031" y="270.031" width="18" height="18">
+  <object id="7" type="platform" gid="3" x="594" y="270" width="18" height="18">
    <properties>
     <property name="active" type="bool" value="false"/>
     <property name="tag" value="puente1"/>
    </properties>
   </object>
-  <object id="8" type="platform" gid="4" x="612.031" y="270.063" width="18" height="18">
+  <object id="8" type="platform" gid="4" x="612" y="270" width="18" height="18">
    <properties>
     <property name="active" type="bool" value="false"/>
     <property name="tag" value="puente1"/>

@@ -1,6 +1,8 @@
 #include <systems/AudioManager.hpp>
 #include <systems/ResourceManager.hpp>
+#include <systems/SoundPlayer.hpp>
 #include <iostream>
+#include <algorithm>
 #include <raylib.h>
 
 // De esta clase se crea una instancia para poder cargar los sonidos
@@ -74,6 +76,13 @@ void AudioManager::updateMusicStream() {
 // Métodos privados de actualización de volúmenes
 void AudioManager::updateMusicVolume() {
     float finalVolume = masterVolume * musicBaseVolume;
+    
+    // Evitar actualizaciones redundantes
+    if (finalVolume == lastMusicFinalVolume) {
+        return;
+    }
+    lastMusicFinalVolume = finalVolume;
+    
     if (IsMusicValid(backgroundMusic)) {
         SetMusicVolume(backgroundMusic, finalVolume);
     }
@@ -81,12 +90,23 @@ void AudioManager::updateMusicVolume() {
 
 void AudioManager::updateSfxVolumes() {
     float finalVolume = masterVolume * sfxBaseVolume;
+    
+    // Evitar actualizaciones redundantes
+    if (finalVolume == lastSfxFinalVolume) {
+        return;
+    }
+    lastSfxFinalVolume = finalVolume;
+    
     if (IsSoundValid(buttonClickSound)) {
         SetSoundVolume(buttonClickSound, finalVolume);
     }
     if (IsSoundValid(buttonHoverSound)) {
         SetSoundVolume(buttonHoverSound, finalVolume);
     }
+    // Actualizar todos los SoundPlayers registrados
+    updateRegisteredSoundPlayers();
+    // Actualizar todos los walkMusic registrados
+    updateRegisteredWalkMusic();
 }
 
 // Setters de volumen con validación de rango
@@ -136,6 +156,84 @@ float AudioManager::getSfxVolume() const {
 
 
 AudioManager::~AudioManager() {
-    //no descargo porque se queda en cache
+    registeredSoundPlayers.clear();
+    registeredWalkMusic.clear();
+}
+
+void AudioManager::registerSoundPlayer(SoundPlayer* player) {
+    if (player == nullptr) return;
+    
+    // Evitar duplicados
+    auto it = std::find(registeredSoundPlayers.begin(), registeredSoundPlayers.end(), player);
+    if (it == registeredSoundPlayers.end()) {
+        registeredSoundPlayers.push_back(player);
+        // Aplicar volumen actual inmediatamente
+        float finalVolume = masterVolume * sfxBaseVolume;
+        player->setVolume(finalVolume);
+        // Log solo en modo DEBUG
+        #ifdef DEBUG
+        TraceLog(LOG_INFO, "[AudioManager] SoundPlayer registrado. Total: %d", (int)registeredSoundPlayers.size());
+        #endif
+    }
+}
+
+void AudioManager::unregisterSoundPlayer(SoundPlayer* player) {
+    if (player == nullptr) return;
+    
+    auto it = std::find(registeredSoundPlayers.begin(), registeredSoundPlayers.end(), player);
+    if (it != registeredSoundPlayers.end()) {
+        registeredSoundPlayers.erase(it);
+        #ifdef DEBUG
+        TraceLog(LOG_INFO, "[AudioManager] SoundPlayer desregistrado. Total: %d", (int)registeredSoundPlayers.size());
+        #endif
+    }
+}
+
+void AudioManager::updateRegisteredSoundPlayers() {
+    float finalVolume = masterVolume * sfxBaseVolume;
+    for (SoundPlayer* player : registeredSoundPlayers) {
+        if (player != nullptr && player->isInitialized()) {
+            player->setVolume(finalVolume);
+        }
+    }
+}
+
+void AudioManager::registerWalkMusic(Music* music) {
+    if (music == nullptr) return;
+    
+    // Evitar duplicados
+    auto it = std::find(registeredWalkMusic.begin(), registeredWalkMusic.end(), music);
+    if (it == registeredWalkMusic.end()) {
+        registeredWalkMusic.push_back(music);
+        // Aplicar volumen actual inmediatamente
+        float finalVolume = masterVolume * sfxBaseVolume;
+        if (IsMusicValid(*music)) {
+            SetMusicVolume(*music, finalVolume);
+        }
+        #ifdef DEBUG
+        TraceLog(LOG_INFO, "[AudioManager] walkMusic registrado. Total: %d", (int)registeredWalkMusic.size());
+        #endif
+    }
+}
+
+void AudioManager::unregisterWalkMusic(Music* music) {
+    if (music == nullptr) return;
+    
+    auto it = std::find(registeredWalkMusic.begin(), registeredWalkMusic.end(), music);
+    if (it != registeredWalkMusic.end()) {
+        registeredWalkMusic.erase(it);
+        #ifdef DEBUG
+        TraceLog(LOG_INFO, "[AudioManager] walkMusic desregistrado. Total: %d", (int)registeredWalkMusic.size());
+        #endif
+    }
+}
+
+void AudioManager::updateRegisteredWalkMusic() {
+    float finalVolume = masterVolume * sfxBaseVolume;
+    for (Music* music : registeredWalkMusic) {
+        if (music != nullptr && IsMusicValid(*music)) {
+            SetMusicVolume(*music, finalVolume);
+        }
+    }
 }
 

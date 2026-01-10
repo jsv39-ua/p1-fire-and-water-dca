@@ -122,6 +122,12 @@ void MainGameState::handleInput()
 
     // Control de ambos jugadores con un bucle
     for (int i = 0; i < 2; i++) {
+        // Si el jugador está esperando en una transición, ignorar input de movimiento
+        if (waitingForTransition[i]) {
+            players[i].walk(0); // Asegurar que no se mueve
+            continue;
+        }
+        
         // Control de movimiento
         if (IsKeyDown(playerKeys[i][0])) {
             players[i].walk(-1);
@@ -197,6 +203,13 @@ void MainGameState::update(float deltaTime)
 
     // Actualizar ambos jugadores
     for (int i = 0; i < 2; i++) {
+        // Si el jugador está esperando en una transición, no actualizar física
+        if (waitingForTransition[i]) {
+            // Solo actualizar bounds sin aplicar física
+            players[i].bounds = { players[i].position.x, players[i].position.y, players[i].width, players[i].height };
+            continue;
+        }
+        
         players[i].update(deltaTime);
         
         int jumpKey = (i == 0) ? SettingsManager::getInstance()->getFireJump() 
@@ -314,7 +327,6 @@ void MainGameState::update(float deltaTime)
                 if (IsMusicValid(players[i].walkMusic)) {
                     PlayMusicStream(players[i].walkMusic);
                     players[i].isWalkMusicPlaying = true;
-                    TraceLog(LOG_INFO, "[MainGameState] Player %d walk music started", i);
                 }
             }
         } else {
@@ -323,7 +335,6 @@ void MainGameState::update(float deltaTime)
                     StopMusicStream(players[i].walkMusic);
                 }
                 players[i].isWalkMusicPlaying = false;
-                TraceLog(LOG_INFO, "[MainGameState] Player %d walk music stopped", i);
             }
         }
     }
@@ -459,13 +470,25 @@ void MainGameState::handleTransitions() {
         // Store target spawn BEFORE loading level (which clears transitions vector)
         Vector2 targetSpawn = active_transition->targetSpawn;
         
-        // cargar nuevo nivel
-        std::string fullPath = active_transition->targetMap;
-        if (fullPath.find("assets/") == std::string::npos) {
-            fullPath = LEVEL_BASE_PATH + fullPath;
-        }
+        // Resolver path del mapa destino (soporta transiciones entre niveles)
+        std::string fullPath = resolveMapPath(active_transition->targetMap);
                 
         loadLevel(fullPath);
+        
+        // Obtener los nuevos bounds del mapa cargado
+        Rectangle newMapBounds = mapLoader.getMapBounds();
+        
+        // Ajustar spawn para que esté dentro del mapa con un margen de seguridad
+        const float SPAWN_MARGIN = 10.0f; // Margen para evitar bugs en el borde
+        
+        // Si el spawn está muy cerca del borde izquierdo, moverlo hacia dentro
+        if (targetSpawn.x < newMapBounds.x + SPAWN_MARGIN) {
+            targetSpawn.x = newMapBounds.x + SPAWN_MARGIN;
+        }
+        // Si el spawn está muy cerca del borde derecho, moverlo hacia dentro
+        if (targetSpawn.x > newMapBounds.x + newMapBounds.width - SPAWN_MARGIN - players[0].width - PLAYER_SPAWN_OFFSET) {
+            targetSpawn.x = newMapBounds.x + newMapBounds.width - SPAWN_MARGIN - players[0].width - PLAYER_SPAWN_OFFSET;
+        }
         
         // Reposicionar jugadores en spawn del nuevo nivel
         players[0].position = targetSpawn;
@@ -497,11 +520,21 @@ void MainGameState::handleMapBoundaries() {
         }
 
         if (inTransition) {
-            // Simular suelo en transiciones laterales: si sale del mapa horizontalmente,
-            // anulamos la gravedad para que no caiga al vacío.
-            if (players[i].position.x < mapBounds.x || 
-                players[i].position.x + players[i].width > mapBounds.x + mapBounds.width) {
-                if (players[i].velocity.y > 0) players[i].velocity.y = 0;
+            // Verificar si el jugador está COMPLETAMENTE fuera del mapa (sprite no visible)
+            // Solo congelar cuando el jugador entero esté fuera de los bounds
+            bool completelyOutside = 
+                (players[i].position.x + players[i].width < mapBounds.x) ||  // Completamente a la izquierda
+                (players[i].position.x > mapBounds.x + mapBounds.width) ||   // Completamente a la derecha
+                (players[i].position.y + players[i].height < mapBounds.y) || // Completamente arriba
+                (players[i].position.y > mapBounds.y + mapBounds.height);    // Completamente abajo
+            
+            if (completelyOutside) {
+                // El jugador está completamente fuera - congelarlo
+                waitingForTransition[i] = true;
+                players[i].velocity.x = 0;
+                players[i].velocity.y = 0;
+            } else {
+                waitingForTransition[i] = false;
             }
 
             // Límite Izquierdo
@@ -536,6 +569,9 @@ void MainGameState::handleMapBoundaries() {
                     players[i].velocity.y = 0; // Detener caída (quedarse flotando)
                 }
             }
+        } else {
+            // No está en una transición, resetear el flag
+            waitingForTransition[i] = false;
         }
 
         // Actualizar bounds tras modificar posición
@@ -565,10 +601,31 @@ void MainGameState::checkFallDeath() {
     }
 }
 
+std::string MainGameState::resolveMapPath(const std::string& targetMap) {
+    if (targetMap.find("assets/") != std::string::npos) {
+        return targetMap;
+    }
+    
+    if (targetMap.find('/') != std::string::npos) {
+        return std::string(LEVELS_BASE_PATH) + targetMap;
+    }
+    
+    return currentLevelPath + targetMap;
+}
+
 void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
     level_platforms.clear();
     level_enemies.clear();
     level_transitions.clear();
+    
+    // Extraer y guardar el path del nivel actual (carpeta contenedora)
+    size_t lastSlash = mapPath.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        currentLevelPath = mapPath.substr(0, lastSlash + 1);
+    } else {
+        currentLevelPath = std::string(LEVELS_BASE_PATH);
+    }
+    TraceLog(LOG_INFO, "Current level path set to: %s", currentLevelPath.c_str());
 
     try {
         mapLoader.loadMapa(mapPath.c_str());

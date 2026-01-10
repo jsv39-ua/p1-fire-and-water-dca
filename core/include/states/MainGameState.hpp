@@ -41,6 +41,9 @@ private:
     // Flags de suelo para cada jugador
     bool on_ground[2] = {false, false}; // [0] = fire, [1] = water
     
+    // Flags para indicar si un jugador está esperando en una transición
+    bool waitingForTransition[2] = {false, false};
+    
     std::vector<Enemy> level_enemies;
     std::vector<Projectile> projectiles;
     std::vector<MapTransition> level_transitions;
@@ -53,6 +56,9 @@ private:
     void updateCamera(float deltaTime);
     void handleMapBoundaries();
     void checkFallDeath();
+    
+    // Resolver path de mapa destino
+    std::string resolveMapPath(const std::string& targetMap);
 
     // Texturas de personajes
     Texture2D character_textures[2];
@@ -74,5 +80,8 @@ private:
     static constexpr float DEATH_DELAY = 1.5f; // 1.5 segundos antes de Game Over
     static constexpr float PLAYER_SPAWN_OFFSET = 40.0f;
     static constexpr float FALL_DEATH_THRESHOLD = 200.0f;
-    static constexpr const char* LEVEL_BASE_PATH = "assets/levels/niveles/nivel-tutorial/";
+    static constexpr const char* LEVELS_BASE_PATH = "assets/levels/niveles/";
+    
+    // Path del nivel actual
+    std::string currentLevelPath;
 };

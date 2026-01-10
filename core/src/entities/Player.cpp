@@ -25,6 +25,11 @@ Player::Player() : Entity() {
 }
 
 Player::~Player() {
+    // Desregistrar walkMusic del AudioManager
+    if (walkMusic.ctxData != nullptr) {
+        AudioManager::getInstance()->unregisterWalkMusic(&walkMusic);
+    }
+    
     // Solo intentar detener la música si el audio está disponible, la ventana está abierta 
     // y walkMusic fue realmente cargada
     if (IsWindowReady() && IsAudioDeviceReady() && walkMusic.ctxData != nullptr) {
@@ -90,7 +95,6 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     }
     if (!sonidosJump.empty()) {
         jumpSound.init(sonidosJump);
-        jumpSound.setVolume(1.0f);
     }
     if (!sonidosDeath.empty()) {
         deathSound.init(sonidosDeath);
@@ -100,9 +104,8 @@ Player::Player(float x, float y, float height, float width, ElementType t)
     
     if (IsMusicValid(walkMusic)) {
         walkMusic.looping = true;
-        // Establecer volumen alto para los pasos - no usar volumen de SFX porque es música
-        SetMusicVolume(walkMusic, 0.8f); // Volumen directo sin multiplicadores
-        TraceLog(LOG_INFO, "[Player] Walk music loaded successfully with volume: 0.8");
+        AudioManager::getInstance()->registerWalkMusic(&walkMusic);
+        TraceLog(LOG_INFO, "[Player] Walk music loaded and registered with AudioManager");
     } else {
         TraceLog(LOG_ERROR, "[Player] Failed to load walk music");
     }
@@ -119,7 +122,8 @@ void Player::setKeys(int left, int right, int jump, int attack) {
 }
 
 void Player::update(float deltaTime) {
-    // Logging periódico
+    // Logging periódico en modo debug
+    #ifdef DEBUG
     log_timer += deltaTime;
     if (log_timer >= LOG_INTERVAL) {
         log_timer = 0.0f;
@@ -130,6 +134,7 @@ void Player::update(float deltaTime) {
             life_count,
             (isInvincible() ? "YES" : "NO"));
     }
+    #endif
 
     // Actualizar timer de invencibilidad
     if (invincibility_timer > 0.0f) {

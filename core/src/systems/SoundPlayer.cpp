@@ -1,8 +1,9 @@
 #include <systems/SoundPlayer.hpp>
 #include <systems/ResourceManager.hpp>
+#include <systems/AudioManager.hpp>
 #include <cstdlib>  // Para rand()
 
-SoundPlayer::SoundPlayer() : currentSound(0), numVariants(0), initialized(false), currentVolume(1.0f) {
+SoundPlayer::SoundPlayer() : currentSound(0), numVariants(0), initialized(false), registeredInAudioManager(false), currentVolume(1.0f) {
     for (int v = 0; v < MAX_VARIANTS; v++) {
         for (int i = 0; i < MAX_SOUNDS; i++) {
             soundArray[v][i] = { 0 };
@@ -11,12 +12,13 @@ SoundPlayer::SoundPlayer() : currentSound(0), numVariants(0), initialized(false)
 }
 
 SoundPlayer::~SoundPlayer() {
+    unregisterFromAudioManager();
     cleanup();
 }
 
 // Copy constructor
 SoundPlayer::SoundPlayer(const SoundPlayer& other) 
-    : currentSound(0), numVariants(0), initialized(false), currentVolume(other.currentVolume) {
+    : currentSound(0), numVariants(0), initialized(false), registeredInAudioManager(false), currentVolume(other.currentVolume) {
     for (int v = 0; v < MAX_VARIANTS; v++) {
         for (int i = 0; i < MAX_SOUNDS; i++) {
             soundArray[v][i] = { 0 };
@@ -36,6 +38,8 @@ SoundPlayer::SoundPlayer(const SoundPlayer& other)
 // Copy assignment operator
 SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
     if (this != &other) {
+        // Desregistrar antes de limpiar
+        unregisterFromAudioManager();
         // Limpiar recursos actuales
         cleanup();
         
@@ -145,6 +149,9 @@ void SoundPlayer::init(const std::vector<std::string>& filePaths) {
     initialized = true;
     loadedFilePaths = filePaths;
     
+    // Registrar en AudioManager para recibir actualizaciones de volumen
+    registerWithAudioManager();
+    
     TraceLog(LOG_INFO, "[SoundPlayer] Successfully initialized with %d variants and %d channels per variant", loadedVariants, MAX_SOUNDS);
 }
 
@@ -172,6 +179,11 @@ void SoundPlayer::play() {
 }
 
 void SoundPlayer::setVolume(float volume) {
+    // Evitar actualizaciones redundantes si el volumen no cambió
+    if (currentVolume == volume) {
+        return;
+    }
+    
     currentVolume = volume;
     
     if (!initialized) {
@@ -185,5 +197,19 @@ void SoundPlayer::setVolume(float volume) {
                 SetSoundVolume(soundArray[v][i], volume);
             }
         }
+    }
+}
+
+void SoundPlayer::registerWithAudioManager() {
+    if (!registeredInAudioManager && initialized) {
+        AudioManager::getInstance()->registerSoundPlayer(this);
+        registeredInAudioManager = true;
+    }
+}
+
+void SoundPlayer::unregisterFromAudioManager() {
+    if (registeredInAudioManager) {
+        AudioManager::getInstance()->unregisterSoundPlayer(this);
+        registeredInAudioManager = false;
     }
 }
