@@ -22,6 +22,10 @@ private:
     float musicBaseVolume = 0.5f;   // Volumen de música (sin multiplicar)
     float sfxBaseVolume = 0.5f;     // Volumen de efectos de sonido
     
+    // Caché de volúmenes finales calculados
+    float lastMusicFinalVolume = -1.0f;
+    float lastSfxFinalVolume = -1.0f;
+    
     AudioManager(); // Constructor privado para Singleton
     
     // Métodos privados de actualización

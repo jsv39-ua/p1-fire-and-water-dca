@@ -76,6 +76,13 @@ void AudioManager::updateMusicStream() {
 // Métodos privados de actualización de volúmenes
 void AudioManager::updateMusicVolume() {
     float finalVolume = masterVolume * musicBaseVolume;
+    
+    // Evitar actualizaciones redundantes
+    if (finalVolume == lastMusicFinalVolume) {
+        return;
+    }
+    lastMusicFinalVolume = finalVolume;
+    
     if (IsMusicValid(backgroundMusic)) {
         SetMusicVolume(backgroundMusic, finalVolume);
     }
@@ -83,6 +90,13 @@ void AudioManager::updateMusicVolume() {
 
 void AudioManager::updateSfxVolumes() {
     float finalVolume = masterVolume * sfxBaseVolume;
+    
+    // Evitar actualizaciones redundantes
+    if (finalVolume == lastSfxFinalVolume) {
+        return;
+    }
+    lastSfxFinalVolume = finalVolume;
+    
     if (IsSoundValid(buttonClickSound)) {
         SetSoundVolume(buttonClickSound, finalVolume);
     }
@@ -156,7 +170,10 @@ void AudioManager::registerSoundPlayer(SoundPlayer* player) {
         // Aplicar volumen actual inmediatamente
         float finalVolume = masterVolume * sfxBaseVolume;
         player->setVolume(finalVolume);
+        // Log solo en modo DEBUG
+        #ifdef DEBUG
         TraceLog(LOG_INFO, "[AudioManager] SoundPlayer registrado. Total: %d", (int)registeredSoundPlayers.size());
+        #endif
     }
 }
 
@@ -166,7 +183,9 @@ void AudioManager::unregisterSoundPlayer(SoundPlayer* player) {
     auto it = std::find(registeredSoundPlayers.begin(), registeredSoundPlayers.end(), player);
     if (it != registeredSoundPlayers.end()) {
         registeredSoundPlayers.erase(it);
+        #ifdef DEBUG
         TraceLog(LOG_INFO, "[AudioManager] SoundPlayer desregistrado. Total: %d", (int)registeredSoundPlayers.size());
+        #endif
     }
 }
 
@@ -191,7 +210,9 @@ void AudioManager::registerWalkMusic(Music* music) {
         if (IsMusicValid(*music)) {
             SetMusicVolume(*music, finalVolume);
         }
+        #ifdef DEBUG
         TraceLog(LOG_INFO, "[AudioManager] walkMusic registrado. Total: %d", (int)registeredWalkMusic.size());
+        #endif
     }
 }
 
@@ -201,7 +222,9 @@ void AudioManager::unregisterWalkMusic(Music* music) {
     auto it = std::find(registeredWalkMusic.begin(), registeredWalkMusic.end(), music);
     if (it != registeredWalkMusic.end()) {
         registeredWalkMusic.erase(it);
+        #ifdef DEBUG
         TraceLog(LOG_INFO, "[AudioManager] walkMusic desregistrado. Total: %d", (int)registeredWalkMusic.size());
+        #endif
     }
 }
 

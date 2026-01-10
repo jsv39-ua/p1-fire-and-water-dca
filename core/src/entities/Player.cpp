@@ -122,7 +122,8 @@ void Player::setKeys(int left, int right, int jump, int attack) {
 }
 
 void Player::update(float deltaTime) {
-    // Logging periódico
+    // Logging periódico en modo debug
+    #ifdef DEBUG
     log_timer += deltaTime;
     if (log_timer >= LOG_INTERVAL) {
         log_timer = 0.0f;
@@ -133,6 +134,7 @@ void Player::update(float deltaTime) {
             life_count,
             (isInvincible() ? "YES" : "NO"));
     }
+    #endif
 
     // Actualizar timer de invencibilidad
     if (invincibility_timer > 0.0f) {

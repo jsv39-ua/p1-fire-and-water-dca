@@ -179,6 +179,11 @@ void SoundPlayer::play() {
 }
 
 void SoundPlayer::setVolume(float volume) {
+    // Evitar actualizaciones redundantes si el volumen no cambió
+    if (currentVolume == volume) {
+        return;
+    }
+    
     currentVolume = volume;
     
     if (!initialized) {
