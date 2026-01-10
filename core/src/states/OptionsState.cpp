@@ -2,6 +2,7 @@
 #include "states/StateMachine.hpp"
 #include "states/KeyBindingsState.hpp"
 #include <systems/AudioManager.hpp>
+#include <systems/SettingsManager.hpp>
 #include <iostream>
 #include "systems/LocalizationManager.hpp"
 extern "C" {
@@ -141,6 +142,7 @@ void OptionsState::update(float deltaTime)
         masterVolume = x / (masterVolumeSlider.width - masterVolumeHandle.width);
         
         audioMgr->setMasterVolume(masterVolume);
+        SettingsManager::getInstance()->setMasterVolume(masterVolume);
         updateMasterVolumeSlider();
     }
 
@@ -153,6 +155,7 @@ void OptionsState::update(float deltaTime)
         musicVolume = x / (musicVolumeSlider.width - musicVolumeHandle.width);
 
         audioMgr->setMusicVolume(musicVolume);
+        SettingsManager::getInstance()->setMusicVolume(musicVolume);
         updateMusicVolumeSlider();
     }
 
@@ -165,6 +168,7 @@ void OptionsState::update(float deltaTime)
         sfxVolume = x / (sfxVolumeSlider.width - sfxVolumeHandle.width);
 
         audioMgr->setSfxVolume(sfxVolume);
+        SettingsManager::getInstance()->setSfxVolume(sfxVolume);
         updateSfxVolumeSlider();
     }
 

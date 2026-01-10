@@ -18,20 +18,25 @@ SoundPlayer::~SoundPlayer() {
 
 // Copy constructor
 SoundPlayer::SoundPlayer(const SoundPlayer& other) 
-    : currentSound(0), numVariants(0), initialized(false), registeredInAudioManager(false), currentVolume(other.currentVolume) {
+    : currentSound(0), numVariants(0), initialized(false), registeredInAudioManager(false), currentVolume(-1.0f) {
     for (int v = 0; v < MAX_VARIANTS; v++) {
         for (int i = 0; i < MAX_SOUNDS; i++) {
             soundArray[v][i] = { 0 };
         }
     }
     
+    // Guardar el volumen objetivo
+    float targetVolume = other.currentVolume;
+    
     // Si el otro está inicializado, inicializamos este con los mismos archivos
     if (other.initialized && !other.loadedFilePaths.empty()) {
         init(other.loadedFilePaths);
-        // Aplicar el volumen del otro
+        // Aplicar el volumen del otro (currentVolume es -1, así que se aplicará)
         if (initialized) {
-            setVolume(other.currentVolume);
+            setVolume(targetVolume);
         }
+    } else {
+        currentVolume = targetVolume;
     }
 }
 
@@ -43,15 +48,19 @@ SoundPlayer& SoundPlayer::operator=(const SoundPlayer& other) {
         // Limpiar recursos actuales
         cleanup();
         
-        currentVolume = other.currentVolume;
+        // Guardar el volumen pero resetear para forzar aplicación
+        float targetVolume = other.currentVolume;
+        currentVolume = -1.0f; // Forzar que setVolume aplique el nuevo valor
         
         // Si el otro está inicializado, inicializamos este con los mismos archivos
         if (other.initialized && !other.loadedFilePaths.empty()) {
             init(other.loadedFilePaths);
-            // Aplicar el volumen del otro
+            // Aplicar el volumen del otro (ahora sí se aplicará porque currentVolume != targetVolume)
             if (initialized) {
-                setVolume(other.currentVolume);
+                setVolume(targetVolume);
             }
+        } else {
+            currentVolume = targetVolume;
         }
     }
     return *this;

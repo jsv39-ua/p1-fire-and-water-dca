@@ -1,6 +1,7 @@
 #include <systems/AudioManager.hpp>
 #include <systems/ResourceManager.hpp>
 #include <systems/SoundPlayer.hpp>
+#include <systems/SettingsManager.hpp>
 #include <iostream>
 #include <algorithm>
 #include <raylib.h>
@@ -31,6 +32,16 @@ void AudioManager::cleanup() {
 }
 
 void AudioManager::init() {
+    // Sincronizar volúmenes con SettingsManager antes de cargar recursos
+    SettingsManager* settings = SettingsManager::getInstance();
+    masterVolume = settings->getMasterVolume();
+    musicBaseVolume = settings->getMusicVolume();
+    sfxBaseVolume = settings->getSfxVolume();
+    
+    // Resetear caché para forzar actualización
+    lastMusicFinalVolume = -1.0f;
+    lastSfxFinalVolume = -1.0f;
+    
     // Cargar musica y sonidos desde ResourceManager
     backgroundMusic = ResourceManager::getInstance()->loadMusic("assets/music/backgroundMusic.mp3");
     buttonClickSound = ResourceManager::getInstance()->loadSound("assets/ui_sounds/boton_click.ogg");
