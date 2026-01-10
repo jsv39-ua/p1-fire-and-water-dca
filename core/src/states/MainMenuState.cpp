@@ -97,13 +97,13 @@ void MainMenuState::render(){
 
     ClearBackground(SKYBLUE);
     
-    // Dibujar el logo más grande y centrado en la parte superior
+    // Dibujar el logo centrado en la parte superior
     if (logo.id != 0) {
-        float scale = 0.5f; // Escalar al 50% del tamaño original (512x512)
+        float scale = 0.6f;
         float logoWidth = logo.width * scale;
         float logoHeight = logo.height * scale;
         float logoX = GetScreenWidth()/2 - logoWidth/2;
-        float logoY = -30;
+        float logoY = 20;
         
         Rectangle source = { 0, 0, (float)logo.width, (float)logo.height };
         Rectangle dest = { logoX, logoY, logoWidth, logoHeight };
