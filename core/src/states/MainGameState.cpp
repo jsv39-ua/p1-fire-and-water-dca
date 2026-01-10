@@ -121,6 +121,12 @@ void MainGameState::handleInput()
 
     // Control de ambos jugadores con un bucle
     for (int i = 0; i < 2; i++) {
+        // Si el jugador está esperando en una transición, ignorar input de movimiento
+        if (waitingForTransition[i]) {
+            players[i].walk(0); // Asegurar que no se mueve
+            continue;
+        }
+        
         // Control de movimiento
         if (IsKeyDown(playerKeys[i][0])) {
             players[i].walk(-1);
@@ -190,6 +196,13 @@ void MainGameState::update(float deltaTime)
 
     // Actualizar ambos jugadores
     for (int i = 0; i < 2; i++) {
+        // Si el jugador está esperando en una transición, no actualizar física
+        if (waitingForTransition[i]) {
+            // Solo actualizar bounds sin aplicar física
+            players[i].bounds = { players[i].position.x, players[i].position.y, players[i].width, players[i].height };
+            continue;
+        }
+        
         players[i].update(deltaTime);
         
         int jumpKey = (i == 0) ? SettingsManager::getInstance()->getFireJump() 
@@ -457,6 +470,21 @@ void MainGameState::handleTransitions() {
                 
         loadLevel(fullPath);
         
+        // Obtener los nuevos bounds del mapa cargado
+        Rectangle newMapBounds = mapLoader.getMapBounds();
+        
+        // Ajustar spawn para que esté dentro del mapa con un margen de seguridad
+        const float SPAWN_MARGIN = 20.0f; // Margen para evitar bugs en el borde
+        
+        // Si el spawn está muy cerca del borde izquierdo, moverlo hacia dentro
+        if (targetSpawn.x < newMapBounds.x + SPAWN_MARGIN) {
+            targetSpawn.x = newMapBounds.x + SPAWN_MARGIN;
+        }
+        // Si el spawn está muy cerca del borde derecho, moverlo hacia dentro
+        if (targetSpawn.x > newMapBounds.x + newMapBounds.width - SPAWN_MARGIN - players[0].width - PLAYER_SPAWN_OFFSET) {
+            targetSpawn.x = newMapBounds.x + newMapBounds.width - SPAWN_MARGIN - players[0].width - PLAYER_SPAWN_OFFSET;
+        }
+        
         // Reposicionar jugadores en spawn del nuevo nivel
         players[0].position = targetSpawn;
         players[1].position = { targetSpawn.x + PLAYER_SPAWN_OFFSET, targetSpawn.y }; 
@@ -487,11 +515,21 @@ void MainGameState::handleMapBoundaries() {
         }
 
         if (inTransition) {
-            // Simular suelo en transiciones laterales: si sale del mapa horizontalmente,
-            // anulamos la gravedad para que no caiga al vacío.
-            if (players[i].position.x < mapBounds.x || 
-                players[i].position.x + players[i].width > mapBounds.x + mapBounds.width) {
-                if (players[i].velocity.y > 0) players[i].velocity.y = 0;
+            // Verificar si el jugador está COMPLETAMENTE fuera del mapa (sprite no visible)
+            // Solo congelar cuando el jugador entero esté fuera de los bounds
+            bool completelyOutside = 
+                (players[i].position.x + players[i].width < mapBounds.x) ||  // Completamente a la izquierda
+                (players[i].position.x > mapBounds.x + mapBounds.width) ||   // Completamente a la derecha
+                (players[i].position.y + players[i].height < mapBounds.y) || // Completamente arriba
+                (players[i].position.y > mapBounds.y + mapBounds.height);    // Completamente abajo
+            
+            if (completelyOutside) {
+                // El jugador está completamente fuera - congelarlo
+                waitingForTransition[i] = true;
+                players[i].velocity.x = 0;
+                players[i].velocity.y = 0;
+            } else {
+                waitingForTransition[i] = false;
             }
 
             // Límite Izquierdo
@@ -526,6 +564,9 @@ void MainGameState::handleMapBoundaries() {
                     players[i].velocity.y = 0; // Detener caída (quedarse flotando)
                 }
             }
+        } else {
+            // No está en una transición, resetear el flag
+            waitingForTransition[i] = false;
         }
 
         // Actualizar bounds tras modificar posición
