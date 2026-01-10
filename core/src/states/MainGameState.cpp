@@ -452,11 +452,8 @@ void MainGameState::handleTransitions() {
         // Store target spawn BEFORE loading level (which clears transitions vector)
         Vector2 targetSpawn = active_transition->targetSpawn;
         
-        // cargar nuevo nivel
-        std::string fullPath = active_transition->targetMap;
-        if (fullPath.find("assets/") == std::string::npos) {
-            fullPath = LEVEL_BASE_PATH + fullPath;
-        }
+        // Resolver path del mapa destino (soporta transiciones entre niveles)
+        std::string fullPath = resolveMapPath(active_transition->targetMap);
                 
         loadLevel(fullPath);
         
@@ -558,10 +555,31 @@ void MainGameState::checkFallDeath() {
     }
 }
 
+std::string MainGameState::resolveMapPath(const std::string& targetMap) {
+    if (targetMap.find("assets/") != std::string::npos) {
+        return targetMap;
+    }
+    
+    if (targetMap.find('/') != std::string::npos) {
+        return std::string(LEVELS_BASE_PATH) + targetMap;
+    }
+    
+    return currentLevelPath + targetMap;
+}
+
 void MainGameState::loadLevel(const std::string& mapPath) {
     level_platforms.clear();
     level_enemies.clear();
     level_transitions.clear();
+    
+    // Extraer y guardar el path del nivel actual (carpeta contenedora)
+    size_t lastSlash = mapPath.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        currentLevelPath = mapPath.substr(0, lastSlash + 1);
+    } else {
+        currentLevelPath = std::string(LEVELS_BASE_PATH);
+    }
+    TraceLog(LOG_INFO, "Current level path set to: %s", currentLevelPath.c_str());
 
     try {
         mapLoader.loadMapa(mapPath.c_str());
