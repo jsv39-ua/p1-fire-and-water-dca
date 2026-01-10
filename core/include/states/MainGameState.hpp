@@ -41,6 +41,9 @@ private:
     // Flags de suelo para cada jugador
     bool on_ground[2] = {false, false}; // [0] = fire, [1] = water
     
+    // Flags para indicar si un jugador está esperando en una transición
+    bool waitingForTransition[2] = {false, false};
+    
     std::vector<Enemy> level_enemies;
     std::vector<Projectile> projectiles;
     std::vector<MapTransition> level_transitions;
