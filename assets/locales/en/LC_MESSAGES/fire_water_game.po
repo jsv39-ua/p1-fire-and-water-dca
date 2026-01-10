@@ -150,5 +150,21 @@ msgstr "CONFIGURATION SAVED!"
 msgid "¡Nivel Completado!"
 msgstr "Level Completed!"
 
+msgid "loading_title"
+msgstr "Loading..."
+
+msgid "loading_logo"
+msgstr "Loading logo"
+
+msgid "loading_characters"
+msgstr "Loading characters"
+
+msgid "loading_music"
+msgstr "Loading music"
+
+msgid "loading_sounds"
+msgstr "Loading sounds"
+
 #~ msgid "ENGLISH (WIP)"
 #~ msgstr "ENGLISH"
+

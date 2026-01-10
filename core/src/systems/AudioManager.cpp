@@ -8,7 +8,10 @@
 AudioManager* AudioManager::instance = nullptr;
 
 AudioManager::AudioManager() {
-    
+    // Inicializar structs a cero para evitar crashes en IsMusicValid/IsSoundValid
+    backgroundMusic = {};
+    buttonClickSound = {};
+    buttonHoverSound = {};
 }
 
 AudioManager* AudioManager::getInstance() {

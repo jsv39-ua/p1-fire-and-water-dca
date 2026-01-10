@@ -144,3 +144,19 @@ msgstr ""
 
 msgid "¡Nivel Completado!"
 msgstr ""
+
+msgid "loading_title"
+msgstr "Cargando..."
+
+msgid "loading_logo"
+msgstr "Cargando logo"
+
+msgid "loading_characters"
+msgstr "Cargando personajes"
+
+msgid "loading_music"
+msgstr "Cargando música"
+
+msgid "loading_sounds"
+msgstr "Cargando sonidos"
+
