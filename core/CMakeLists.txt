@@ -9,6 +9,7 @@ set(GAME_CORE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/GameOverState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/KeyBindingState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/states/LoadingState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/MainGameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/MainMenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/OptionsState.cpp

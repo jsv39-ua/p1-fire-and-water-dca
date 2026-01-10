@@ -1,6 +1,7 @@
 #include <states/StateMachine.hpp>
 #include <states/MainGameState.hpp>
 #include <states/MainMenuState.hpp>
+#include <states/LoadingState.hpp>
 #include <systems/AudioManager.hpp>
 #include <systems/ResourceManager.hpp>
 #include <memory>
@@ -27,13 +28,12 @@ int main()
     InitAudioDevice();
     SetMasterVolume(0.5f); // Ajustar el volumen maestro al 50%
 
-    // Inicializar gestores Singleton
-    AudioManager::getInstance()->init();
+    // AudioManager se inicializa después de la carga de recursos (en LoadingState)
     // resourcemanager se inicializa automaticamente al llamar a getInstance()
     float delta_time = 0.0f;
 
     StateMachine state_machine = StateMachine();
-    state_machine.add_state(std::make_unique<MainMenuState>(), false);
+    state_machine.add_state(std::make_unique<LoadingState>(), false);
 
     // Bucle principal del juego proporcionado por Raylib
     while (!WindowShouldClose() && !state_machine.is_game_ending()) // Este bucle se ejecuta hasta que el usuario cierra la ventana
