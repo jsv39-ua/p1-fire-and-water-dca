@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+
 extern "C" {
     #include <raylib.h>
 }
+
+class SoundPlayer;
 
 class AudioManager {
 private:
@@ -18,11 +22,21 @@ private:
     float musicBaseVolume = 0.5f;   // Volumen de música (sin multiplicar)
     float sfxBaseVolume = 0.5f;     // Volumen de efectos de sonido
     
+    // Caché de volúmenes finales calculados
+    float lastMusicFinalVolume = -1.0f;
+    float lastSfxFinalVolume = -1.0f;
+    
     AudioManager(); // Constructor privado para Singleton
     
     // Métodos privados de actualización
     void updateMusicVolume();
     void updateSfxVolumes();
+    void updateRegisteredSoundPlayers();
+    void updateRegisteredWalkMusic();
+    
+    // Listas de SoundPlayers y walkMusic registrados
+    std::vector<SoundPlayer*> registeredSoundPlayers;
+    std::vector<Music*> registeredWalkMusic;
     
 public:
     static AudioManager* getInstance();
@@ -42,6 +56,14 @@ public:
     float getMasterVolume() const;
     float getMusicVolume() const;
     float getSfxVolume() const;
+    
+    // Sistema de registro de SoundPlayers
+    void registerSoundPlayer(SoundPlayer* player);
+    void unregisterSoundPlayer(SoundPlayer* player);
+    
+    // Sistema de registro de walkMusic
+    void registerWalkMusic(Music* music);
+    void unregisterWalkMusic(Music* music);
     
     ~AudioManager(); 
 };
