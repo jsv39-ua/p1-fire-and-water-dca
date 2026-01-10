@@ -48,7 +48,8 @@ private:
     std::vector<Projectile> projectiles;
     std::vector<MapTransition> level_transitions;
 
-    void loadLevel(const std::string& mapPath);
+    // Cargar nivel. Si useMapSpawn es true, posiciona los jugadores en el spawn del mapa
+    void loadLevel(const std::string& mapPath, bool useMapSpawn = false);
     
     // Métodos auxiliares para update()
     void handleTransitions();

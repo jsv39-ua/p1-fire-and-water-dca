@@ -67,6 +67,10 @@ public:
     // Extraer transiciones del mapa
     std::vector<MapTransition> extractTransitions();
 
+    // Obtener el punto de spawn inicial de los jugadores
+    // Busca un objeto "PlayerSpawn" en el mapa, o devuelve una posición por defecto
+    Vector2 getInitialSpawn() const;
+
     // Obtener los límites del mapa en píxeles
     Rectangle getMapBounds() const;
 

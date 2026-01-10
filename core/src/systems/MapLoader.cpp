@@ -394,6 +394,42 @@ Rectangle MapLoader::getMapBounds() const {
     };
 }
 
+// Obtener el punto de spawn inicial de los jugadores
+Vector2 MapLoader::getInitialSpawn() const {
+    if (this->mapa == nullptr) {
+        TraceLog(LOG_WARNING, "No hay mapa cargado para obtener spawn inicial");
+        return {100.0f, 100.0f};
+    }
+    
+
+    for (uint32_t i = 0; i < this->mapa->layersLength; i++) {
+        TmxLayer* layer = &this->mapa->layers[i];
+        
+        if (layer->type == LAYER_TYPE_OBJECT_GROUP) {
+            TmxObjectGroup* objGroup = &layer->exact.objectGroup;
+            
+            for (uint32_t j = 0; j < objGroup->objectsLength; j++) {
+                TmxObject* obj = &objGroup->objects[j];
+                
+                
+                if ((obj->typeString && strcmp(obj->typeString, "PlayerSpawn") == 0) ||
+                    (obj->name && strcmp(obj->name, "PlayerSpawn") == 0)) {
+                    TraceLog(LOG_INFO, "PlayerSpawn encontrado en x=%.2f, y=%.2f", obj->x, obj->y);
+                    return {(float)obj->x, (float)obj->y};
+                }
+            }
+        }
+    }
+    
+
+    float defaultX = (float)(this->mapa->tileWidth * 3); 
+    
+    float defaultY = (float)((this->mapa->height - 7) * this->mapa->tileHeight);
+    
+    TraceLog(LOG_INFO, "No se encontró PlayerSpawn, usando posición por defecto: x=%.2f, y=%.2f", defaultX, defaultY);
+    return {defaultX, defaultY};
+}
+
 
 std::vector<Enemy> MapLoader::extractEnemies() {
     std::vector<Enemy> enemies;
