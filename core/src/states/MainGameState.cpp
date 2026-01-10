@@ -40,8 +40,9 @@ void MainGameState::init()
     float hitboxHeight = frameHeight;
    
     // Inicializar jugadores: [0] = FIRE, [1] = WATER
-    players[0] = Player(100.0f, 250.0f, hitboxWidth, hitboxHeight, FIRE);
-    players[1] = Player(150.0f, 250.0f, hitboxWidth, hitboxHeight, WATER);
+    // Posición inicial temporal - será actualizada después de cargar el nivel
+    players[0] = Player(0.0f, 0.0f, hitboxWidth, hitboxHeight, FIRE);
+    players[1] = Player(0.0f, 0.0f, hitboxWidth, hitboxHeight, WATER);
     
     // Cargar teclas desde SettingsManager
     players[0].setKeys(
@@ -60,8 +61,8 @@ void MainGameState::init()
 
     // Inicialización de la cámara
 
-    // Inicialización del MapLoader
-    loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx");
+    // Inicialización del MapLoader - usar spawn del mapa para posicionar jugadores
+    loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx", true);
 
     // Log de depuración para ver posiciones iniciales
     TraceLog(LOG_INFO, "=== DEBUG: Posiciones iniciales de jugadores ===");
@@ -173,6 +174,12 @@ void MainGameState::handleInput()
 
 void MainGameState::update(float deltaTime)
 {
+    
+    static const float MAX_DELTA_TIME = 0.05f; 
+    if (deltaTime > MAX_DELTA_TIME) {
+        deltaTime = MAX_DELTA_TIME;
+    }
+    
     // Si un jugador está muriendo, contar el timer
     if (playerDying) {
         deathTimer += deltaTime;
@@ -552,13 +559,13 @@ void MainGameState::checkFallDeath() {
     bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
     
     if (fire_fell_below || water_fell_below) {
-        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
-        this->state_machine->add_state(std::make_unique<GameOverState>(), true);
-        return;
+        //TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        //this->state_machine->add_state(std::make_unique<GameOverState>(), true);
+        //return;
     }
 }
 
-void MainGameState::loadLevel(const std::string& mapPath) {
+void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
     level_platforms.clear();
     level_enemies.clear();
     level_transitions.clear();
@@ -578,11 +585,27 @@ void MainGameState::loadLevel(const std::string& mapPath) {
         TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 
             (int)level_platforms.size(), (int)level_enemies.size(), (int)level_transitions.size());
         
-        // Actualizar límites de la cámara con el nuevo mapa
+        // Si se solicita usar el spawn del mapa, posicionar los jugadores
+        if (useMapSpawn) {
+            Vector2 spawn = mapLoader.getInitialSpawn();
+            players[0].position = spawn;
+            players[1].position = { spawn.x + PLAYER_SPAWN_OFFSET, spawn.y };
+            
+            
+            players[0].velocity = {0, 0};
+            players[1].velocity = {0, 0};
+            
+            players[0].update(0);
+            players[1].update(0);
+            
+            TraceLog(LOG_INFO, "Jugadores posicionados en spawn: FIRE(%.2f, %.2f), WATER(%.2f, %.2f)",
+                players[0].position.x, players[0].position.y,
+                players[1].position.x, players[1].position.y);
+        }
+        
         Rectangle mapBounds = mapLoader.getMapBounds();
         camera.setMapBounds(mapBounds);
 
-        // Recalcular zoom mínimo
         float screenWidth = (float)GetScreenWidth();
         float screenHeight = (float)GetScreenHeight();
         
