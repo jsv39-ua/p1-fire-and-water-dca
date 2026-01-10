@@ -474,7 +474,7 @@ void MainGameState::handleTransitions() {
         Rectangle newMapBounds = mapLoader.getMapBounds();
         
         // Ajustar spawn para que esté dentro del mapa con un margen de seguridad
-        const float SPAWN_MARGIN = 20.0f; // Margen para evitar bugs en el borde
+        const float SPAWN_MARGIN = 10.0f; // Margen para evitar bugs en el borde
         
         // Si el spawn está muy cerca del borde izquierdo, moverlo hacia dentro
         if (targetSpawn.x < newMapBounds.x + SPAWN_MARGIN) {
