@@ -29,9 +29,9 @@ set(GAME_CORE_SOURCES
 # Creamos la librería estática 'game_core' con los fuentes del núcleo del juego
 add_library(game_core STATIC ${GAME_CORE_SOURCES})
 
-# raytmx/hoxml (vendor): MSVC en C++ no soporta algunos constructs C99 usados por raytmx.h.
-# Para no modificar la librería en el repo, generamos una copia parcheada en el build dir
-# y la ponemos antes en el include path (solo MSVC).
+
+# Esto es para que la libreria raytmx sea compatible con el compilador de VSCode (MSVC)
+# porque en el workflow del CI de Github fallaba en esta parte
 set(RAYTMX_GENERATED_INCLUDE_DIR "${CMAKE_BINARY_DIR}/generated")
 set(RAYTMX_VENDOR_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/vendor/include")
 
@@ -42,10 +42,8 @@ if(MSVC)
   if(EXISTS "${RAYTMX_IN}")
     file(READ "${RAYTMX_IN}" RAYTMX_CONTENTS)
 
-    # 1) C99 compound literal: (Rectangle){0.0f}  ->  Rectangle{0.0f}
+    
     string(REPLACE "(Rectangle){0.0f}" "Rectangle{0.0f}" RAYTMX_CONTENTS "${RAYTMX_CONTENTS}")
-
-    # 2) C99 designated initializer for Rectangle -> C++ aggregate init
     string(REGEX REPLACE "\\*tileRect = \\(Rectangle\\) \\{[\\r\\n[:space:]]*\\.x = ([^,]+),[\\r\\n[:space:]]*\\.y = ([^,]+),[\\r\\n[:space:]]*\\.width = ([^,]+),[\\r\\n[:space:]]*\\.height = ([^\\r\\n;]+)[\\r\\n[:space:]]*\\};" "*tileRect = Rectangle{\\1,\\2,\\3,\\4};" RAYTMX_CONTENTS "${RAYTMX_CONTENTS}")
 
     file(WRITE "${RAYTMX_OUT}" "${RAYTMX_CONTENTS}")
@@ -60,7 +58,6 @@ target_include_directories(game_core
     ${RAYTMX_VENDOR_INCLUDE_DIR}
 )
 
-# Enlazamos Raylib al núcleo del juego
 target_link_libraries(game_core
   PUBLIC
     raylib
