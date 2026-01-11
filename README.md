@@ -31,30 +31,7 @@ cmake --build build -j4
 cp build
 cpack
 ```
-
-## **Hito 1 - Versión Alpha (Práctica 1)**
-
-Este repositorio contiene el proyecto para la asignatura de **Desarrollo Colaborativo de Aplicaciones (DCA)**, enfocado en el desarrollo de un videojuego 2D cooperativo de plataformas y puzzles llamado "Fuego y Agua".
-
-### **Progreso del Proyecto**
-
-Hemos completado la configuración inicial de la versión "alpha" del juego. Los siguientes hitos han sido alcanzados:
-
-- **Ejercicio 0: Configuración de Entidades y Ventana**
-  - Se ha inicializado una ventana de juego con las dimensiones correctas.
-  - Se han definido las estructuras de datos básicas para los jugadores (Fuego y Agua).
-  - Se ha creado un nivel de prueba con plataformas estáticas.
-  - Los personajes y el nivel se dibujan correctamente en la pantalla utilizando figuras geométricas básicas (rectángulos).
-
-- **Ejercicio 1: Movimiento y Física de Plataformas**
-  - Se ha implementado el control de movimiento horizontal para ambos personajes con sus respectivas teclas (**A, D, Izquierda, Derecha**).
-  - La **gravedad y la física de colisiones** con las plataformas estáticas se han añadido correctamente.
   - Se ha implementado la lógica de **salto** que solo permite saltar si el personaje está tocando una plataforma.
-
-- **Ejercicio 2: Colisiones Elementales y Transición a Game Over**
-  - Se han añadido al nivel **peligros de lava y agua** como obstáculos.
-  - Se ha implementado la **lógica de colisiones elementales** que hace que cada personaje muera al tocar el elemento opuesto.
-  - Se ha implementado una **pantalla de Game Over** que se activa al morir un personaje y permite reiniciar el juego.
 
 
 ### **Cómo Ejecutar el Proyecto**
@@ -73,3 +50,30 @@ g++ -o game.exe src/*.cpp -I vendor/include/ -L vendor/lib/windows -lraylib -lop
 ### Si se añaden nuevos textos al juego hay que recompilar el .pot y los .po con:
 
 cmake --build build --target update_translations
+
+# Cómo ejecutar los Tests Unitarios
+
+Este proyecto utiliza **Boost.Test** como framework de pruebas y **CTest** como gestor de ejecución.
+
+## Guía Rápida
+
+```bash
+
+# Configurar con tests habilitados
+cmake -S . -B build -DBUILD_GAME_TESTS=ON
+
+# Compilar
+cmake --build build
+
+# Ejecutar tests en Linux
+cd build && ctest --output-on-failure
+
+# En Windows:
+cd build; ctest --output-on-failure -C Debug
+```
+
+## CI
+
+Los tests se ejecutan automáticamente en GitHub Actions (`.github/workflows/tests.yml`) en:
+- Pull requests hacia `main`
+- Push a `main`
