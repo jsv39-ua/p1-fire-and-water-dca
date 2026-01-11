@@ -17,6 +17,7 @@ set(GAME_CORE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/SimpleLevelState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/StateMachine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/AudioManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/LevelStateManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/LocalizationManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/raytmx_impl.cpp

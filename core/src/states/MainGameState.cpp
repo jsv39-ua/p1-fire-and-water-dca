@@ -12,6 +12,7 @@
 #include <systems/SettingsManager.hpp>
 #include <systems/LocalizationManager.hpp>
 #include <systems/SignDictionary.hpp>
+#include <systems/LevelStateManager.hpp>
 extern "C" {
     #include <raylib.h>
 }
@@ -595,9 +596,13 @@ void MainGameState::checkFallDeath() {
     bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
     
     if (fire_fell_below || water_fell_below) {
-        //TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
         //this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         //return;
+        playerDying = true;
+        deathTimer = 0.0f;
+        
+
     }
 }
 
@@ -614,6 +619,22 @@ std::string MainGameState::resolveMapPath(const std::string& targetMap) {
 }
 
 void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
+    // Guardar estado de la zona actual antes de cambiar (si hay plataformas)
+    if (!currentZonePath.empty() && !level_platforms.empty()) {
+        std::vector<PlatformState> states;
+        for (const auto& platform : level_platforms) {
+            PlatformState ps;
+            ps.id = platform.id;
+            ps.active = platform.active;
+            ps.isPressed = platform.isPressed;
+            states.push_back(ps);
+        }
+        LevelStateManager::getInstance().saveZoneState(currentZonePath, states);
+    }
+    
+    // Guardar el path de la nueva zona
+    currentZonePath = mapPath;
+    
     level_platforms.clear();
     level_enemies.clear();
     level_transitions.clear();
@@ -637,6 +658,23 @@ void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
 
         level_enemies = mapLoader.extractEnemies();
         level_transitions = mapLoader.extractTransitions();
+        
+        // Restaurar estado de plataformas si esta zona ya fue visitada
+        if (LevelStateManager::getInstance().hasZoneState(mapPath)) {
+            const ZoneState* savedState = LevelStateManager::getInstance().getZoneState(mapPath);
+            if (savedState) {
+                for (auto& platform : level_platforms) {
+                    for (const auto& ps : savedState->platformStates) {
+                        if (platform.id == ps.id) {
+                            platform.active = ps.active;
+                            platform.isPressed = ps.isPressed;
+                            break;
+                        }
+                    }
+                }
+                TraceLog(LOG_INFO, "[LevelStateManager] Restored state for zone: %s", mapPath.c_str());
+            }
+        }
         
         TraceLog(LOG_INFO, "Nivel cargado: %s", mapPath.c_str());
         TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 

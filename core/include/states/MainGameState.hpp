@@ -82,6 +82,9 @@ private:
     static constexpr float FALL_DEATH_THRESHOLD = 200.0f;
     static constexpr const char* LEVELS_BASE_PATH = "assets/levels/niveles/";
     
-    // Path del nivel actual
+    // Path del nivel actual (carpeta contenedora)
     std::string currentLevelPath;
+    
+    // Path de la zona actual (archivo .tmx completo) - para LevelStateManager
+    std::string currentZonePath;
 };
