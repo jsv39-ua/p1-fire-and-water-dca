@@ -60,6 +60,8 @@ void MainGameState::init()
         SettingsManager::getInstance()->getWaterAttack()
     );
 
+    LevelStateManager::getInstance().clearAllState(); // Limpiar estado previo de niveles
+
     // Inicialización de la cámara
 
     // Inicialización del MapLoader - usar spawn del mapa para posicionar jugadores
@@ -301,6 +303,11 @@ void MainGameState::update(float deltaTime)
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by TAG", platform.id, target.id);
                                 }
+                            }
+                            
+                            // Guardar el tag activado globalmente para que persista entre zonas
+                            if (!platform.targetTag.empty()) {
+                                LevelStateManager::getInstance().activateTag(platform.targetTag);
                             }
                         }
                     }
@@ -673,6 +680,14 @@ void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
                     }
                 }
                 TraceLog(LOG_INFO, "[LevelStateManager] Restored state for zone: %s", mapPath.c_str());
+            }
+        }
+        
+        // Aplicar tags activados globalmente (de botones en otras zonas)
+        for (auto& platform : level_platforms) {
+            if (!platform.tag.empty() && LevelStateManager::getInstance().isTagActivated(platform.tag)) {
+                platform.active = true;
+                TraceLog(LOG_INFO, "[LevelStateManager] Platform %d activated by global tag: %s", platform.id, platform.tag.c_str());
             }
         }
         

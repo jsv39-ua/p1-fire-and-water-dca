@@ -47,7 +47,8 @@ void LevelStateManager::clearLevelState(const std::string& levelPath) {
 
 void LevelStateManager::clearAllState() {
     zoneStates.clear();
-    TraceLog(LOG_INFO, "[LevelStateManager] Cleared all zone states");
+    activatedTags.clear();
+    TraceLog(LOG_INFO, "[LevelStateManager] Cleared all zone states and activated tags");
 }
 
 std::string LevelStateManager::getLevelPathFromZone(const std::string& zonePath) {
@@ -58,4 +59,18 @@ std::string LevelStateManager::getLevelPathFromZone(const std::string& zonePath)
         return zonePath.substr(0, lastSlash + 1);
     }
     return zonePath;
+}
+
+void LevelStateManager::activateTag(const std::string& tag) {
+    activatedTags.insert(tag);
+    TraceLog(LOG_INFO, "[LevelStateManager] Tag activated globally: %s", tag.c_str());
+}
+
+bool LevelStateManager::isTagActivated(const std::string& tag) const {
+    return activatedTags.find(tag) != activatedTags.end();
+}
+
+void LevelStateManager::clearActivatedTags() {
+    activatedTags.clear();
+    TraceLog(LOG_INFO, "[LevelStateManager] Cleared all activated tags");
 }

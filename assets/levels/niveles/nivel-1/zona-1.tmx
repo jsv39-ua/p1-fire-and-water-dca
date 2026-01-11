@@ -1,20 +1,242 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="18" tileheight="18" infinite="0" nextlayerid="3" nextobjectid="1">
- <tileset firstgid="1" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="18" tileheight="18" infinite="0" nextlayerid="6" nextobjectid="3">
+ <tileset firstgid="1" name="TileMap PixelPlatformer" tilewidth="18" tileheight="18" spacing="1" tilecount="180" columns="20">
+  <image source="../../tilesets_niveles/kenney_pixel-platformer/Tilemap/tilemap_fuego.png" width="379" height="170"/>
+  <tile id="0">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="1">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="2">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="3">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="4">
+   <objectgroup draworder="index" id="2">
+    <object id="2" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="5">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="20">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="21">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="22">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="23">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="24">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="25">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="40">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="41">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="42">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="43">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="47">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="48">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="49">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="50">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="60">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="61">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="62">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="63">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="80">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="81">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="82">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="83">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="84">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="message" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="85">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="message" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="86">
+   <objectgroup draworder="index" id="2">
+    <object id="1" type="message" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="100">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="101">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="102">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="103">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="120">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="121">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="122">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="123">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="140">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="141">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="142">
+   <objectgroup>
+    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+  <tile id="143">
+   <objectgroup draworder="index" id="3">
+    <object id="8" type="Plataforma" x="0" y="0" width="18" height="18"/>
+   </objectgroup>
+  </tile>
+ </tileset>
+ <tileset firstgid="181" source="../../tilesets_niveles/TileMap PixelPlatformer.tsx"/>
+ <tileset firstgid="361" source="tilemap_agua_2.tsx"/>
+ <imagelayer id="4" name="Capa fondo" offsetx="-334" offsety="-117.33" parallaxy="0.8">
+  <image source="../../../backgrounds/background-3.jpg" width="1024" height="565"/>
+ </imagelayer>
  <layer id="2" name="Capa pared" width="30" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+123,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-105,105,105,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+143,105,105,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 105,105,105,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 105,105,105,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 105,105,105,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -27,26 +249,70 @@
  </layer>
  <layer id="1" name="Capa de plataformas" width="30" height="20">
   <data encoding="csv">
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+5,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+25,3,3,3,3,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-2,3,3,3,3,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-23,23,23,23,23,23,23,23,23,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-123,123,123,123,123,123,123,123,5,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-123,123,123,123,123,123,123,5,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-123,123,123,123,123,123,123,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-123,123,123,123,123,123,123,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+23,23,23,23,23,23,23,23,23,24,0,0,0,0,0,0,0,0,0,0,382,383,383,383,383,383,383,383,383,383,
+123,123,123,123,123,123,123,123,5,144,0,0,0,0,0,0,0,0,0,0,502,366,483,483,483,483,483,483,483,483,
+123,123,123,123,123,123,123,5,144,0,0,0,0,0,0,0,0,0,0,0,0,502,366,483,483,483,483,483,483,483,
+123,123,123,123,123,123,123,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,502,366,483,483,483,483,483,483,
+123,123,123,123,123,123,123,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,482,483,483,483,483,483,483
 </data>
  </layer>
+ <layer id="5" name="Capa decoraciones" width="30" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,506,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="3" name="Transitions">
+  <object id="1" x="-60.5834" y="122.834" width="60.6667" height="242.333">
+   <properties>
+    <property name="direction" value="right"/>
+    <property name="targetMap" value="nivel-tutorial/zona-4.tmx"/>
+    <property name="targetSpawnX" type="float" value="800"/>
+    <property name="targetSpawnY" type="float" value="225"/>
+    <property name="transitionType" value="instant"/>
+   </properties>
+  </object>
+  <object id="2" x="0.333317" y="-37.1665" width="130" height="36.9997">
+   <properties>
+    <property name="direction" value="down"/>
+    <property name="targetMap" value="zona-2.tmx"/>
+    <property name="targetSpawnX" type="float" value="10"/>
+    <property name="targetSpawnY" type="float" value="220"/>
+    <property name="transitionType" value="instant"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

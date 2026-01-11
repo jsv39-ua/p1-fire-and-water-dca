@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 /**
@@ -48,6 +49,11 @@ public:
     
     // Obtener el path del nivel actual desde el path de una zona
     static std::string getLevelPathFromZone(const std::string& zonePath);
+    
+    // Sistema de tags activados globalmente (persisten entre zonas)
+    void activateTag(const std::string& tag);
+    bool isTagActivated(const std::string& tag) const;
+    void clearActivatedTags();
 
 private:
     LevelStateManager() = default;
@@ -57,4 +63,7 @@ private:
 
     // Mapa de path de zona -> estado de la zona
     std::unordered_map<std::string, ZoneState> zoneStates;
+    
+    // Tags activados globalmente (por botones en cualquier zona)
+    std::unordered_set<std::string> activatedTags;
 };
