@@ -1,3 +1,4 @@
+# Buscar Boost.Test en el sistema o descargarlo si no está disponible
 find_package(Boost 1.70 COMPONENTS unit_test_framework QUIET)
 
 if(Boost_FOUND)
@@ -19,12 +20,14 @@ else()
     FetchContent_MakeAvailable(Boost)
 endif()
 
+# Crear ejecutable de tests
 add_executable(unit_tests test_suite.cpp)
 
 if(NOT WIN32 AND Boost_FOUND)
     target_compile_definitions(unit_tests PRIVATE BOOST_TEST_DYN_LINK)
 endif()
 
+# Enlazar con Boost.Test, la librería del juego y raylib
 target_link_libraries(unit_tests PRIVATE 
     Boost::unit_test_framework
     game_core
@@ -38,6 +41,7 @@ target_include_directories(unit_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/core/include/systems
 )
 
+# Copiar assets para que los tests puedan acceder a los recursos
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 add_test(

@@ -17,6 +17,8 @@
 #include <vector>
 #include <memory>
 
+// Siguiendo el esquema AAA (Arrange, Act, Assert) cada test se divide en 3 secciones claras.
+
 // Fixture para tests que requieren contexto de raylib/raytmx
 struct RaylibFixture {
     bool audioInitialized = false;
