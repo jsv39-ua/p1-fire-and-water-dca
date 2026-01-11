@@ -41,11 +41,14 @@ if(XGETTEXT_EXECUTABLE AND MSGMERGE_EXECUTABLE)
     )
 
     add_custom_target(update_translations
+        
         # Generar template.pot buscando en src e include
         COMMAND ${XGETTEXT_EXECUTABLE} --keyword=_ --language=C++ --add-comments --sort-output --no-location --from-code=UTF-8 -o assets/locales/template.pot ${TRANSLATION_SOURCES}
-        # Actualizar PO Español
+        
+        # Actualizar PO Español (se podría hacer un comando unificado pero así es más claro y comprensible)
         COMMAND ${MSGMERGE_EXECUTABLE} --update --no-fuzzy-matching --backup=off assets/locales/es/LC_MESSAGES/fire_water_game.po assets/locales/template.pot
-        # Actualizar PO Inglés
+        
+        # Actualizar PO Inglés 
         COMMAND ${MSGMERGE_EXECUTABLE} --update --no-fuzzy-matching --backup=off assets/locales/en/LC_MESSAGES/fire_water_game.po assets/locales/template.pot
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Actualizando template.pot y fusionando cambios en archivos .po"
