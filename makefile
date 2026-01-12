@@ -26,13 +26,11 @@ LDFLAGS = -L $(LIB_DIR)
 PKG_CONFIG ?= pkg-config
 ifeq ($(DETECTED_OS),Windows)
 	INTL_CFLAGS :=
-	INTL_LIBS :=
+	INTL_LIBS := -lintl
+	CXXFLAGS += -DHAVE_GETTEXT=1
 else
 	INTL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libintl 2>/dev/null)
 	INTL_LIBS := $(shell $(PKG_CONFIG) --libs libintl 2>/dev/null)
-endif
-
-ifeq ($(DETECTED_OS),Linux)
 	CXXFLAGS += -DHAVE_GETTEXT=1
 endif
 
