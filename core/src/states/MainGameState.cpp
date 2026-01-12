@@ -62,12 +62,9 @@ void MainGameState::init()
 
     LevelStateManager::getInstance().clearAllState(); // Limpiar estado previo de niveles
 
-    // Inicialización de la cámara
-
-    // Inicialización del MapLoader - usar spawn del mapa para posicionar jugadores
+    
     loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx", true);
 
-    // Log de depuración para ver posiciones iniciales
     TraceLog(LOG_INFO, "=== DEBUG: Posiciones iniciales de jugadores ===");
     TraceLog(LOG_INFO, "FIRE: (%.2f, %.2f) | WATER: (%.2f, %.2f)", 
         players[0].position.x, players[0].position.y,
@@ -84,19 +81,18 @@ void MainGameState::init()
     camera.setSmoothSpeed(5.0f);
     camera.setZoomSmoothSpeed(3.0f);
 
-    // Calcular zoom mínimo para evitar ver fuera del mapa
+    // zoom minimo de la camara
     float screenWidth = (float)GetScreenWidth();
     float screenHeight = (float)GetScreenHeight();
     float minZoomX = screenWidth / mapBounds.width;
     float minZoomY = screenHeight / mapBounds.height;
-    
-    // zoom mínimo
+
     float minZoom = fmaxf(1.0f, fmaxf(minZoomX, minZoomY));
 
     camera.setZoomLimits(minZoom, 3.0f);
     camera.setDynamicZoom(true);
 
-    // Inicializar animaciones para ambos jugadores
+    // Inicializar animaciones para los jugadores
     idle_animations[0] = Animation(5, 0.2f, true, character_textures[0], 9, 12);
     walk_animations[0] = Animation(8, 0.1f, true, character_textures[0], 0, 8);
     
@@ -125,8 +121,8 @@ void MainGameState::handleInput()
 
     // Control de ambos jugadores con un bucle
     for (int i = 0; i < 2; i++) {
-        // Si el jugador está esperando en una transición, ignorar input de movimiento
-        if (waitingForTransition[i]) {
+        
+        if (waitingForTransition[i]) { // Si el jugador está esperando en una transición, ignorar input de movimiento
             players[i].walk(0); // Asegurar que no se mueve
             continue;
         }
@@ -152,7 +148,6 @@ void MainGameState::handleInput()
                 players[i].attack();
                 
                 // Crear proyectil
-                // Posición: centro del jugador
                 Vector2 pos = { players[i].position.x + players[i].width/2, players[i].position.y + players[i].height/2 };
                 
                 // Velocidad: Depende de la dirección
@@ -165,20 +160,6 @@ void MainGameState::handleInput()
         }
     }
 
-    // Debug: Spawnear enemigos con e y con r
-    if (IsKeyPressed(KEY_E)) {
-        Rectangle b = { players[0].position.x + 100, players[0].position.y - 32, 32, 32 };
-        Enemy en(b, FIRE, 90.0f, true);
-        level_enemies.push_back(en);
-        TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
-    }
-
-    if (IsKeyPressed(KEY_R)) {
-        Rectangle b = { players[1].position.x + 100, players[1].position.y - 32, 32, 32 };
-        Enemy en2(b, WATER, 150.0f, false);
-        level_enemies.push_back(en2);
-        TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
-    }
 }
 
 void MainGameState::update(float deltaTime)
