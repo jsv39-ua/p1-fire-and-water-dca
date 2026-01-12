@@ -10,43 +10,16 @@ option(BUILD_GAME_TESTS "Build game tests" OFF)
 include(GNUInstallDirs)
 include(FetchContent)
 
-# Localización (GNU gettext)
-# En Windows con MSVC, libintl de MinGW no es compatible.
-# Con MinGW sí funciona.
+
+# En Windows con MSVC, libintl de MinGW no es compatible
 option(USE_GETTEXT "Enable gettext/libintl based localization" ON)
+
 
 set(HAVE_GETTEXT OFF)
 if(USE_GETTEXT)
   if(WIN32)
-    if(MINGW)
-      # MinGW: buscar libintl en MSYS2
-      find_path(Intl_INCLUDE_DIR libintl.h
-        PATHS
-          "C:/msys64/mingw64/include"
-          "C:/msys64/ucrt64/include"
-          "$ENV{MINGW_PREFIX}/include"
-      )
-      find_library(Intl_LIBRARY
-        NAMES intl libintl
-        PATHS
-          "C:/msys64/mingw64/lib"
-          "C:/msys64/ucrt64/lib"
-          "$ENV{MINGW_PREFIX}/lib"
-      )
-      if(Intl_INCLUDE_DIR AND Intl_LIBRARY)
-        set(Intl_FOUND TRUE)
-        set(HAVE_GETTEXT ON)
-        message(STATUS "Found libintl for MinGW: ${Intl_LIBRARY}")
-      endif()
-    else()
-      # MSVC: solo si hay una versión compatible (vcpkg, etc.)
-      find_package(Intl QUIET)
-      if(Intl_FOUND)
-        set(HAVE_GETTEXT ON)
-      endif()
-    endif()
+    find_package(Intl QUIET)
   else()
-    # Linux/macOS
     find_package(Intl REQUIRED)
     if(Intl_FOUND)
       set(HAVE_GETTEXT ON)
