@@ -307,10 +307,10 @@
   </object>
   <object id="2" x="0.333317" y="-37.1665" width="130" height="36.9997">
    <properties>
-    <property name="direction" value="down"/>
+    <property name="direction" value="up"/>
     <property name="targetMap" value="zona-2.tmx"/>
-    <property name="targetSpawnX" type="float" value="5"/>
-    <property name="targetSpawnY" type="float" value="200"/>
+    <property name="targetSpawnX" type="float" value="18"/>
+    <property name="targetSpawnY" type="float" value="230"/>
     <property name="transitionType" value="instant"/>
    </properties>
   </object>
