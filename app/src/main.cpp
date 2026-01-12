@@ -14,8 +14,8 @@ extern "C" {
 int main()
 {
     // Initialize the game window
-    const int screenWidth = 1280;  // Más grande (era 800)
-    const int screenHeight = 720;  // Más grande (era 450)
+    const int screenWidth = 1280;  
+    const int screenHeight = 720;  
 
     LocalizationManager::getInstance()->init();
     //LocalizationManager::getInstance()->setLanguage("en"); #obligar a inglés para pruebas
@@ -31,6 +31,8 @@ int main()
     // AudioManager se inicializa después de la carga de recursos (en LoadingState)
     // resourcemanager se inicializa automaticamente al llamar a getInstance()
     float delta_time = 0.0f;
+
+    SetTraceLogLevel(LOG_ERROR);
 
     StateMachine state_machine = StateMachine();
     state_machine.add_state(std::make_unique<LoadingState>(), false);

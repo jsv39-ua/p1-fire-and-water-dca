@@ -211,9 +211,6 @@ std::vector<Platform> MapLoader::extractPlatforms() {
         TmxLayer* layer = &this->mapa->layers[i];
         
         if (layer->type == LAYER_TYPE_TILE_LAYER) {
-            // Opcional: Si tienes una capa específica llamada "Colisiones",
-            // descomenta esto para ignorar capas decorativas y ganar más rendimiento:
-            // if (strcmp(layer->name, "Colisiones") != 0) continue;
 
             TmxTileLayer* tileLayer = &layer->exact.tileLayer;
             
@@ -222,19 +219,18 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                     uint32_t index = y * tileLayer->width + x;
                     uint32_t gid = tileLayer->tiles[index];
                     
-                    // Verificación O(1) gracias al unordered_set
+                   
                     if (gid > 0 && solidGids.count(gid)) {
-                        // Mapear GID a tileset y tile local para obtener propiedades
                         ElementType pType = NONE;
                         for (uint32_t t = 0; t < this->mapa->tilesetsLength; t++) {
                             TmxTileset* tileset = &this->mapa->tilesets[t];
                             if (gid >= tileset->firstGid && (t == this->mapa->tilesetsLength - 1 || gid < this->mapa->tilesets[t+1].firstGid)) {
                                 uint32_t localId = gid - tileset->firstGid;
-                                // buscar el tile declarado en el tileset
+                                
                                 for (uint32_t tt = 0; tt < tileset->tilesLength; tt++) {
                                     TmxTilesetTile* tile = &tileset->tiles[tt];
                                     if (tile->id == localId) {
-                                        // Si tiene propiedades, buscar la property 'type'
+                                       
                                         if (tile->propertiesLength > 0) {
                                             for (uint32_t pi = 0; pi < tile->propertiesLength; ++pi) {
                                                 TmxProperty* prop = &tile->properties[pi];
@@ -245,14 +241,14 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                                                 }
                                             }
                                         }
-                                        break; // Encontrado tile correspondiente
+                                        break; 
                                     }
                                 }
-                                break; // Encontrado tileset correcto
+                                break; 
                             }
                         }
 
-                        // fallback: si la capa tiene nombre, usarlo
+                     
                         if (pType == NONE && layer->name != NULL) {
                             if (strcmp(layer->name, "Water") == 0) pType = WATER;
                             else if (strcmp(layer->name, "Fire") == 0) pType = FIRE;
@@ -275,14 +271,14 @@ std::vector<Platform> MapLoader::extractPlatforms() {
             }
         }
         
-        // PASO 3: Recorrer capas de objetos para plataformas interactivas y botones
+        
         if (layer->type == LAYER_TYPE_OBJECT_GROUP) {
             TmxObjectGroup* objGroup = &layer->exact.objectGroup;
             
             for (uint32_t j = 0; j < objGroup->objectsLength; j++) {
                 TmxObject* obj = &objGroup->objects[j];
                 
-                // Check type/class
+               
                 bool isButton = (obj->typeString && strcmp(obj->typeString, "button") == 0);
                 bool isPlatform = (obj->typeString && strcmp(obj->typeString, "platform") == 0);
                 bool isSign = (obj->typeString && strcmp(obj->typeString, "sign") == 0);
@@ -299,7 +295,7 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                     p.id = obj->id;
                     p.isButton = isButton;
                     
-                    // Read properties
+                
                     if (obj->properties) {
                         for (uint32_t k = 0; k < obj->propertiesLength; k++) {
                             TmxProperty* prop = &obj->properties[k];
@@ -320,7 +316,7 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                                 if (strcmp(prop->stringValue, "water") == 0) p.type = WATER;
                                 else if (strcmp(prop->stringValue, "fire") == 0) p.type = FIRE;
                             }
-                            // Aqui busco text para encontrar los textos de las señales en el tiled
+                            
                             if ((strcmp(prop->name, "text") == 0) 
                                 && prop->type == PROPERTY_TYPE_STRING) {
                                 
@@ -330,14 +326,14 @@ std::vector<Platform> MapLoader::extractPlatforms() {
                         }
                     }
 
-                    // Read Visuals from GID (Tile Objects)
+                    
                     if (obj->gid > 0) {
                         TileData tData = GetTileDataFromGID(obj->gid);
                         if (tData.valid) {
                             p.hasVisuals = true;
                             p.texture = tData.texture;
                             p.sourceRect = tData.source;
-                            // Adjust Y for Tile Objects (Tiled uses bottom-left, we want top-left)
+                            
                             p.bounds.y -= p.bounds.height;
                         }
                     }
@@ -349,8 +345,6 @@ std::vector<Platform> MapLoader::extractPlatforms() {
         }
     }
     
-    // Post-processing: Link buttons to their pressed state visuals
-    // Optimization: Use a map for O(1) lookup instead of nested loops O(N^2)
     std::unordered_map<int, Platform*> idToPlatformMap;
     for (auto& p : platforms) {
         idToPlatformMap[p.id] = &p;
@@ -361,14 +355,13 @@ std::vector<Platform> MapLoader::extractPlatforms() {
             auto it = idToPlatformMap.find(p.targetId);
             if (it != idToPlatformMap.end()) {
                 Platform* target = it->second;
-                // If target has visuals, copy them to pressed state
+             
                 if (target->hasVisuals) {
                     p.hasPressedVisuals = true;
                     p.pressedTexture = target->texture;
                     p.pressedSourceRect = target->sourceRect;
                     TraceLog(LOG_INFO, "Linked button %d to pressed visual from %d", p.id, target->id);
                     
-                    // Clear targetId so we don't try to activate it as a logic platform
                     p.targetId = -1; 
                 }
             }
@@ -394,7 +387,6 @@ Rectangle MapLoader::getMapBounds() const {
     };
 }
 
-// Obtener el punto de spawn inicial de los jugadores
 Vector2 MapLoader::getInitialSpawn() const {
     if (this->mapa == nullptr) {
         TraceLog(LOG_WARNING, "No hay mapa cargado para obtener spawn inicial");
@@ -468,20 +460,19 @@ std::vector<Enemy> MapLoader::extractEnemies() {
                                 (float)this->mapa->tileHeight
                             };
 
-                            // --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE ---
-                            // Delegamos la lógica fea a la función auxiliar
+                           
                             TileData tData = GetTileDataFromGID(gid);
                             
                             Enemy en;
                             if (tData.valid) {
-                                // Constructor con textura
+                                
                                 en = Enemy(bounds, eType, range, tData.texture, tData.source, vertical);
                             } else {
-                                // Constructor sin textura (fallback)
+                              
                                 en = Enemy(bounds, eType, range, vertical);
                             }
                             
-                            // Asignar tag si existe
+                         
                             if (targetTagStr && strlen(targetTagStr) > 0) {
                                 en.targetTag = std::string(targetTagStr);
                             }
@@ -518,7 +509,7 @@ std::vector<MapTransition> MapLoader::extractTransitions() {
                     MapTransition transition;
                     transition.bounds = { (float)obj->x, (float)obj->y, (float)obj->width, (float)obj->height };
                     
-                    // Default values
+                 
                     transition.targetMap = "";
                     transition.targetSpawn = { 0, 0 };
                     transition.direction = "none";

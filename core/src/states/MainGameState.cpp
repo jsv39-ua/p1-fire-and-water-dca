@@ -12,6 +12,7 @@
 #include <systems/SettingsManager.hpp>
 #include <systems/LocalizationManager.hpp>
 #include <systems/SignDictionary.hpp>
+#include <systems/LevelStateManager.hpp>
 extern "C" {
     #include <raylib.h>
 }
@@ -59,12 +60,11 @@ void MainGameState::init()
         SettingsManager::getInstance()->getWaterAttack()
     );
 
-    // Inicialización de la cámara
+    LevelStateManager::getInstance().clearAllState(); // Limpiar estado previo de niveles
 
-    // Inicialización del MapLoader - usar spawn del mapa para posicionar jugadores
+    
     loadLevel("assets/levels/niveles/nivel-tutorial/zona-1.tmx", true);
 
-    // Log de depuración para ver posiciones iniciales
     TraceLog(LOG_INFO, "=== DEBUG: Posiciones iniciales de jugadores ===");
     TraceLog(LOG_INFO, "FIRE: (%.2f, %.2f) | WATER: (%.2f, %.2f)", 
         players[0].position.x, players[0].position.y,
@@ -81,19 +81,18 @@ void MainGameState::init()
     camera.setSmoothSpeed(5.0f);
     camera.setZoomSmoothSpeed(3.0f);
 
-    // Calcular zoom mínimo para evitar ver fuera del mapa
+    // zoom minimo de la camara
     float screenWidth = (float)GetScreenWidth();
     float screenHeight = (float)GetScreenHeight();
     float minZoomX = screenWidth / mapBounds.width;
     float minZoomY = screenHeight / mapBounds.height;
-    
-    // zoom mínimo
+
     float minZoom = fmaxf(1.0f, fmaxf(minZoomX, minZoomY));
 
     camera.setZoomLimits(minZoom, 3.0f);
     camera.setDynamicZoom(true);
 
-    // Inicializar animaciones para ambos jugadores
+    // Inicializar animaciones para los jugadores
     idle_animations[0] = Animation(5, 0.2f, true, character_textures[0], 9, 12);
     walk_animations[0] = Animation(8, 0.1f, true, character_textures[0], 0, 8);
     
@@ -122,8 +121,8 @@ void MainGameState::handleInput()
 
     // Control de ambos jugadores con un bucle
     for (int i = 0; i < 2; i++) {
-        // Si el jugador está esperando en una transición, ignorar input de movimiento
-        if (waitingForTransition[i]) {
+        
+        if (waitingForTransition[i]) { // Si el jugador está esperando en una transición, ignorar input de movimiento
             players[i].walk(0); // Asegurar que no se mueve
             continue;
         }
@@ -149,7 +148,6 @@ void MainGameState::handleInput()
                 players[i].attack();
                 
                 // Crear proyectil
-                // Posición: centro del jugador
                 Vector2 pos = { players[i].position.x + players[i].width/2, players[i].position.y + players[i].height/2 };
                 
                 // Velocidad: Depende de la dirección
@@ -162,20 +160,6 @@ void MainGameState::handleInput()
         }
     }
 
-    // Debug: Spawnear enemigos con e y con r
-    if (IsKeyPressed(KEY_E)) {
-        Rectangle b = { players[0].position.x + 100, players[0].position.y - 32, 32, 32 };
-        Enemy en(b, FIRE, 90.0f, true);
-        level_enemies.push_back(en);
-        TraceLog(LOG_INFO, "DEBUG: Spawned vertical FIRE enemy at x=%f y=%f", b.x, b.y);
-    }
-
-    if (IsKeyPressed(KEY_R)) {
-        Rectangle b = { players[1].position.x + 100, players[1].position.y - 32, 32, 32 };
-        Enemy en2(b, WATER, 150.0f, false);
-        level_enemies.push_back(en2);
-        TraceLog(LOG_INFO, "DEBUG: Spawned horizontal WATER enemy at x=%f y=%f", b.x, b.y);
-    }
 }
 
 void MainGameState::update(float deltaTime)
@@ -300,6 +284,11 @@ void MainGameState::update(float deltaTime)
                                     target.active = true;
                                     TraceLog(LOG_INFO, "Button %d activated platform %d by TAG", platform.id, target.id);
                                 }
+                            }
+                            
+                            // Guardar el tag activado globalmente para que persista entre zonas
+                            if (!platform.targetTag.empty()) {
+                                LevelStateManager::getInstance().activateTag(platform.targetTag);
                             }
                         }
                     }
@@ -595,9 +584,13 @@ void MainGameState::checkFallDeath() {
     bool water_fell_below = (players[1].bounds.y) > (mapBottom + deathThreshold);
     
     if (fire_fell_below || water_fell_below) {
-        //TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
+        TraceLog(LOG_INFO, "Juego terminado: jugador(s) cayeron muy por debajo del mapa (fire=%d, water=%d)", fire_fell_below, water_fell_below);
         //this->state_machine->add_state(std::make_unique<GameOverState>(), true);
         //return;
+        playerDying = true;
+        deathTimer = 0.0f;
+        
+
     }
 }
 
@@ -614,6 +607,22 @@ std::string MainGameState::resolveMapPath(const std::string& targetMap) {
 }
 
 void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
+    // Guardar estado de la zona actual antes de cambiar
+    if (!currentZonePath.empty() && !level_platforms.empty()) {
+        std::vector<PlatformState> states;
+        for (const auto& platform : level_platforms) {
+            PlatformState ps;
+            ps.id = platform.id;
+            ps.active = platform.active;
+            ps.isPressed = platform.isPressed;
+            states.push_back(ps);
+        }
+        LevelStateManager::getInstance().saveZoneState(currentZonePath, states);
+    }
+    
+    // Guardar el path de la nueva zona
+    currentZonePath = mapPath;
+    
     level_platforms.clear();
     level_enemies.clear();
     level_transitions.clear();
@@ -637,6 +646,31 @@ void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
 
         level_enemies = mapLoader.extractEnemies();
         level_transitions = mapLoader.extractTransitions();
+        
+        
+        if (LevelStateManager::getInstance().hasZoneState(mapPath)) {
+            const ZoneState* savedState = LevelStateManager::getInstance().getZoneState(mapPath);
+            if (savedState) {
+                for (auto& platform : level_platforms) {
+                    for (const auto& ps : savedState->platformStates) {
+                        if (platform.id == ps.id) {
+                            platform.active = ps.active;
+                            platform.isPressed = ps.isPressed;
+                            break;
+                        }
+                    }
+                }
+                TraceLog(LOG_INFO, "[LevelStateManager] Restored state for zone: %s", mapPath.c_str());
+            }
+        }
+        
+        // Aplicar tags activados globalmente (de botones en otras zonas)
+        for (auto& platform : level_platforms) {
+            if (!platform.tag.empty() && LevelStateManager::getInstance().isTagActivated(platform.tag)) {
+                platform.active = true;
+                TraceLog(LOG_INFO, "[LevelStateManager] Platform %d activated by global tag: %s", platform.id, platform.tag.c_str());
+            }
+        }
         
         TraceLog(LOG_INFO, "Nivel cargado: %s", mapPath.c_str());
         TraceLog(LOG_INFO, "Plataformas: %d, Enemigos: %d, Transiciones: %d", 

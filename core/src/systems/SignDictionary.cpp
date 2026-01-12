@@ -23,5 +23,11 @@ std::string SignDictionary::getText(const std::string& id) {
     if (id == "SIGN_SECRET_1") {
         return _("A veces encontraras secretos ocultos... ¡Anímate a explorar!");
     }
+    if (id == "SIGN_SECRET_2") {
+        return _("¿Cómo has llegado hasta aquí? Vuelve por donde has venido, anda");
+    }
+    if( id == "SIGN_TO_BE_CONTINUED" ) {
+        return _("¡Gracias por jugar Elements!\n\nVuelve pronto para más aventuras...");
+    }
     return id;
 }

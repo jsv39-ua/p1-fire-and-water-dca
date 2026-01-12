@@ -84,4 +84,7 @@ private:
     
     // Path del nivel actual
     std::string currentLevelPath;
+    
+    // Path de la zona actual (archivo .tmx completo) - para LevelStateManager
+    std::string currentZonePath;
 };

@@ -17,6 +17,7 @@ set(GAME_CORE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/SimpleLevelState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/states/StateMachine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/AudioManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/LevelStateManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/LocalizationManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/raytmx_impl.cpp
@@ -68,6 +69,9 @@ if(DEFINED HAVE_GETTEXT AND HAVE_GETTEXT)
   target_compile_definitions(game_core PUBLIC HAVE_GETTEXT=1)
   if(TARGET Intl::Intl)
     target_link_libraries(game_core PUBLIC Intl::Intl)
+  elseif(Intl_LIBRARY)
+    target_include_directories(game_core PUBLIC ${Intl_INCLUDE_DIR})
+    target_link_libraries(game_core PUBLIC ${Intl_LIBRARY})
   endif()
 else()
   target_compile_definitions(game_core PUBLIC HAVE_GETTEXT=0)
