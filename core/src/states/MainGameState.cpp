@@ -626,7 +626,7 @@ std::string MainGameState::resolveMapPath(const std::string& targetMap) {
 }
 
 void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
-    // Guardar estado de la zona actual antes de cambiar (si hay plataformas)
+    // Guardar estado de la zona actual antes de cambiar
     if (!currentZonePath.empty() && !level_platforms.empty()) {
         std::vector<PlatformState> states;
         for (const auto& platform : level_platforms) {
@@ -666,7 +666,7 @@ void MainGameState::loadLevel(const std::string& mapPath, bool useMapSpawn) {
         level_enemies = mapLoader.extractEnemies();
         level_transitions = mapLoader.extractTransitions();
         
-        // Restaurar estado de plataformas si esta zona ya fue visitada
+        
         if (LevelStateManager::getInstance().hasZoneState(mapPath)) {
             const ZoneState* savedState = LevelStateManager::getInstance().getZoneState(mapPath);
             if (savedState) {

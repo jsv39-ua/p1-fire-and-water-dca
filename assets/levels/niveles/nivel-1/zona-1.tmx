@@ -309,8 +309,8 @@
    <properties>
     <property name="direction" value="down"/>
     <property name="targetMap" value="zona-2.tmx"/>
-    <property name="targetSpawnX" type="float" value="10"/>
-    <property name="targetSpawnY" type="float" value="220"/>
+    <property name="targetSpawnX" type="float" value="5"/>
+    <property name="targetSpawnY" type="float" value="200"/>
     <property name="transitionType" value="instant"/>
    </properties>
   </object>
