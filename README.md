@@ -1,5 +1,9 @@
 # Fuego y Agua: La Aventura Elemental
 
+## Enlace a itch.io
+
+https://mrjavier81.itch.io/elements
+
 
 ## Como ejecutar el Cmake
 
