@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 00:10+0100\n"
+"POT-Creation-Date: 2026-01-12 18:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,6 +106,9 @@ msgstr ""
 msgid "Pulsa ESPACIO para reiniciar"
 msgstr ""
 
+msgid "Pulsa ESPACIO para volver a jugar o ESC para menu"
+msgstr ""
+
 msgid "REANUDAR"
 msgstr ""
 
@@ -142,5 +145,17 @@ msgstr ""
 msgid "¡CONFIGURACION GUARDADA!"
 msgstr ""
 
+msgid "¡Enhorabuena por completar la demo de Elements!"
+msgstr ""
+
+msgid ""
+"¡Gracias por jugar Elements!\n"
+"\n"
+"Vuelve pronto para más aventuras..."
+msgstr ""
+
 msgid "¡Nivel Completado!"
+msgstr ""
+
+msgid "¿Cómo has llegado hasta aquí? Vuelve por donde has venido, anda"
 msgstr ""

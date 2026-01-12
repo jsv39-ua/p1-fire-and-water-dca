@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-24 20:27+0100\n"
+"POT-Creation-Date: 2026-01-12 18:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -111,6 +111,9 @@ msgstr "Press any key..."
 msgid "Pulsa ESPACIO para reiniciar"
 msgstr "Press SPACE to restart"
 
+msgid "Pulsa ESPACIO para volver a jugar o ESC para menu"
+msgstr "Press SPACE to play again or ESC to Main Menu"
+
 msgid "REANUDAR"
 msgstr "RESUME"
 
@@ -147,8 +150,23 @@ msgstr "Warning: Duplicate key!"
 msgid "¡CONFIGURACION GUARDADA!"
 msgstr "CONFIGURATION SAVED!"
 
+msgid "¡Enhorabuena por completar la demo de Elements!"
+msgstr "Congratulations! You completed the demo for Elements!"
+
+msgid ""
+"¡Gracias por jugar Elements!\n"
+"\n"
+"Vuelve pronto para más aventuras..."
+msgstr ""
+"Thanks for playing Elements!\n"
+"\n"
+"Come back soon for more adventures..."
+
 msgid "¡Nivel Completado!"
 msgstr "Level Completed!"
+
+msgid "¿Cómo has llegado hasta aquí? Vuelve por donde has venido, anda"
+msgstr "How did you get here? Go on, go back to where you came from"
 
 msgid "loading_title"
 msgstr "Loading..."
@@ -165,6 +183,5 @@ msgstr "Loading music"
 msgid "loading_sounds"
 msgstr "Loading sounds"
 
-#~ msgid "ENGLISH (WIP)"
-#~ msgstr "ENGLISH"
-
+msgid "ENGLISH (WIP)"
+msgstr "ENGLISH"
