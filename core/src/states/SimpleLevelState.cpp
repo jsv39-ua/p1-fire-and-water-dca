@@ -15,7 +15,7 @@ void SimpleLevelState::init() {
 }
 
 void SimpleLevelState::handleInput() {
-    // Press SPACE to restart the main game state for now
+    
     if (IsKeyPressed(KEY_SPACE)) {
         AudioManager::getInstance()->playButtonClick();
         this->state_machine->add_state(std::make_unique<MainGameState>(), true);
@@ -33,7 +33,7 @@ void SimpleLevelState::render() {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    const char* message = "NIVEL 2 (Placeholder)";
+    const char* message = "¡Enhorabuena por completar la demo de Elements!";
     int textWidth = MeasureText(message, 30);
     int x = (GetScreenWidth() - textWidth) / 2;
     int y = (GetScreenHeight() / 2) - 50;

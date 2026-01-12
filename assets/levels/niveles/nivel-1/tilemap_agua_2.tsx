@@ -51,6 +51,26 @@
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
   </objectgroup>
  </tile>
+ <tile id="47">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="48">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="49">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
+ <tile id="50">
+  <objectgroup draworder="index" id="2">
+   <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
+  </objectgroup>
+ </tile>
  <tile id="121">
   <objectgroup draworder="index" id="2">
    <object id="1" type="Plataforma" x="0" y="0" width="18" height="18"/>
